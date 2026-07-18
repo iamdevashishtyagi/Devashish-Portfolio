@@ -21,7 +21,7 @@ export default function Navigation() {
     if (!wordmark || !slot) return;
     const initialStyles = window.getComputedStyle(wordmark);
     const initialFontSize = Number.parseFloat(initialStyles.fontSize);
-    const finalFontSize = 20;
+    const finalFontSize = 24;
     const initialWidth = wordmark.getBoundingClientRect().width;
     const finalWidth = initialWidth * (finalFontSize / initialFontSize);
 
@@ -46,7 +46,7 @@ export default function Navigation() {
             const rect = slot.getBoundingClientRect();
             return rect.top + rect.height / 2 - window.innerHeight / 2;
           },
-          fontSize: "1.25rem",
+          fontSize: "1.5rem",
           fontWeight: 600,
           letterSpacing: "-0.025em",
           ease: "none",
@@ -106,7 +106,7 @@ export default function Navigation() {
         style={{
           left: "50%",
           top: "50%",
-          fontSize: "clamp(6rem, 18vw, 16rem)",
+          fontSize: "clamp(3.25rem, 16vw, 16rem)",
           fontWeight: 900,
           fontFamily: "var(--font-medieval-sharp)",
           letterSpacing: "-0.09em",
@@ -129,7 +129,7 @@ export default function Navigation() {
       >
         <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-24">
           <div className="flex items-center justify-between h-16">
-            <div ref={wordmarkSlotRef} className="h-8 w-32" aria-hidden="true" />
+            <div ref={wordmarkSlotRef} className="h-8 w-36" aria-hidden="true" />
 
           <div className="hidden md:flex items-center gap-6 text-sm">
             {navLinks.map((link) => (
