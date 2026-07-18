@@ -8,14 +8,14 @@ gsap.registerPlugin(ScrollTrigger);
 export function initScrollBackground() {
   // Background color transitions between sections
   const sections = [
-    { id: "#about", bg: "#FFFFFF", textColor: "#1A1A1A" },
-    { id: "#experience", bg: "#FFFFFF", textColor: "#1A1A1A" },
-    { id: "#projects", bg: "#FBF9EF", textColor: "#1A1A1A" },
-    { id: "#wins", bg: "#FFFFFF", textColor: "#1A1A1A" },
-    { id: "#skills", bg: "#FBF9EF", textColor: "#1A1A1A" },
-    { id: "#architecture", bg: "#000000", textColor: "#FBF9EF" },
-    { id: "#achievements", bg: "#FFFFFF", textColor: "#1A1A1A" },
-    { id: "#contact", bg: "#000000", textColor: "#FBF9EF" },
+    { id: "#about", bg: "#FFFFFF", textColor: "#1A1A1A", theme: "light" },
+    { id: "#experience", bg: "#FFFFFF", textColor: "#1A1A1A", theme: "light" },
+    { id: "#projects", bg: "#FBF9EF", textColor: "#1A1A1A", theme: "light" },
+    { id: "#wins", bg: "#FFFFFF", textColor: "#1A1A1A", theme: "light" },
+    { id: "#skills", bg: "#FBF9EF", textColor: "#1A1A1A", theme: "light" },
+    { id: "#architecture", bg: "#000000", textColor: "#FBF9EF", theme: "dark" },
+    { id: "#achievements", bg: "#FFFFFF", textColor: "#1A1A1A", theme: "light" },
+    { id: "#contact", bg: "#000000", textColor: "#FBF9EF", theme: "dark" },
   ];
 
   sections.forEach((section) => {
@@ -29,10 +29,12 @@ export function initScrollBackground() {
       onEnter: () => {
         document.body.style.backgroundColor = section.bg;
         document.body.style.color = section.textColor;
+        document.body.dataset.theme = section.theme;
       },
       onEnterBack: () => {
         document.body.style.backgroundColor = section.bg;
         document.body.style.color = section.textColor;
+        document.body.dataset.theme = section.theme;
       },
     });
   });

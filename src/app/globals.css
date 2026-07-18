@@ -41,7 +41,7 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
-  transition: background-color 0.7s ease;
+  transition: background-color 0.7s ease, color 0.7s ease;
 }
 
 ::selection {
@@ -184,6 +184,36 @@ body {
 
 .animate-marquee {
   animation: marquee 30s linear infinite;
+}
+
+.skill-marquee {
+  --marquee-background: rgb(251 249 239 / 0.7);
+  --marquee-border: #d4d4cc;
+  --marquee-text: #1a1a1a;
+  border-top: 1px solid var(--marquee-border);
+  border-bottom: 1px solid var(--marquee-border);
+  background-color: var(--marquee-background);
+  transition: background-color 0.7s ease, border-color 0.7s ease;
+}
+
+.skill-marquee-track {
+  padding: 1.25rem 0;
+}
+
+.skill-marquee-item {
+  margin: 0 2rem;
+  color: var(--marquee-text);
+  font-size: clamp(0.9rem, 1.3vw, 1.15rem);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  transition: color 0.7s ease;
+}
+
+body[data-theme="dark"] .skill-marquee {
+  --marquee-background: rgb(26 26 26 / 0.7);
+  --marquee-border: #4c4c44;
+  --marquee-text: #ffffff;
 }
 
 .animate-spin-slow {

@@ -19,21 +19,29 @@ export default function Skills() {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      gsap.from(".skill-card", {
-        opacity: 0,
+      gsap.fromTo(".skill-card", {
+        autoAlpha: 0,
         scale: 0.95,
+      }, {
+        autoAlpha: 1,
+        scale: 1,
         duration: 0.6,
         stagger: 0.05,
         ease: "power3.out",
         scrollTrigger: {
           trigger: sectionRef.current,
           start: "top 70%",
-          toggleActions: "play none none reverse",
+          once: true,
         },
       });
     }, sectionRef);
 
     return () => ctx.revert();
+  }, []);
+
+  useEffect(() => {
+    const refreshId = requestAnimationFrame(() => ScrollTrigger.refresh());
+    return () => cancelAnimationFrame(refreshId);
   }, [activeCategory]);
 
   const sizeClasses = {

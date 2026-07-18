@@ -53,7 +53,7 @@ export default function Contact() {
     <section
       ref={sectionRef}
       id="contact"
-      className="section-padding text-cream border-t border-gray-800"
+      className="section-padding border-t border-gray-800"
     >
       <div className="container-narrow">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
@@ -65,7 +65,7 @@ export default function Contact() {
 
             <h2 className="heading-2 mt-4 mb-6">Let's build something</h2>
 
-            <p className="body-large max-w-2xl mb-12 text-gray-300">
+            <p className="body-large max-w-2xl mb-12 text-current">
               Got a project, a problem, or just want to talk systems? I'm
               always open to interesting conversations.
             </p>

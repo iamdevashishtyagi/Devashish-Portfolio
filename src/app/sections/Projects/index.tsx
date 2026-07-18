@@ -21,21 +21,29 @@ export default function Projects() {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      gsap.from(".project-grid > *", {
-        opacity: 0,
+      gsap.fromTo(".project-grid > *", {
+        autoAlpha: 0,
         y: 30,
+      }, {
+        autoAlpha: 1,
+        y: 0,
         duration: 0.8,
         stagger: 0.1,
         ease: "power3.out",
         scrollTrigger: {
           trigger: sectionRef.current,
           start: "top 70%",
-          toggleActions: "play none none reverse",
+          once: true,
         },
       });
     }, sectionRef);
 
     return () => ctx.revert();
+  }, []);
+
+  useEffect(() => {
+    const refreshId = requestAnimationFrame(() => ScrollTrigger.refresh());
+    return () => cancelAnimationFrame(refreshId);
   }, [activeFilter]);
 
   return (

@@ -13,16 +13,19 @@ export default function Wins() {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      gsap.from(".win-card", {
-        opacity: 0,
+      gsap.fromTo(".win-card", {
+        autoAlpha: 0,
         y: 40,
+      }, {
+        autoAlpha: 1,
+        y: 0,
         duration: 0.8,
         stagger: 0.1,
         ease: "power3.out",
         scrollTrigger: {
           trigger: sectionRef.current,
           start: "top 75%",
-          toggleActions: "play none none reverse",
+          once: true,
         },
       });
     }, sectionRef);

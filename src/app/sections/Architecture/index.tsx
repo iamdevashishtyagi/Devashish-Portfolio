@@ -43,14 +43,14 @@ export default function Architecture() {
     <section
       ref={sectionRef}
       id="architecture"
-      className="section-padding text-cream border-t border-gray-800"
+      className="section-padding border-t border-gray-800"
     >
       <div className="container-narrow">
         <span className="text-sm uppercase tracking-widest text-gray-400">
           Systems
         </span>
         <h2 className="heading-2 mt-4 mb-6">RAG pipeline architecture</h2>
-        <p className="body-large max-w-2xl mb-12 text-gray-300">
+        <p className="body-large max-w-2xl mb-12 text-current">
           How a question becomes a grounded answer — tenant-isolated, retrieval-first.
         </p>
 
