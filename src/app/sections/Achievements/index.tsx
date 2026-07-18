@@ -82,7 +82,7 @@ export default function Achievements() {
     <section
       ref={sectionRef}
       id="achievements"
-      className="section-padding bg-white border-t border-gray-100"
+      className="section-padding border-t border-gray-100"
     >
       <div className="container-narrow">
         <span className="text-sm uppercase tracking-widest text-gray-400">

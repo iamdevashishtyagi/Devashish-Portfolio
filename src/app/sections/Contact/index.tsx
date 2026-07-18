@@ -53,65 +53,67 @@ export default function Contact() {
     <section
       ref={sectionRef}
       id="contact"
-      className="section-padding bg-charcoal text-cream border-t border-gray-800"
+      className="section-padding text-cream border-t border-gray-800"
     >
       <div className="container-narrow">
-        <span className="text-sm uppercase tracking-widest text-gray-400">
-          Contact
-        </span>
-        <h2 className="heading-2 mt-4 mb-6">Let's build something</h2>
-        <p className="body-large max-w-2xl mb-12 text-gray-300">
-          Got a project, a problem, or just want to talk systems? I'm always
-          open to interesting conversations.
-        </p>
-
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {/* Contact Info */}
-          <div className="space-y-8">
-            <div className="contact-item flex items-start gap-4">
-              <MapPin className="w-5 h-5 text-gray-400 mt-1" />
-              <div>
-                <p className="text-sm text-gray-400">Location</p>
-                <p className="font-medium">{profile.location}</p>
-              </div>
-            </div>
+          {/* Left Section */}
+          <div>
+            <span className="text-sm uppercase tracking-widest text-gray-400">
+              Contact
+            </span>
 
-            <a
-              href={`mailto:${profile.email}`}
-              className="contact-item flex items-start gap-4 hover:text-gray-300 transition-colors group"
-            >
-              <Mail className="w-5 h-5 text-gray-400 mt-1 group-hover:text-cream transition-colors" />
-              <div>
-                <p className="text-sm text-gray-400">Email</p>
-                <p className="font-medium">{profile.email}</p>
-              </div>
-            </a>
+            <h2 className="heading-2 mt-4 mb-6">Let's build something</h2>
 
-            <div className="contact-item flex gap-4 pt-4 border-t border-gray-800">
+            <p className="body-large max-w-2xl mb-12 text-gray-300">
+              Got a project, a problem, or just want to talk systems? I'm
+              always open to interesting conversations.
+            </p>
+
+            <div className="space-y-8">
+              <div className="contact-item flex items-start gap-4">
+                <MapPin className="w-5 h-5 text-gray-400 mt-1" />
+                <div>
+                  <p className="text-sm text-gray-400">Location</p>
+                  <p className="font-medium">{profile.location}</p>
+                </div>
+              </div>
+
               <a
-                href={profile.github}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-3 bg-gray-800 rounded-full hover:bg-gray-700 transition-colors"
+                href={`mailto:${profile.email}`}
+                className="contact-item flex items-start gap-4 hover:text-gray-300 transition-colors group"
               >
-                <FaGithub className="w-5 h-5" />
+                <Mail className="w-5 h-5 text-gray-400 mt-1 group-hover:text-cream transition-colors" />
+                <div>
+                  <p className="text-sm text-gray-400">Email</p>
+                  <p className="font-medium">{profile.email}</p>
+                </div>
               </a>
-              <a
-                href={profile.linkedin}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-3 bg-gray-800 rounded-full hover:bg-gray-700 transition-colors"
-              >
-                <FaLinkedin className="w-5 h-5" />
-              </a>
+
+              <div className="contact-item flex gap-4 pt-4 border-t border-gray-800">
+                <a
+                  href={profile.github}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-3 bg-gray-800 rounded-full hover:bg-gray-700 transition-colors"
+                >
+                  <FaGithub className="w-5 h-5" />
+                </a>
+
+                <a
+                  href={profile.linkedin}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-3 bg-gray-800 rounded-full hover:bg-gray-700 transition-colors"
+                >
+                  <FaLinkedin className="w-5 h-5" />
+                </a>
+              </div>
             </div>
           </div>
 
-          {/* Form */}
-          <form
-            onSubmit={handleSubmit}
-            className="contact-item space-y-4"
-          >
+          {/* Right Section */}
+          <form onSubmit={handleSubmit} className="contact-item space-y-4">
             <div>
               <label className="text-sm text-gray-400 block mb-1">Name</label>
               <input
@@ -141,7 +143,9 @@ export default function Contact() {
             </div>
 
             <div>
-              <label className="text-sm text-gray-400 block mb-1">Message</label>
+              <label className="text-sm text-gray-400 block mb-1">
+                Message
+              </label>
               <textarea
                 value={formData.message}
                 onChange={(e) =>

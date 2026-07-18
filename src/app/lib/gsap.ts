@@ -13,9 +13,9 @@ export function initScrollBackground() {
     { id: "#projects", bg: "#FBF9EF", textColor: "#1A1A1A" },
     { id: "#wins", bg: "#FFFFFF", textColor: "#1A1A1A" },
     { id: "#skills", bg: "#FBF9EF", textColor: "#1A1A1A" },
-    { id: "#architecture", bg: "#1A1A1A", textColor: "#FBF9EF" },
+    { id: "#architecture", bg: "#000000", textColor: "#FBF9EF" },
     { id: "#achievements", bg: "#FFFFFF", textColor: "#1A1A1A" },
-    { id: "#contact", bg: "#1A1A1A", textColor: "#FBF9EF" },
+    { id: "#contact", bg: "#000000", textColor: "#FBF9EF" },
   ];
 
   sections.forEach((section) => {

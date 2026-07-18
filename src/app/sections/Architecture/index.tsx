@@ -43,7 +43,7 @@ export default function Architecture() {
     <section
       ref={sectionRef}
       id="architecture"
-      className="section-padding bg-charcoal text-cream border-t border-gray-800"
+      className="section-padding text-cream border-t border-gray-800"
     >
       <div className="container-narrow">
         <span className="text-sm uppercase tracking-widest text-gray-400">

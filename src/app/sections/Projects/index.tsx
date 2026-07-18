@@ -42,7 +42,7 @@ export default function Projects() {
     <section
       ref={sectionRef}
       id="projects"
-      className="section-padding bg-cream border-t border-gray-100"
+      className="section-padding border-t border-gray-100"
     >
       <div className="container-narrow">
         <span className="text-sm uppercase tracking-widest text-gray-400">

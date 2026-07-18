@@ -2,7 +2,7 @@
 
 :root {
   --background: #FBF9EF;
-  --foreground: #1A1A1A;
+  --foreground: #000000;
 }
 
 @theme inline {
@@ -15,7 +15,7 @@
 /* Custom colors */
 @theme {
   --color-cream: #FBF9EF;
-  --color-charcoal: #1A1A1A;
+  --color-charcoal: #000000;
   --color-black: #0A0A0A;
   --color-gray-50: #F8F8F6;
   --color-gray-100: #EDEDE5;
@@ -45,7 +45,7 @@ body {
 }
 
 ::selection {
-  background: #1A1A1A;
+  background: #000000;
   color: #FBF9EF;
 }
 
@@ -59,7 +59,7 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #1A1A1A;
+  background: #000000;
   border-radius: 9999px;
 }
 

@@ -1,15 +1,28 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { navLinks } from "@/src/app/data/profile";
 
 export default function Navigation() {
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isHidden, setIsHidden] = useState(false);
   const [activeSection, setActiveSection] = useState("");
+  const lastScrollY = useRef(0);
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
+      const currentScrollY = window.scrollY;
+      const hasScrolled = currentScrollY > 50;
+
+      setIsScrolled(hasScrolled);
+      const scrollDelta = currentScrollY - lastScrollY.current;
+
+      if (!hasScrolled) {
+        setIsHidden(false);
+      } else if (Math.abs(scrollDelta) > 2) {
+        setIsHidden(scrollDelta > 0);
+      }
+      lastScrollY.current = currentScrollY;
 
       // Detect active section
       const sections = navLinks.map((link) => link.href.replace("#", ""));
@@ -22,13 +35,16 @@ export default function Navigation() {
       if (current) setActiveSection(`#${current}`);
     };
 
-    window.addEventListener("scroll", handleScroll);
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        isHidden ? "-translate-y-full" : "translate-y-0"
+      } ${
         isScrolled
           ? "bg-cream/90 backdrop-blur-md border-b border-gray-100"
           : "bg-transparent"
