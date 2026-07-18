@@ -62,6 +62,7 @@ export default function Hero() {
           toggleActions: "play none none reverse",
         },
       });
+
     }, containerRef);
 
     return () => ctx.revert();

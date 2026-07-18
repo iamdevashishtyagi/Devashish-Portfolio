@@ -1,7 +1,7 @@
 "use client";
 
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, MedievalSharp  } from "next/font/google";
 import { useEffect } from "react";
 import { initScrollBackground } from "./lib/gsap";
 import "./globals.css";
@@ -13,6 +13,12 @@ const geistSans = Geist({
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+const medievalSharp = MedievalSharp({
+  variable: "--font-medieval-sharp",
+  weight: "400",
   subsets: ["latin"],
 });
 
@@ -28,7 +34,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${medievalSharp.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col transition-colors duration-700">
         {children}

@@ -8,7 +8,7 @@ export default function SkillMarquee() {
 
   return (
     <div className="relative overflow-hidden py-4 border-y border-gray-200 bg-cream/50">
-      <div className="flex animate-marquee whitespace-nowrap">
+      <div className="flex w-max animate-marquee whitespace-nowrap">
         {skills.map((skill, i) => (
           <span
             key={i}

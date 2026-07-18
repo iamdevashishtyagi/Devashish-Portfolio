@@ -1,13 +1,68 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { navLinks } from "@/src/app/data/profile";
+
+gsap.registerPlugin(ScrollTrigger);
 
 export default function Navigation() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isHidden, setIsHidden] = useState(false);
   const [activeSection, setActiveSection] = useState("");
   const lastScrollY = useRef(0);
+  const wordmarkRef = useRef<HTMLAnchorElement>(null);
+  const wordmarkSlotRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const wordmark = wordmarkRef.current;
+    const slot = wordmarkSlotRef.current;
+    if (!wordmark || !slot) return;
+    const initialStyles = window.getComputedStyle(wordmark);
+    const initialFontSize = Number.parseFloat(initialStyles.fontSize);
+    const finalFontSize = 20;
+    const initialWidth = wordmark.getBoundingClientRect().width;
+    const finalWidth = initialWidth * (finalFontSize / initialFontSize);
+
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        wordmark,
+        {
+          left: "50%",
+          top: "50%",
+          x: 0,
+          y: 0,
+          xPercent: -50,
+          yPercent: -50,
+          fontSize: initialStyles.fontSize,
+          fontWeight: 900,
+          letterSpacing: initialStyles.letterSpacing,
+        },
+        {
+          x: () =>
+            slot.getBoundingClientRect().left - window.innerWidth / 2 + finalWidth / 2,
+          y: () => {
+            const rect = slot.getBoundingClientRect();
+            return rect.top + rect.height / 2 - window.innerHeight / 2;
+          },
+          fontSize: "1.25rem",
+          fontWeight: 600,
+          letterSpacing: "-0.025em",
+          ease: "none",
+          scrollTrigger: {
+            trigger: document.documentElement,
+            start: "top top",
+            end: "+=420",
+            scrub: true,
+            invalidateOnRefresh: true,
+          },
+        }
+      );
+    });
+
+    return () => ctx.revert();
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -17,7 +72,8 @@ export default function Navigation() {
       setIsScrolled(hasScrolled);
       const scrollDelta = currentScrollY - lastScrollY.current;
 
-      if (!hasScrolled) {
+      // Keep the bar present while the hero wordmark transitions into it.
+      if (currentScrollY < 420) {
         setIsHidden(false);
       } else if (Math.abs(scrollDelta) > 2) {
         setIsHidden(scrollDelta > 0);
@@ -41,23 +97,39 @@ export default function Navigation() {
   }, []);
 
   return (
-    <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isHidden ? "-translate-y-full" : "translate-y-0"
-      } ${
-        isScrolled
-          ? "bg-cream/90 backdrop-blur-md border-b border-gray-100"
-          : "bg-transparent"
-      }`}
-    >
-      <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-24">
-        <div className="flex items-center justify-between h-16">
-          <a
-            href="#"
-            className="text-xl font-medium tracking-tight hover:opacity-70 transition"
-          >
-            DT
-          </a>
+    <>
+      <a
+        ref={wordmarkRef}
+        href="#"
+        aria-label="Back to top"
+        
+        style={{
+          left: "50%",
+          top: "50%",
+          fontSize: "clamp(6rem, 18vw, 16rem)",
+          fontWeight: 900,
+          fontFamily: "var(--font-medieval-sharp)",
+          letterSpacing: "-0.09em",
+        }}
+        className={`fixed z-[60] -translate-x-1/2 -translate-y-1/2 font-sans uppercase leading-none text-charcoal will-change-transform transition-opacity duration-300 ${
+          isHidden ? "pointer-events-none opacity-0" : "opacity-100"
+        }`}
+      >
+        DEVASHISH
+      </a>
+
+      <nav
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+          isHidden ? "-translate-y-full" : "translate-y-0"
+        } ${
+          isScrolled
+            ? "bg-cream/90 backdrop-blur-md border-b border-gray-100"
+            : "bg-transparent"
+        }`}
+      >
+        <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-24">
+          <div className="flex items-center justify-between h-16">
+            <div ref={wordmarkSlotRef} className="h-8 w-32" aria-hidden="true" />
 
           <div className="hidden md:flex items-center gap-6 text-sm">
             {navLinks.map((link) => (
@@ -81,8 +153,9 @@ export default function Navigation() {
           >
             Let's talk
           </a>
+          </div>
         </div>
-      </div>
-    </nav>
+      </nav>
+    </>
   );
 }
