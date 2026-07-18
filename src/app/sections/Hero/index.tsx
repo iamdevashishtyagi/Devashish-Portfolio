@@ -10,6 +10,7 @@ gsap.registerPlugin(ScrollTrigger);
 export default function Hero() {
   const containerRef = useRef<HTMLDivElement>(null);
   const windowRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -30,6 +31,21 @@ export default function Hero() {
             start: "top top",
             end: "+=420",
             scrub: 1.2,
+          },
+        }
+      );
+
+      gsap.fromTo(
+        contentRef.current,
+        { autoAlpha: 0 },
+        {
+          autoAlpha: 1,
+          ease: "none",
+          scrollTrigger: {
+            trigger: document.documentElement,
+            start: "top top",
+            end: "+=420",
+            scrub: true,
           },
         }
       );
@@ -75,7 +91,7 @@ export default function Hero() {
         ref={windowRef}
         className="w-full max-w-7xl mx-auto px-6 md:px-12 lg:px-24 py-20"
       >
-        <div className="space-y-6">
+        <div ref={contentRef} className="space-y-6 opacity-0">
           <p className="text-sm uppercase tracking-widest text-gray-400 hero-title">
             {profile.location}
           </p>
