@@ -20,6 +20,7 @@ export default function Home() {
     <>
       <Navigation />
       <main>
+        <div className="h-[420px]" aria-hidden="true" />
         <Hero />
         <About />
         <Experience />

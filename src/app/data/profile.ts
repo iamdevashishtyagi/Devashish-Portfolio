@@ -9,7 +9,7 @@ export const profile = {
   ],
   location: "India",
   experienceYears: "1.5+",
-  email: "devashish.tyagi@example.com",
+  email: "iamdevashishtyagi@gmail.com",
   github: "https://github.com/devashishtyagi",
   linkedin: "https://linkedin.com/in/devashishtyagi",
   resumeUrl: "/resume.pdf",

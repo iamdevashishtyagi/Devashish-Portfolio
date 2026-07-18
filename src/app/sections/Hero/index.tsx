@@ -18,19 +18,17 @@ export default function Hero() {
         windowRef.current,
         {
           scale: 0.7,
-          opacity: 0,
           borderRadius: "40px",
         },
         {
           scale: 1,
-          opacity: 1,
           borderRadius: "0px",
           duration: 1.5,
           ease: "power3.out",
           scrollTrigger: {
-            trigger: containerRef.current,
+            trigger: document.documentElement,
             start: "top top",
-            end: "bottom top",
+            end: "+=420",
             scrub: 1.2,
           },
         }
