@@ -18,14 +18,41 @@ export default function Navigation() {
   useEffect(() => {
     const wordmark = wordmarkRef.current;
     const slot = wordmarkSlotRef.current;
+
     if (!wordmark || !slot) return;
-    const initialStyles = window.getComputedStyle(wordmark);
-    const initialFontSize = Number.parseFloat(initialStyles.fontSize);
-    const finalFontSize = 24;
-    const initialWidth = wordmark.getBoundingClientRect().width;
-    const finalWidth = initialWidth * (finalFontSize / initialFontSize);
 
     const ctx = gsap.context(() => {
+      const initialStyles = window.getComputedStyle(wordmark);
+
+      /*
+      * Initial centered state.
+      * This is also the exact starting state of the existing
+      * scroll-driven animation.
+      */
+      gsap.set(wordmark, {
+        left: "50%",
+        top: "50%",
+        x: 0,
+        y: 0,
+        xPercent: -50,
+        yPercent: -50,
+        fontSize: initialStyles.fontSize,
+        fontWeight: 900,
+        letterSpacing: initialStyles.letterSpacing,
+
+        // Start completely hidden
+        clipPath: "inset(0 100% 0 0)",
+      });
+
+      /*
+      * Create the original scroll-driven wordmark animation.
+      * This remains the only animation responsible for:
+      *
+      * - position
+      * - size
+      * - font weight
+      * - letter spacing
+      */
       gsap.fromTo(
         wordmark,
         {
@@ -40,16 +67,36 @@ export default function Navigation() {
           letterSpacing: initialStyles.letterSpacing,
         },
         {
-          x: () =>
-            slot.getBoundingClientRect().left - window.innerWidth / 2 + finalWidth / 2,
+          x: () => {
+            const finalFontSize = 24;
+            const initialFontSize = Number.parseFloat(initialStyles.fontSize);
+            const initialWidth = wordmark.getBoundingClientRect().width;
+            const finalWidth =
+              initialWidth * (finalFontSize / initialFontSize);
+
+            return (
+              slot.getBoundingClientRect().left -
+              window.innerWidth / 2 +
+              finalWidth / 2
+            );
+          },
+
           y: () => {
             const rect = slot.getBoundingClientRect();
-            return rect.top + rect.height / 2 - window.innerHeight / 2;
+
+            return (
+              rect.top +
+              rect.height / 2 -
+              window.innerHeight / 2
+            );
           },
+
           fontSize: "1.5rem",
           fontWeight: 600,
           letterSpacing: "-0.025em",
+
           ease: "none",
+
           scrollTrigger: {
             trigger: document.documentElement,
             start: "top top",
@@ -59,6 +106,40 @@ export default function Navigation() {
           },
         }
       );
+
+      /*
+      * Intro sequence
+      */
+      const intro = gsap.timeline({
+        onComplete: () => {
+          /*
+          * After the reveal, automatically scroll the page.
+          *
+          * This drives the existing ScrollTrigger animation,
+          * instead of manually animating the wordmark again.
+          */
+          const scrollProxy = { value: window.scrollY };
+
+          gsap.to(scrollProxy, {
+            value: 420,
+            duration: 1.8,
+            ease: "power2.inOut",
+
+            onUpdate: () => {
+              window.scrollTo(0, scrollProxy.value);
+            },
+          });
+        },
+      });
+
+      /*
+      * Reveal DEVASHISH from left to right
+      */
+      intro.to(wordmark, {
+        clipPath: "inset(0 0% 0 0)",
+        duration: 1.6,
+        ease: "power2.out",
+      });
     });
 
     return () => ctx.revert();
