@@ -36,16 +36,19 @@ export default function Achievements() {
         },
       });
 
-      gsap.from(".principle-item", {
-        opacity: 0,
+      gsap.fromTo(".principle-item", {
+        autoAlpha: 0,
         y: 20,
+      }, {
+        autoAlpha: 1,
+        y: 0,
         duration: 0.6,
         stagger: 0.08,
         ease: "power3.out",
         scrollTrigger: {
           trigger: ".principles-grid",
           start: "top 80%",
-          toggleActions: "play none none reverse",
+          once: true,
         },
       });
     }, sectionRef);
