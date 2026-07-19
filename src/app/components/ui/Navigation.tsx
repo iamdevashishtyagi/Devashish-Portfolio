@@ -7,10 +7,13 @@ import { navLinks } from "@/src/app/data/profile";
 
 gsap.registerPlugin(ScrollTrigger);
 
+const WORDMARK = "DEVASHISH";
+
 export default function Navigation() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isHidden, setIsHidden] = useState(false);
   const [activeSection, setActiveSection] = useState("");
+
   const lastScrollY = useRef(0);
   const wordmarkRef = useRef<HTMLAnchorElement>(null);
   const wordmarkSlotRef = useRef<HTMLDivElement>(null);
@@ -24,11 +27,8 @@ export default function Navigation() {
     const ctx = gsap.context(() => {
       const initialStyles = window.getComputedStyle(wordmark);
 
-      /*
-      * Initial centered state.
-      * This is also the exact starting state of the existing
-      * scroll-driven animation.
-      */
+      const characters =
+        wordmark.querySelectorAll<HTMLElement>(".wordmark-character");
       gsap.set(wordmark, {
         left: "50%",
         top: "50%",
@@ -39,20 +39,19 @@ export default function Navigation() {
         fontSize: initialStyles.fontSize,
         fontWeight: 900,
         letterSpacing: initialStyles.letterSpacing,
-
-        // Start completely hidden
-        clipPath: "inset(0 100% 0 0)",
       });
 
       /*
-      * Create the original scroll-driven wordmark animation.
-      * This remains the only animation responsible for:
-      *
-      * - position
-      * - size
-      * - font weight
-      * - letter spacing
-      */
+       * Hide all characters initially
+       */
+      gsap.set(characters, {
+        opacity: 0,
+        // y: "0.12em",
+      });
+
+      /*
+       * Existing scroll-driven wordmark animation
+       */
       gsap.fromTo(
         wordmark,
         {
@@ -69,10 +68,15 @@ export default function Navigation() {
         {
           x: () => {
             const finalFontSize = 24;
-            const initialFontSize = Number.parseFloat(initialStyles.fontSize);
-            const initialWidth = wordmark.getBoundingClientRect().width;
+            const initialFontSize =
+              Number.parseFloat(initialStyles.fontSize);
+
+            const initialWidth =
+              wordmark.getBoundingClientRect().width;
+
             const finalWidth =
-              initialWidth * (finalFontSize / initialFontSize);
+              initialWidth *
+              (finalFontSize / initialFontSize);
 
             return (
               slot.getBoundingClientRect().left -
@@ -108,17 +112,17 @@ export default function Navigation() {
       );
 
       /*
-      * Intro sequence
-      */
+       * Typing-style reveal
+       */
       const intro = gsap.timeline({
         onComplete: () => {
           /*
-          * After the reveal, automatically scroll the page.
-          *
-          * This drives the existing ScrollTrigger animation,
-          * instead of manually animating the wordmark again.
-          */
-          const scrollProxy = { value: window.scrollY };
+           * Automatically perform the same scroll interaction
+           * as the original manual scroll behavior.
+           */
+          const scrollProxy = {
+            value: window.scrollY,
+          };
 
           gsap.to(scrollProxy, {
             value: 420,
@@ -132,13 +136,12 @@ export default function Navigation() {
         },
       });
 
-      /*
-      * Reveal DEVASHISH from left to right
-      */
-      intro.to(wordmark, {
-        clipPath: "inset(0 0% 0 0)",
-        duration: 1.6,
-        ease: "power2.out",
+      intro.to(characters, {
+        opacity: 1,
+        y: 0,
+        duration: 0,
+        stagger: 0.1,
+        ease: "none",
       });
     });
 
@@ -151,7 +154,9 @@ export default function Navigation() {
       const hasScrolled = currentScrollY > 50;
 
       setIsScrolled(hasScrolled);
-      const scrollDelta = currentScrollY - lastScrollY.current;
+
+      const scrollDelta =
+        currentScrollY - lastScrollY.current;
 
       // Keep the bar present while the hero wordmark transitions into it.
       if (currentScrollY < 420) {
@@ -159,22 +164,38 @@ export default function Navigation() {
       } else if (Math.abs(scrollDelta) > 2) {
         setIsHidden(scrollDelta > 0);
       }
+
       lastScrollY.current = currentScrollY;
 
       // Detect active section
-      const sections = navLinks.map((link) => link.href.replace("#", ""));
+      const sections = navLinks.map((link) =>
+        link.href.replace("#", "")
+      );
+
       const current = sections.find((id) => {
         const el = document.getElementById(id);
+
         if (!el) return false;
+
         const rect = el.getBoundingClientRect();
+
         return rect.top <= 100 && rect.bottom >= 100;
       });
-      if (current) setActiveSection(`#${current}`);
+
+      if (current) {
+        setActiveSection(`#${current}`);
+      }
     };
 
     handleScroll();
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
+
+    window.addEventListener("scroll", handleScroll, {
+      passive: true,
+    });
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
   }, []);
 
   return (
@@ -183,7 +204,6 @@ export default function Navigation() {
         ref={wordmarkRef}
         href="#"
         aria-label="Back to top"
-        
         style={{
           left: "50%",
           top: "50%",
@@ -192,48 +212,63 @@ export default function Navigation() {
           fontFamily: "var(--font-medieval-sharp)",
           letterSpacing: "-0.09em",
         }}
-        className={`fixed z-[60] -translate-x-1/2 -translate-y-1/2 font-sans uppercase leading-none text-charcoal will-change-transform transition-opacity duration-300 ${
-          isHidden ? "pointer-events-none opacity-0" : "opacity-100"
+        className={`fixed z-[60] -translate-x-1/2 -translate-y-1/2 whitespace-nowrap font-sans uppercase leading-none text-charcoal will-change-transform transition-opacity duration-300 ${
+          isHidden
+            ? "pointer-events-none opacity-0"
+            : "opacity-100"
         }`}
       >
-        DEVASHISH
+        {WORDMARK.split("").map((character, index) => (
+          <span
+            key={`${character}-${index}`}
+            className="wordmark-character inline-block"
+          >
+            {character}
+          </span>
+        ))}
       </a>
 
       <nav
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          isHidden ? "-translate-y-full" : "translate-y-0"
+        className={`fixed top-0 right-0 left-0 z-50 transition-all duration-300 ${
+          isHidden
+            ? "-translate-y-full"
+            : "translate-y-0"
         } ${
           isScrolled
-            ? "bg-cream/90 backdrop-blur-md border-b border-gray-100"
+            ? "border-b border-gray-100 bg-cream/90 backdrop-blur-md"
             : "bg-transparent"
         }`}
       >
-        <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-24">
-          <div className="flex items-center justify-between h-16">
-            <div ref={wordmarkSlotRef} className="h-8 w-36" aria-hidden="true" />
+        <div className="mx-auto max-w-7xl px-6 md:px-12 lg:px-24">
+          <div className="flex h-16 items-center justify-between">
+            <div
+              ref={wordmarkSlotRef}
+              className="h-8 w-36"
+              aria-hidden="true"
+            />
 
-          <div className="hidden md:flex items-center gap-6 text-sm">
-            {navLinks.map((link) => (
-              <a
-                key={link.label}
-                href={link.href}
-                className={`transition-colors hover:text-charcoal ${
-                  activeSection === link.href
-                    ? "text-charcoal font-medium"
-                    : "text-gray-400"
-                }`}
-              >
-                {link.label}
-              </a>
-            ))}
-          </div>
+            <div className="hidden items-center gap-6 text-sm md:flex">
+              {navLinks.map((link) => (
+                <a
+                  key={link.label}
+                  href={link.href}
+                  className={`transition-colors hover:text-charcoal ${
+                    activeSection === link.href
+                      ? "font-medium text-charcoal"
+                      : "text-gray-400"
+                  }`}
+                >
+                  {link.label}
+                </a>
+              ))}
+            </div>
 
-          <a
-            href="#contact"
-            className="px-5 py-2 bg-charcoal text-cream rounded-full text-sm font-medium hover:bg-gray-800 transition-colors"
-          >
-            Let's talk
-          </a>
+            <a
+              href="#contact"
+              className="rounded-full bg-charcoal px-5 py-2 text-sm font-medium text-cream transition-colors hover:bg-gray-800"
+            >
+              Let's talk
+            </a>
           </div>
         </div>
       </nav>
