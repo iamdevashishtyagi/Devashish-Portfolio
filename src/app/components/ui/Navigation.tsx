@@ -8,6 +8,7 @@ import { navLinks } from "@/src/app/data/profile";
 gsap.registerPlugin(ScrollTrigger);
 
 const WORDMARK = "DEVASHISH";
+const WORDMARK_CHARACTERS = WORDMARK.split("");
 
 export default function Navigation() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -18,23 +19,20 @@ export default function Navigation() {
   const wordmarkWrapperRef = useRef<HTMLDivElement>(null);
   const wordmarkRef = useRef<HTMLAnchorElement>(null);
   const wordmarkSlotRef = useRef<HTMLDivElement>(null);
+  const loadingLineRef = useRef<HTMLDivElement>(null);
+  const loadingBarRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const wrapper = wordmarkWrapperRef.current;
     const wordmark = wordmarkRef.current;
     const slot = wordmarkSlotRef.current;
+    const loadingLine = loadingLineRef.current;
+    const loadingBar = loadingBarRef.current;
 
-    if (!wrapper || !wordmark || !slot) return;
+    if (!wrapper || !wordmark || !slot || !loadingLine || !loadingBar) return;
 
     const ctx = gsap.context(() => {
       const initialStyles = window.getComputedStyle(wordmark);
-
-      /*
-       * Base centered position for the wordmark itself.
-       * This element is only ever touched by the ScrollTrigger
-       * animation below — entrance sliding is handled entirely
-       * by the wrapper's `x`, so these two tweens never collide.
-       */
       gsap.set(wordmark, {
         left: "50%",
         top: "50%",
@@ -46,11 +44,6 @@ export default function Navigation() {
         fontWeight: 900,
         letterSpacing: initialStyles.letterSpacing,
       });
-
-      /*
-       * Existing scroll-driven wordmark animation
-       * (hero -> navbar), untouched.
-       */
       gsap.fromTo(
         wordmark,
         {
@@ -98,26 +91,41 @@ export default function Navigation() {
           },
         }
       );
+      const charEls = Array.from(
+        wordmark.querySelectorAll<HTMLElement>(".wordmark-character")
+      );
+      const [firstChar, ...restChars] = charEls;
 
-      /*
-       * Entrance animation: slide the whole wordmark in from
-       * completely outside the right edge of the viewport.
-       *
-       * This only ever animates the WRAPPER's `x`, never the
-       * wordmark's own transform properties, so it can never
-       * fight with the ScrollTrigger tween above.
-       */
-      const offscreenX = () =>
-        window.innerWidth + wordmark.getBoundingClientRect().width;
+      const measurer = document.createElement("span");
+      measurer.style.position = "fixed";
+      measurer.style.top = "-9999px";
+      measurer.style.left = "-9999px";
+      measurer.style.visibility = "hidden";
+      measurer.style.whiteSpace = "pre";
+      measurer.style.pointerEvents = "none";
+      measurer.style.fontSize = initialStyles.fontSize;
+      measurer.style.fontWeight = "900";
+      measurer.style.fontFamily = initialStyles.fontFamily;
+      measurer.style.letterSpacing = initialStyles.letterSpacing;
+      measurer.style.textTransform = initialStyles.textTransform;
+      document.body.appendChild(measurer);
 
-      gsap.set(wrapper, { x: offscreenX });
+      const naturalWidths = WORDMARK_CHARACTERS.map((char) => {
+        measurer.textContent = char;
+        return measurer.getBoundingClientRect().width;
+      });
+
+      document.body.removeChild(measurer);
+      const dRect = firstChar.getBoundingClientRect();
+      gsap.set(loadingLine, {
+        top: dRect.bottom + 28,
+        opacity: 1,
+        display: "block",
+      });
+      gsap.set(loadingBar, { scaleX: 0, transformOrigin: "left center" });
 
       const intro = gsap.timeline({
         onComplete: () => {
-          /*
-           * Automatically perform the same scroll interaction
-           * as the original manual scroll behavior.
-           */
           const scrollProxy = { value: window.scrollY };
 
           gsap.to(scrollProxy, {
@@ -131,11 +139,45 @@ export default function Navigation() {
         },
       });
 
-      intro.to(wrapper, {
-        x: 0,
-        duration: 1.1,
-        ease: "power3.out",
-      });
+      intro.to(
+        loadingBar,
+        {
+          scaleX: 1,
+          duration: 1.3,
+          ease: "power2.inOut",
+        },
+        0.2
+      );
+      intro.to(
+        loadingLine,
+        {
+          opacity: 0,
+          scaleY: 0,
+          duration: 0.1,
+          ease: "power1.in",
+          onComplete: () => {
+            gsap.set(loadingLine, { display: "none" });
+          },
+        },
+        "+=0.15"
+      );
+
+      intro.to(
+        restChars,
+        {
+          width: (i: number) => naturalWidths[i + 1],
+          opacity: 1,
+          duration: 0.45,
+          ease: "power2.out",
+          stagger: 0.08,
+          onComplete: () => {
+            charEls.forEach((el) => {
+              gsap.set(el, { width: "auto" });
+            });
+          },
+        },
+        "-=0.05"
+      );
     });
 
     return () => ctx.revert();
@@ -149,8 +191,6 @@ export default function Navigation() {
       setIsScrolled(hasScrolled);
 
       const scrollDelta = currentScrollY - lastScrollY.current;
-
-      // Keep the bar present while the hero wordmark transitions into it.
       if (currentScrollY < 420) {
         setIsHidden(false);
       } else if (Math.abs(scrollDelta) > 2) {
@@ -158,8 +198,6 @@ export default function Navigation() {
       }
 
       lastScrollY.current = currentScrollY;
-
-      // Detect active section
       const sections = navLinks.map((link) => link.href.replace("#", ""));
 
       const current = sections.find((id) => {
@@ -186,16 +224,9 @@ export default function Navigation() {
 
   return (
     <>
-      {/*
-        Entrance wrapper: covers the full viewport, fixed in place.
-        Only its `x` (translateX) is ever animated — for the
-        slide-in-from-the-right entrance. It never touches
-        left/top/xPercent/yPercent/fontSize, so it can't conflict
-        with the wordmark's own ScrollTrigger animation.
-      */}
       <div
         ref={wordmarkWrapperRef}
-        className={`pointer-events-none fixed inset-0 z-[60] will-change-transform transition-opacity duration-300 ${
+        className={`pointer-events-none fixed inset-0 z-[60] transition-opacity duration-300 ${
           isHidden ? "opacity-0" : "opacity-100"
         }`}
       >
@@ -215,8 +246,27 @@ export default function Navigation() {
             isHidden ? "pointer-events-none" : ""
           }`}
         >
-          {WORDMARK}
+          {WORDMARK_CHARACTERS.map((character, index) => (
+            <span
+              key={`${character}-${index}`}
+              className="wordmark-character inline-block"
+              style={
+                index === 0
+                  ? { verticalAlign: "top" }
+                  : { width: 0, opacity: 0, verticalAlign: "top" }
+              }
+            >
+              {character}
+            </span>
+          ))}
         </a>
+
+        <div
+          ref={loadingLineRef}
+          className="fixed left-1/2 h-[2px] w-24 -translate-x-1/2 overflow-hidden rounded-full bg-charcoal/15 opacity-0 sm:w-32"
+        >
+          <div ref={loadingBarRef} className="h-full w-full rounded-full bg-charcoal" />
+        </div>
       </div>
 
       <nav
