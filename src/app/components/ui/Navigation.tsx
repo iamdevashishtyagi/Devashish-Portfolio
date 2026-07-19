@@ -27,8 +27,7 @@ export default function Navigation() {
     const ctx = gsap.context(() => {
       const initialStyles = window.getComputedStyle(wordmark);
 
-      const characters =
-        wordmark.querySelectorAll<HTMLElement>(".wordmark-character");
+      const characters = wordmark.querySelectorAll<HTMLElement>(".wordmark-character");
       gsap.set(wordmark, {
         left: "50%",
         top: "50%",
@@ -45,7 +44,8 @@ export default function Navigation() {
        * Hide all characters initially
        */
       gsap.set(characters, {
-        opacity: 0,
+        // opacity: 0,
+        autoAlpha: 0,
         // y: "0.12em",
       });
 
@@ -137,10 +137,11 @@ export default function Navigation() {
       });
 
       intro.to(characters, {
-        opacity: 1,
-        y: 0,
+        // opacity: 1,
+        // y: 0,
+        autoAlpha: 1,
         duration: 0,
-        stagger: 0.1,
+        stagger: 0.2,
         ease: "none",
       });
     });
@@ -221,7 +222,7 @@ export default function Navigation() {
         {WORDMARK.split("").map((character, index) => (
           <span
             key={`${character}-${index}`}
-            className="wordmark-character inline-block"
+            className="wordmark-character inline-block opacity-0"
           >
             {character}
           </span>
