@@ -10,8 +10,8 @@ export const profile = {
   location: "India",
   experienceYears: "1.5+",
   email: "iamdevashishtyagi@gmail.com",
-  github: "https://github.com/devashishtyagi",
-  linkedin: "https://linkedin.com/in/devashishtyagi",
+  github: "https://github.com/iamdevashishtyagi", 
+  linkedin: "https://www.linkedin.com/in/devashish-tyagi-34a38a268/",
   resumeUrl: "/resume.pdf",
 };
 
@@ -153,7 +153,7 @@ export const projects: Project[] = [
       { label: "Modules owned", value: "3+" },
       { label: "Rollbacks", value: "0" },
     ],
-    links: { caseStudy: "#" },
+    links: { demo: 'https://echelon.aperptech.com/dashboard', caseStudy: "#" },
     accent: "blue",
   },
   {
@@ -193,7 +193,7 @@ export const projects: Project[] = [
       { label: "Schema", value: "SDI XML" },
       { label: "Client region", value: "Italy" },
     ],
-    links: { caseStudy: "#" },
+    links: { demo: 'https://www.xml-babel-converter.com', caseStudy: "#" },
     accent: "amber",
   },
   {
@@ -233,7 +233,7 @@ export const projects: Project[] = [
       { label: "Tenant model", value: "Multi-gym" },
       { label: "Auth roles", value: "3" },
     ],
-    links: { caseStudy: "#" },
+    links: { demo: 'https://gym-admin-management-dashboard.vercel.app/login', caseStudy: "#" },
     accent: "blue",
   },
   {
@@ -311,7 +311,7 @@ export const projects: Project[] = [
       { label: "Hosting", value: "Vercel" },
       { label: "Devices", value: "All" },
     ],
-    links: { caseStudy: "#" },
+    links: { demo: 'https://worldmediancr.com', caseStudy: "#" },
     accent: "blue",
   },
 ];
