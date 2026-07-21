@@ -60,7 +60,7 @@ export default function Skills() {
         <span className="text-sm uppercase tracking-widest text-gray-400">
           Skills
         </span>
-        <h2 className="heading-2 mt-4 mb-6">Tech stack & tools</h2>
+        <h2 className="heading-2 mt-4 mb-6">TECH STACK & TOOLS</h2>
         <p className="body-large max-w-2xl mb-8">
           What I actually use to ship products.
         </p>

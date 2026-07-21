@@ -128,7 +128,7 @@ useEffect(() => {
           Wins
         </span>
 
-        <h2 className="heading-2 mt-4 mb-6">Engineering wins</h2>
+        <h2 className="heading-2 mt-4 mb-6">ENGINEERING WINS</h2>
 
         <p className="body-large mb-12 max-w-2xl">
           Real problems, real fixes — the how, not just the what.

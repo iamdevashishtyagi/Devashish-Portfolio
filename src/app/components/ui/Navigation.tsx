@@ -21,6 +21,7 @@ export default function Navigation() {
   const wordmarkSlotRef = useRef<HTMLDivElement>(null);
   const loadingLineRef = useRef<HTMLDivElement>(null);
   const loadingBarRef = useRef<HTMLDivElement>(null);
+  const remainingCharsRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
     const wrapper = wordmarkWrapperRef.current;
@@ -28,8 +29,9 @@ export default function Navigation() {
     const slot = wordmarkSlotRef.current;
     const loadingLine = loadingLineRef.current;
     const loadingBar = loadingBarRef.current;
+    const remainingChars = remainingCharsRef.current;
 
-    if (!wrapper || !wordmark || !slot || !loadingLine || !loadingBar) return;
+    if (!wrapper || !wordmark || !slot || !loadingLine || !loadingBar || !remainingChars) return;
 
     const ctx = gsap.context(() => {
       const initialStyles = window.getComputedStyle(wordmark);
@@ -91,11 +93,20 @@ export default function Navigation() {
           },
         }
       );
+
+      // Get the D character and measure it
       const charEls = Array.from(
         wordmark.querySelectorAll<HTMLElement>(".wordmark-character")
       );
-      const [firstChar, ...restChars] = charEls;
+      const [firstChar] = charEls;
 
+      // Set initial state - only D visible, remaining letters hidden behind it
+      gsap.set(remainingChars, {
+        opacity: 0,
+        x: 0,
+      });
+
+      // Measure the width of the remaining text as a single block
       const measurer = document.createElement("span");
       measurer.style.position = "fixed";
       measurer.style.top = "-9999px";
@@ -110,12 +121,14 @@ export default function Navigation() {
       measurer.style.textTransform = initialStyles.textTransform;
       document.body.appendChild(measurer);
 
-      const naturalWidths = WORDMARK_CHARACTERS.map((char) => {
-        measurer.textContent = char;
-        return measurer.getBoundingClientRect().width;
-      });
+      // Get the full remaining text as a single block
+      const remainingText = WORDMARK.slice(1);
+      measurer.textContent = remainingText;
+      const remainingWidth = measurer.getBoundingClientRect().width;
 
       document.body.removeChild(measurer);
+
+      // Position the loading line
       const dRect = firstChar.getBoundingClientRect();
       gsap.set(loadingLine, {
         top: dRect.bottom + 28,
@@ -139,6 +152,7 @@ export default function Navigation() {
         },
       });
 
+      // Loading bar animation
       intro.to(
         loadingBar,
         {
@@ -148,6 +162,7 @@ export default function Navigation() {
         },
         0.2
       );
+
       intro.to(
         loadingLine,
         {
@@ -162,21 +177,55 @@ export default function Navigation() {
         "+=0.15"
       );
 
+      // NEW ANIMATION: The remaining letters slide out from behind D as a single solid block
+      intro.to(
+        remainingChars,
+        {
+          opacity: 1,
+          x: 0, // Move from left to right
+          duration: 0.6,
+          ease: "power2.out",
+        },
+        "-=0.05"
+      );
+
+      // Also animate the individual letter widths to match their natural widths
+      // but now they should appear as a solid block
+      const restChars = charEls.slice(1);
+      const naturalWidths = remainingText.split("").map((char) => {
+        const measurer2 = document.createElement("span");
+        measurer2.style.position = "fixed";
+        measurer2.style.top = "-9999px";
+        measurer2.style.left = "-9999px";
+        measurer2.style.visibility = "hidden";
+        measurer2.style.whiteSpace = "pre";
+        measurer2.style.pointerEvents = "none";
+        measurer2.style.fontSize = initialStyles.fontSize;
+        measurer2.style.fontWeight = "900";
+        measurer2.style.fontFamily = initialStyles.fontFamily;
+        measurer2.style.letterSpacing = initialStyles.letterSpacing;
+        measurer2.style.textTransform = initialStyles.textTransform;
+        document.body.appendChild(measurer2);
+        measurer2.textContent = char;
+        const width = measurer2.getBoundingClientRect().width;
+        document.body.removeChild(measurer2);
+        return width;
+      });
+
+      // Animate widths simultaneously (not staggered)
       intro.to(
         restChars,
         {
-          width: (i: number) => naturalWidths[i + 1],
-          opacity: 1,
-          duration: 0.45,
+          width: (i: number) => naturalWidths[i],
+          duration: 0.6,
           ease: "power2.out",
-          stagger: 0.08,
           onComplete: () => {
             charEls.forEach((el) => {
               gsap.set(el, { width: "auto" });
             });
           },
         },
-        "-=0.05"
+        "-=0.6"
       );
     });
 
@@ -246,19 +295,24 @@ export default function Navigation() {
             isHidden ? "pointer-events-none" : ""
           }`}
         >
-          {WORDMARK_CHARACTERS.map((character, index) => (
-            <span
-              key={`${character}-${index}`}
-              className="wordmark-character inline-block"
-              style={
-                index === 0
-                  ? { verticalAlign: "top" }
-                  : { width: 0, opacity: 0, verticalAlign: "top" }
-              }
-            >
-              {character}
-            </span>
-          ))}
+          <span className="wordmark-character inline-block">
+            {WORDMARK_CHARACTERS[0]}
+          </span>
+          <span
+            ref={remainingCharsRef}
+            className="inline-block"
+            style={{ opacity: 0 }}
+          >
+            {WORDMARK_CHARACTERS.slice(1).map((character, index) => (
+              <span
+                key={`${character}-${index}`}
+                className="wordmark-character inline-block"
+                style={{ width: 0, verticalAlign: "top" }}
+              >
+                {character}
+              </span>
+            ))}
+          </span>
         </a>
 
         <div

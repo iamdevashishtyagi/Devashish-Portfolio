@@ -63,7 +63,7 @@ export default function Contact() {
               Contact
             </span>
 
-            <h2 className="heading-2 mt-4 mb-6">Let's build something</h2>
+            <h2 className="contact-heading-2 mt-4 mb-6">Let's build something</h2>
 
             <p className="body-large max-w-2xl mb-12 text-current">
               Got a project, a problem, or just want to talk systems? I'm

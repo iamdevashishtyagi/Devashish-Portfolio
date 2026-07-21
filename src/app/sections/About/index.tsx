@@ -40,7 +40,7 @@ export default function About() {
           <span className="text-sm uppercase tracking-widest text-gray-400">
             About
           </span>
-          <h2 className="heading-2 mt-4 mb-12">The short version</h2>
+          <h2 className="heading-2 mt-4 mb-12">THE SHORT VERSION</h2>
 
           <div className="space-y-6">
             {aboutParagraphs.map((paragraph, i) => (

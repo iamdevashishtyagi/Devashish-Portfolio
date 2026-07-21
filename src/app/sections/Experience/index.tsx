@@ -39,7 +39,7 @@ export default function Experience() {
         <span className="text-sm uppercase tracking-widest text-gray-400">
           Experience
         </span>
-        <h2 className="heading-2 mt-4 mb-12">Where I've shipped</h2>
+        <h2 className="heading-2 mt-4 mb-12">WHERE I'VE SHIPPED</h2>
 
         <div className="space-y-16">
           {experience.map((exp, index) => (
