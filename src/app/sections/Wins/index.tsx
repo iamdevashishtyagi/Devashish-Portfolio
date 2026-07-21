@@ -121,7 +121,7 @@ useEffect(() => {
     <section
       ref={sectionRef}
       id="wins"
-      className="wins-section-padding border-t border-gray-100"
+      className="section-padding border-t border-gray-100"
     >
       <div className="container-narrow">
         <span className="text-sm uppercase tracking-widest text-gray-400">
