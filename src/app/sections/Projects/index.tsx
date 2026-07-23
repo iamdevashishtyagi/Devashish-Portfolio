@@ -4,81 +4,92 @@ import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { projects } from "@/src/app/data/profile";
-import ProjectCard from "./ProjectCard";
+import ProjectShowcase from "./ProjectShowcase";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const filters = ["all", "enterprise", "ai", "saas", "compliance", "marketing"];
-
 export default function Projects() {
   const sectionRef = useRef<HTMLElement>(null);
-  const [activeFilter, setActiveFilter] = useState("all");
-
-  const filteredProjects =
-    activeFilter === "all"
-      ? projects
-      : projects.filter((p) => p.filter === activeFilter);
+  const [activeIndex, setActiveIndex] = useState(0);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      gsap.fromTo(".project-grid > *", {
-        autoAlpha: 0,
-        y: 30,
-      }, {
-        autoAlpha: 1,
-        y: 0,
-        duration: 0.8,
-        stagger: 0.1,
-        ease: "power3.out",
+      // Parallax background effect
+      gsap.to(".projects-bg", {
+        y: 100,
+        scale: 1.05,
         scrollTrigger: {
           trigger: sectionRef.current,
-          start: "top 70%",
-          once: true,
+          start: "top bottom",
+          end: "bottom top",
+          scrub: 1.5,
         },
       });
+
+      // Fade in section
+      gsap.fromTo(
+        ".projects-content",
+        { opacity: 0, y: 60 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 1.2,
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: "top 80%",
+            once: true,
+          },
+        }
+      );
     }, sectionRef);
 
     return () => ctx.revert();
   }, []);
 
-  useEffect(() => {
-    const refreshId = requestAnimationFrame(() => ScrollTrigger.refresh());
-    return () => cancelAnimationFrame(refreshId);
-  }, [activeFilter]);
-
   return (
     <section
       ref={sectionRef}
       id="projects"
-      className="section-padding border-t border-gray-100"
+      className="relative section-padding overflow-hidden"
     >
-      <div className="container-narrow">
-        <span className="text-sm uppercase tracking-widest text-gray-400">
-          Work
-        </span>
-        <h2 className="heading-2 mt-4 mb-6">THINGS I'VE BUILT</h2>
+      {/* Animated background */}
+      <div className="projects-bg absolute inset-0 opacity-5">
+        <div className="absolute inset-0 bg-gradient-to-br from-current via-transparent to-current" />
+      </div>
 
-        <div className="flex flex-wrap gap-2 mb-12">
-          {filters.map((filter) => (
+      <div className="projects-content relative container-narrow">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+          <div>
+            <span className="text-sm uppercase tracking-widest text-current/50">
+              Portfolio
+            </span>
+            <h2 className="heading-2 mt-2 text-current">
+              Featured <span className="text-current/60">Work</span>
+            </h2>
+          </div>
+          <div className="flex gap-3">
             <button
-              key={filter}
-              onClick={() => setActiveFilter(filter)}
-              className={`px-4 py-2 text-sm rounded-full transition-all duration-300 ${
-                activeFilter === filter
-                  ? "bg-charcoal text-cream"
-                  : "bg-white text-gray-600 hover:bg-gray-100"
-              }`}
+              onClick={() => setActiveIndex(Math.max(0, activeIndex - 1))}
+              className="p-3 rounded-full border border-current/20 hover:border-current/60 transition-all hover:scale-110"
+              disabled={activeIndex === 0}
             >
-              {filter.charAt(0).toUpperCase() + filter.slice(1)}
+              ←
             </button>
-          ))}
+            <button
+              onClick={() => setActiveIndex(Math.min(projects.length - 1, activeIndex + 1))}
+              className="p-3 rounded-full border border-current/20 hover:border-current/60 transition-all hover:scale-110"
+              disabled={activeIndex === projects.length - 1}
+            >
+              →
+            </button>
+          </div>
         </div>
 
-        <div className="project-grid grid grid-cols-1 md:grid-cols-2 gap-6">
-          {filteredProjects.map((project, index) => (
-            <ProjectCard key={project.id} project={project} index={index} />
-          ))}
-        </div>
+        <ProjectShowcase
+          projects={projects}
+          activeIndex={activeIndex}
+          setActiveIndex={setActiveIndex}
+        />
       </div>
     </section>
   );

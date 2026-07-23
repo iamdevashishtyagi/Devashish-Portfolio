@@ -1,16 +1,17 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { architectureSteps } from "@/src/app/data/profile";
-import { ArrowRight, Database, Search, Cpu, FileText, MessageSquare, Brain } from "lucide-react";
+import { ArrowRight, Database, Search, Cpu, FileText, MessageSquare, Brain, Layers } from "lucide-react";
 
 gsap.registerPlugin(ScrollTrigger);
 
 const icons = {
   question: MessageSquare,
-  embedding: Database,
+  chunk: Layers,
+  embed: Database,
   search: Search,
   context: FileText,
   llm: Brain,
@@ -19,20 +20,100 @@ const icons = {
 
 export default function Architecture() {
   const sectionRef = useRef<HTMLElement>(null);
+  const stepRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      gsap.from(".arch-step", {
-        opacity: 0,
-        x: -40,
-        duration: 0.8,
-        stagger: 0.12,
-        ease: "power3.out",
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top 70%",
-          toggleActions: "play none none reverse",
-        },
+      stepRefs.current.forEach((step, index) => {
+        if (!step) return;
+
+        const icon = step.querySelector(".step-icon") as HTMLElement;
+        if (!icon) return;
+
+        ScrollTrigger.create({
+          trigger: step,
+          start: "top 75%",
+          end: "bottom 25%",
+          onEnter: () => {
+            icon.style.borderColor = "#00e5ff";
+            icon.style.boxShadow = "0 0 30px #00e5ff, 0 0 80px #0077ff";
+            const iconSvg = icon.querySelector("svg");
+            if (iconSvg) {
+              iconSvg.style.color = "#00e5ff";
+            }
+          },
+          onLeave: () => {
+            icon.style.borderColor = "";
+            icon.style.boxShadow = "";
+            const iconSvg = icon.querySelector("svg");
+            if (iconSvg) {
+              iconSvg.style.color = "";
+            }
+          },
+          onEnterBack: () => {
+            icon.style.borderColor = "#00e5ff";
+            icon.style.boxShadow = "0 0 30px #00e5ff, 0 0 80px #0077ff";
+            const iconSvg = icon.querySelector("svg");
+            if (iconSvg) {
+              iconSvg.style.color = "#00e5ff";
+            }
+          },
+          onLeaveBack: () => {
+            icon.style.borderColor = "";
+            icon.style.boxShadow = "";
+            const iconSvg = icon.querySelector("svg");
+            if (iconSvg) {
+              iconSvg.style.color = "";
+            }
+          },
+        });
+      });
+
+      document.querySelectorAll(".step-detail").forEach((el) => {
+        const detail = el as HTMLElement;
+        detail.addEventListener("mouseenter", () => {
+          gsap.to(detail, {
+            rotationX: 6,
+            rotationY: 6,
+            scale: 1.02,
+            color: "#00e5ff",
+            duration: 0.3,
+            ease: "power2.out",
+          });
+        });
+        detail.addEventListener("mouseleave", () => {
+          gsap.to(detail, {
+            rotationX: 0,
+            rotationY: 0,
+            scale: 1,
+            color: "",
+            duration: 0.3,
+            ease: "power2.out",
+          });
+        });
+      });
+
+      document.querySelectorAll(".step-label").forEach((el) => {
+        el.addEventListener("mouseenter", () => {
+          gsap.to(el, {
+            rotationX: 10,
+            rotationY: 10,
+            scale: 1.05,
+            color: "#00e5ff",
+            duration: 0.4,
+            ease: "power2.out",
+          });
+        });
+        el.addEventListener("mouseleave", () => {
+          gsap.to(el, {
+            rotationX: 0,
+            rotationY: 0,
+            scale: 1,
+            color: "",
+            duration: 0.4,
+            ease: "power2.out",
+          });
+        });
       });
     }, sectionRef);
 
@@ -46,16 +127,18 @@ export default function Architecture() {
       className="section-padding border-t border-gray-800"
     >
       <div className="container-narrow">
-        <span className="text-sm uppercase tracking-widest text-gray-400">
+        {/* Make the section title adapt to background */}
+        <span className="text-sm uppercase tracking-widest text-current opacity-70">
           Systems
         </span>
-        <h2 className="heading-2 mt-4 mb-6">RAG PIPELINE ARCHITECTURE</h2>
-        <p className="body-large max-w-2xl mb-12 text-current">
+        <h2 className="heading-2 mt-4 mb-6 text-current">
+          RAG PIPELINE ARCHITECTURE
+        </h2>
+        <p className="body-large max-w-2xl mb-12 text-current opacity-90">
           How a question becomes a grounded answer — tenant-isolated, retrieval-first.
         </p>
 
         <div className="relative">
-          {/* Connection line */}
           <div className="absolute left-[19px] top-8 bottom-8 w-0.5 bg-gray-700 hidden md:block" />
 
           <div className="space-y-8">
@@ -64,24 +147,39 @@ export default function Architecture() {
               return (
                 <div
                   key={step.id}
+                  ref={(el) => {
+                    stepRefs.current[index] = el;
+                  }}
                   className="arch-step flex items-start gap-6 relative"
                 >
-                  <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center border border-gray-700 relative z-10">
-                    <Icon className="w-5 h-5 text-gray-300" />
+                  <div
+                    className={`step-icon flex-shrink-0 w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center border border-gray-700 relative z-10 transition-all duration-500`}
+                  >
+                    <Icon className="w-5 h-5 text-current transition-colors duration-500" />
                   </div>
 
                   <div className="flex-1 pt-1">
                     <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-6">
-                      <h3 className="text-lg font-medium">{step.label}</h3>
-                      <span className="text-sm text-gray-400">{step.detail}</span>
+                      <h3
+                        className="step-label text-lg font-bold tracking-tight text-current transition-colors duration-200 cursor-default"
+                        style={{ perspective: "600px" }}
+                      >
+                        {step.label}
+                      </h3>
+                      <span
+                        className="step-detail text-sm font-medium text-current opacity-80 transition-colors duration-200 cursor-default"
+                        style={{ perspective: "400px" }}
+                      >
+                        {step.detail}
+                      </span>
                     </div>
 
                     {index < architectureSteps.length - 1 && (
-                      <ArrowRight className="w-4 h-4 text-gray-600 mt-2 hidden md:block" />
+                      <ArrowRight className="w-4 h-4 text-current opacity-30 mt-2 hidden md:block" />
                     )}
                   </div>
 
-                  <span className="text-xs text-gray-500 font-mono">
+                  <span className="text-xs font-mono text-current opacity-40">
                     {String(index + 1).padStart(2, "0")}
                   </span>
                 </div>
@@ -90,10 +188,10 @@ export default function Architecture() {
           </div>
         </div>
 
-        <div className="mt-12 p-6 bg-gray-900/50 rounded-2xl border border-gray-800">
-          <p className="text-sm text-gray-300">
-            <span className="text-gray-400">Key design decisions:</span>{" "}
-            Tenant-isolated vector indexes • Semantic chunking strategy • 
+        <div className="mt-12 p-6 bg-current/5 rounded-2xl border border-current/10">
+          <p className="text-sm text-current opacity-80">
+            <span className="font-semibold opacity-100">Key design decisions:</span>{" "}
+            Tenant-isolated vector indexes • Semantic chunking with overlap •
             Retrieval quality over model choice • Grounded, attributable answers
           </p>
         </div>

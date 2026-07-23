@@ -47,7 +47,7 @@ export const experience = [
       "Paired with and reviewed code from newer contributors, turning tribal knowledge into documented conventions the team still uses.",
       "Became the person pulled in when a module broke in production — the reliability work nobody assigns but everybody needs.",
     ],
-    stack: ["Vue.js", "Node.js", "Express", "MongoDB", "REST APIs"],
+    stack: ["Vue.js", "Node.js", "Express", "MongoDB", "REST APIs", "AWS"],
   },
   {
     id: "invoice",
@@ -62,7 +62,7 @@ export const experience = [
       "Automated a previously manual, error-prone conversion process into a workflow the client now trusts to run unattended.",
       "Worked directly with a non-technical client across a language and time-zone gap, translating tax rules into deterministic code.",
     ],
-    stack: ["Node.js", "Express", "XML/XSD", "Automation", "Validation"],
+    stack: ["Vue.js", "Node.js", "Express", "XML/XSD", "Automation", "Validation"],
   },
   {
     id: "gym",
@@ -77,7 +77,7 @@ export const experience = [
       "Built the attendance system with check-in flows fast enough for a front-desk queue, not just a demo.",
       "Shipped the admin dashboard used daily by gym owners to track revenue and member retention at a glance.",
     ],
-    stack: ["Vue.js", "Node.js", "MongoDB", "Auth", "Pinia"],
+    stack: ["Vue.js", "Node.js", "Express", "MongoDB", "Auth", "TypeScript"],
   },
   {
     id: "college-start",
@@ -91,7 +91,7 @@ export const experience = [
       "Learned to read code before writing it: understanding legacy decisions before proposing new ones.",
       "Built the habit of writing for the next developer, not just for the feature to work.",
     ],
-    stack: ["Vue.js", "Express", "MongoDB", "Git"],
+    stack: ["Vue.js", "Node.js", "Express", "MongoDB", "Git"],
   },
 ];
 
@@ -147,10 +147,10 @@ export const projects: Project[] = [
       "Fee management & receipts",
       "Role-based access for staff, faculty, and students",
     ],
-    stack: ["Vue.js", "Node.js", "Express", "MongoDB", "REST APIs"],
+    stack: ["Vue.js", "Node.js", "Express", "MongoDB", "REST APIs", "AWS"],
     metrics: [
       { label: "Colleges live", value: "Multiple" },
-      { label: "Modules owned", value: "3+" },
+      { label: "Modules", value: "30+" },
       { label: "Rollbacks", value: "0" },
     ],
     links: { demo: 'https://echelon.aperptech.com/dashboard', caseStudy: "#" },
@@ -187,7 +187,7 @@ export const projects: Project[] = [
       "Batch conversion workflow",
       "Error reporting in plain language",
     ],
-    stack: ["Node.js", "Express", "XML/XSD", "Automation"],
+    stack: ["Vue.js", "Node.js", "Express", "XML/XSD", "Automation"],
     metrics: [
       { label: "Manual steps removed", value: "~90%" },
       { label: "Schema", value: "SDI XML" },
@@ -227,7 +227,7 @@ export const projects: Project[] = [
       "Subscription & billing cycles",
       "Owner analytics dashboard",
     ],
-    stack: ["Vue.js", "Pinia", "Node.js", "MongoDB", "Auth"],
+    stack: ["Vue.js", "Pinia", "Node.js", "Express", "MongoDB", "Auth", "TypeScript"],
     metrics: [
       { label: "Core modules", value: "4" },
       { label: "Tenant model", value: "Multi-gym" },
@@ -305,7 +305,7 @@ export const projects: Project[] = [
       "Optimized images & fonts",
       "Vercel deployment pipeline",
     ],
-    stack: ["Next.js", "SEO", "Vercel"],
+    stack: ["Next.js", "TypeScript", "SEO", "Vercel", "Render"],
     metrics: [
       { label: "Lighthouse", value: "90+" },
       { label: "Hosting", value: "Vercel" },
@@ -676,10 +676,11 @@ export const blogPosts = [
 ];
 
 export const architectureSteps = [
-  { id: "question", label: "User Question", detail: "A natural-language question enters the system." },
-  { id: "embedding", label: "Embedding", detail: "The question is converted into a vector representation." },
-  { id: "search", label: "Vector Search", detail: "The vector is matched against a tenant-isolated index." },
-  { id: "context", label: "Retrieved Context", detail: "The most relevant document chunks are pulled back." },
-  { id: "llm", label: "LLM", detail: "The model reasons over the question plus retrieved context." },
-  { id: "answer", label: "Final Answer", detail: "A grounded, tenant-specific answer is returned." },
+  { id: "question", label: "User Question", detail: "Raw natural‑language query enters the system – unmodified, ungrounded." },
+  { id: "chunk", label: "Document Chunking", detail: "Tenant documents are split into semantic chunks – overlapping windows preserve context across boundaries." },
+  { id: "embed", label: "Embedding", detail: "Each chunk is converted into a dense vector representation using a frozen embedding model." },
+  { id: "search", label: "Vector Search", detail: "Query vector is matched against tenant‑isolated indexes – returns top‑K most relevant chunks." },
+  { id: "context", label: "Retrieved Context", detail: "Selected chunks are assembled into a grounded context window – filtered, deduplicated, ranked." },
+  { id: "llm", label: "LLM Reasoning", detail: "The model synthesizes an answer using only the retrieved context – no hallucinated outside knowledge." },
+  { id: "answer", label: "Final Answer", detail: "A tenant‑specific, attributable response is returned – with citations to the source chunks." },
 ];

@@ -13,110 +13,118 @@ export default function Wins() {
   const stackRef = useRef<HTMLDivElement>(null);
   const lastCardTriggerRef = useRef<HTMLDivElement>(null);
 
-useEffect(() => {
-  const stack = stackRef.current;
-  const lastCardTrigger = lastCardTriggerRef.current;
+  useEffect(() => {
+    const stack = stackRef.current;
+    const lastCardTrigger = lastCardTriggerRef.current;
 
-  if (!stack || !lastCardTrigger) return;
+    if (!stack || !lastCardTrigger) return;
 
-  const ctx = gsap.context(() => {
-    const cards = gsap.utils.toArray<HTMLElement>(".win-card");
-    const transitions = Math.max(cards.length - 1, 1);
+    const ctx = gsap.context(() => {
+      const cards = gsap.utils.toArray<HTMLElement>(".win-card");
+      const transitions = Math.max(cards.length - 1, 1);
 
-    gsap.set(cards, {
-      transformOrigin: "center bottom",
-      transformStyle: "preserve-3d",
-    });
-
-    cards.forEach((card, index) => {
-      gsap.set(card, {
-        zIndex: cards.length - index,
-        y: index * 14,
-        scale: 1 - index * 0.02,
-        width: "90%",
-        left: "5%",
+      gsap.set(cards, {
+        transformOrigin: "center bottom",
+        transformStyle: "preserve-3d",
       });
-    });
 
-    const timeline = gsap.timeline({
-      scrollTrigger: {
-        trigger: stack,
-        start: "top 80vh",
-        end: () => `+=${transitions * 100}%`,
-        pin: true,
-        scrub: 0.8,
-        anticipatePin: 1,
+      cards.forEach((card, index) => {
+        gsap.set(card, {
+          zIndex: cards.length - index,
+          y: index * 14,
+          scale: 1 - index * 0.02,
+          width: "90%",
+          left: "5%",
+        });
+      });
 
-        snap: {
-          snapTo: 1 / transitions,
-          duration: {
-            min: 0.2,
-            max: 0.45,
+      const timeline = gsap.timeline({
+        scrollTrigger: {
+          trigger: stack,
+          start: "top 80vh",
+          end: () => `+=${transitions * 100}%`,
+          pin: true,
+          scrub: 0.8,
+          anticipatePin: 1,
+
+          snap: {
+            snapTo: 1 / transitions,
+            duration: {
+              min: 0.2,
+              max: 0.45,
+            },
+            ease: "power2.inOut",
           },
-          ease: "power2.inOut",
         },
-      },
-    });
+      });
 
-    cards.slice(0, -1).forEach((card, index) => {
-      const nextCard = cards[index + 1];
+      cards.slice(0, -1).forEach((card, index) => {
+        const nextCard = cards[index + 1];
 
-      timeline.to(
-        card,
-        {
-          rotateX: 110,
-          yPercent: -230,
-          duration: 1,
-          ease: "power2.inOut",
+        timeline.to(
+          card,
+          {
+            rotateX: 110,
+            yPercent: -230,
+            duration: 1,
+            ease: "power2.inOut",
+          },
+          index
+        );
+
+        timeline.to(
+          nextCard,
+          {
+            y: 0,
+            scale: 1,
+            duration: 1,
+            ease: "power2.inOut",
+          },
+          index
+        );
+      });
+
+      const lastCard = cards[cards.length - 1];
+
+      gsap.to(lastCard, {
+        rotateX: 110,
+        yPercent: -230,
+        ease: "power2.inOut",
+
+        scrollTrigger: {
+          trigger: lastCardTrigger,
+
+          // The trigger is reached by normal page scrolling
+          // immediately after the pinned stack releases.
+          start: "top bottom",
+
+          // The last card flips while the next section is entering.
+          end: "top top",
+
+          scrub: 0.8,
         },
-        index
-      );
+      });
+    }, sectionRef);
 
-      timeline.to(
-        nextCard,
-        {
-          y: 0,
-          scale: 1,
-          duration: 1,
-          ease: "power2.inOut",
-        },
-        index
-      );
-    });
+    return () => ctx.revert();
+  }, []);
 
-    const lastCard = cards[cards.length - 1];
-
-    gsap.to(lastCard, {
-      rotateX: 110,
-      yPercent: -230,
-      ease: "power2.inOut",
-
-      scrollTrigger: {
-        trigger: lastCardTrigger,
-
-        // The trigger is reached by normal page scrolling
-        // immediately after the pinned stack releases.
-        start: "top bottom",
-
-        // The last card flips while the next section is entering.
-        end: "top top",
-
-        scrub: 0.8,
-      },
-    });
-  }, sectionRef);
-
-  return () => ctx.revert();
-}, []);
   const cardColors = [
-    "#3D2FA9",
-    "#F74625",
-    "#A4DB23",
-    "#A723DB",
+    "#190d72",
+    "#ac5817",
+    "#15804c",
+    "#7a1585",
     "#DB2348",
-    "#DBCF23",
+    "#827b13",
   ];
-
+  // const cardColors = [
+  //   "#303A36",
+  //   "#765548",
+  //   "#646B4D",
+  //   "#5A5262",
+  //   "#814C46",
+  //   "#8D7A4F",
+  // ];
   return (
     <section
       ref={sectionRef}

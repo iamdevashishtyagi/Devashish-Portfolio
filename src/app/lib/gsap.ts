@@ -6,14 +6,13 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 gsap.registerPlugin(ScrollTrigger);
 
 export function initScrollBackground() {
-  // Background color transitions between sections
   const sections = [
     { id: "#about", bg: "#FFFFFF", textColor: "#1A1A1A", theme: "light" },
     { id: "#experience", bg: "#FFFFFF", textColor: "#1A1A1A", theme: "light" },
     { id: "#projects", bg: "#FBF9EF", textColor: "#1A1A1A", theme: "light" },
     { id: "#wins", bg: "#FFFFFF", textColor: "#1A1A1A", theme: "light" },
     { id: "#skills", bg: "#FBF9EF", textColor: "#1A1A1A", theme: "light" },
-    { id: "#architecture", bg: "#000000", textColor: "#FBF9EF", theme: "dark" },
+    { id: "#architecture", bg: "#000000", textColor: "#ad9f90", theme: "dark" },
     { id: "#achievements", bg: "#FFFFFF", textColor: "#1A1A1A", theme: "light" },
     { id: "#contact", bg: "#000000", textColor: "#FBF9EF", theme: "dark" },
   ];

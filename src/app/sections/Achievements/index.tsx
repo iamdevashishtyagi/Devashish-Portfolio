@@ -91,7 +91,7 @@ export default function Achievements() {
         <span className="text-sm uppercase tracking-widest text-gray-400">
           Achievements
         </span>
-        <h2 className="heading-2 mt-4 mb-6">By the numbers</h2>
+        <h2 className="heading-2 mt-4 mb-6 text-current">By the numbers</h2>
 
         {/* Stats Grid */}
         <div className="stats-grid grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 mb-16">

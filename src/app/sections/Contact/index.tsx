@@ -154,7 +154,7 @@ export default function Contact() {
                 required
                 rows={4}
                 className="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg text-cream placeholder-gray-500 focus:outline-none focus:border-gray-500 transition-colors resize-none"
-                placeholder="Tell me about your project..."
+                placeholder="Leave a message or Tell me about your project..."
               />
             </div>
 
