@@ -95,6 +95,13 @@ export const experience = [
   },
 ];
 
+export type ProjectImage = {
+  src: string;
+  alt: string;
+  caption: string;
+};
+
+
 export type Project = {
   id: string;
   title: string;
@@ -113,6 +120,7 @@ export type Project = {
   metrics: { label: string; value: string }[];
   links: { demo?: string; github?: string; caseStudy?: string };
   accent: "blue" | "violet" | "amber";
+  images: ProjectImage[];
 };
 
 export const projects: Project[] = [
@@ -155,6 +163,23 @@ export const projects: Project[] = [
     ],
     links: { demo: 'https://echelon.aperptech.com/dashboard', caseStudy: "#" },
     accent: "blue",
+    images: [
+      {
+        src: "/images/projects/college-erp1.png",
+        alt: "College ERP Dashboard",
+        caption: "Main dashboard with attendance overview and quick access to modules"
+      },
+      {
+        src: "/images/projects/college-erp2.png",
+        alt: "College ERP Admissions",
+        caption: "Student admission and enrollment management interface"
+      },
+      {
+        src: "/images/projects/college-erp3.png",
+        alt: "College ERP Attendance",
+        caption: "Daily attendance tracking with class-wise reports"
+      }
+    ]
   },
   {
     id: "invoice-converter",
@@ -195,6 +220,33 @@ export const projects: Project[] = [
     ],
     links: { demo: 'https://www.xml-babel-converter.com', caseStudy: "#" },
     accent: "amber",
+    images: [
+      {
+        src: "/images/projects/invoice-converter1.png",
+        alt: "Invoice Upload Interface",
+        caption: "Upload interface for invoice data files"
+      },
+      {
+        src: "/images/projects/invoice-converter2.png",
+        alt: "XML Conversion Preview",
+        caption: "Conversion preview showing input data and generated XML output"
+      },
+      {
+        src: "/images/projects/invoice-converter3.png",
+        alt: "Invoice Converter Dashboard",
+        caption: "Dashboard showing conversion status and history"
+      },
+      {
+        src: "/images/projects/invoice-converter4.png",
+        alt: "Validation Results",
+        caption: "Validation results with error reporting in plain language"
+      },
+      {
+        src: "/images/projects/invoice-converter5.png",
+        alt: "Batch Processing",
+        caption: "Batch conversion workflow for multiple invoices"
+      }
+    ]
   },
   {
     id: "gym-saas",
@@ -235,6 +287,23 @@ export const projects: Project[] = [
     ],
     links: { demo: 'https://gym-admin-management-dashboard.vercel.app/login', caseStudy: "#" },
     accent: "blue",
+    images: [
+      {
+        src: "/images/projects/gym-saas1.png",
+        alt: "Gym Management Dashboard",
+        caption: "Owner dashboard showing members, attendance, and revenue overview"
+      },
+      {
+        src: "/images/projects/gym-saas2.png",
+        alt: "Member Management",
+        caption: "Member profiles with subscription details and attendance history"
+      },
+      {
+        src: "/images/projects/gym-saas3.png",
+        alt: "Attendance Check-in",
+        caption: "Quick check-in interface for daily member attendance"
+      }
+    ]
   },
   {
     id: "ai-chatbot",
@@ -275,10 +344,27 @@ export const projects: Project[] = [
     ],
     links: { caseStudy: "#architecture" },
     accent: "violet",
+    images: [
+      {
+        src: "/images/projects/ai-chatbot1.png",
+        alt: "Chat Interface",
+        caption: "Chat interface with grounded responses and source citations"
+      },
+      {
+        src: "/images/projects/ai-chatbot2.png",
+        alt: "Document Upload",
+        caption: "Document upload interface for tenant-specific knowledge base"
+      },
+      {
+        src: "/images/projects/ai-chatbot3.png",
+        alt: "Admin Panel",
+        caption: "Admin panel showing vector indexes and tenant isolation"
+      }
+    ]
   },
   {
-    id: "business-site",
-    title: "Business Website",
+    id: "worldmedia",
+    title: "World Media",
     category: "Marketing Site",
     filter: "marketing",
     mockup: "landing",
@@ -313,6 +399,33 @@ export const projects: Project[] = [
     ],
     links: { demo: 'https://worldmediancr.com', caseStudy: "#" },
     accent: "blue",
+    images: [
+      {
+        src: "/images/projects/worldmedia1.png",
+        alt: "World Media Homepage",
+        caption: "Marketing homepage with clean design and fast loading"
+      },
+      {
+        src: "/images/projects/worldmedia2.png",
+        alt: "World Media Services",
+        caption: "Services page with structured content and SEO metadata"
+      },
+      {
+        src: "/images/projects/worldmedia3.png",
+        alt: "World Media About",
+        caption: "About page with responsive layout"
+      },
+      {
+        src: "/images/projects/worldmedia4.png",
+        alt: "World Media Contact",
+        caption: "Contact page with form integration"
+      },
+      {
+        src: "/images/projects/worldmedia5.png",
+        alt: "World Media Blog",
+        caption: "Blog section with optimized content delivery"
+      }
+    ]
   },
 ];
 
