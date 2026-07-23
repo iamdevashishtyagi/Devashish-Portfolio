@@ -12,6 +12,11 @@ export function useLenis() {
       smoothWheel: true,
     });
 
+    // Keep Lenis' scroll limit in sync when client-side interactions change
+    // the document height (for example, expanding a skill's project details).
+    const resizeObserver = new ResizeObserver(() => lenis.resize());
+    resizeObserver.observe(document.body);
+
     function raf(time: number) {
       lenis.raf(time);
       requestAnimationFrame(raf);
@@ -19,6 +24,9 @@ export function useLenis() {
 
     requestAnimationFrame(raf);
 
-    return () => lenis.destroy();
+    return () => {
+      resizeObserver.disconnect();
+      lenis.destroy();
+    };
   }, []);
 }

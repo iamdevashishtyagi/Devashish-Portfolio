@@ -84,6 +84,13 @@ export default function Skills() {
     return () => ctx.revert();
   }, [activeId, reduced]);
 
+  // The detail panel changes the document height after a skill is selected.
+  // Refresh ScrollTrigger after React has committed the new layout.
+  // useEffect(() => {
+  //   const refreshId = requestAnimationFrame(() => ScrollTrigger.refresh());
+  //   return () => cancelAnimationFrame(refreshId);
+  // }, [activeId]);
+
   return (
     <section ref={sectionRef} id="skills" className="section-padding border-t border-current/10">
       <div className="container-narrow">

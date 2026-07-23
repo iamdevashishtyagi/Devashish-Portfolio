@@ -4,7 +4,7 @@
 import { useEffect, useState } from "react";
 
 interface SkillConnectorsProps {
-  containerRef: React.RefObject<HTMLDivElement>;
+  containerRef: React.RefObject<HTMLDivElement | null>;
   nodeRefs: React.RefObject<Map<string, HTMLButtonElement>>;
   activeId: string | null;
   relatedIds: string[];
