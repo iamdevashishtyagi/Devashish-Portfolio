@@ -22,6 +22,7 @@ export default function Navigation() {
   const loadingLineRef = useRef<HTMLDivElement>(null);
   const loadingBarRef = useRef<HTMLDivElement>(null);
   const remainingCharsRef = useRef<HTMLSpanElement>(null);
+  const introBackdropRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const wrapper = wordmarkWrapperRef.current;
@@ -30,8 +31,9 @@ export default function Navigation() {
     const loadingLine = loadingLineRef.current;
     const loadingBar = loadingBarRef.current;
     const remainingChars = remainingCharsRef.current;
+    const introBackdrop = introBackdropRef.current;
 
-    if (!wrapper || !wordmark || !slot || !loadingLine || !loadingBar || !remainingChars) return;
+    if (!wrapper || !wordmark || !slot || !loadingLine || !loadingBar || !remainingChars || !introBackdrop) return;
 
     const ctx = gsap.context(() => {
       const initialStyles = window.getComputedStyle(wordmark);
@@ -93,6 +95,18 @@ export default function Navigation() {
           },
         }
       );
+
+      // The intro backdrop hands off to the full-screen home background at scroll position 420.
+      gsap.to(introBackdrop, {
+        autoAlpha: 0,
+        ease: "none",
+        scrollTrigger: {
+          trigger: document.documentElement,
+          start: "top top",
+          end: "+=420",
+          scrub: true,
+        },
+      });
 
       // Get the D character and measure it
       const charEls = Array.from(
@@ -275,10 +289,11 @@ export default function Navigation() {
     <>
       <div
         ref={wordmarkWrapperRef}
-        className={`pointer-events-none fixed inset-0 z-[60] transition-opacity duration-300 ${
+        className={`pointer-events-none fixed inset-0 z-[60] overflow-hidden transition-opacity duration-300 ${
           isHidden ? "opacity-0" : "opacity-100"
         }`}
       >
+        <div ref={introBackdropRef} className="hero-geometry hero-geometry-intro" aria-hidden="true" />
         <a
           ref={wordmarkRef}
           href="#"
@@ -291,7 +306,7 @@ export default function Navigation() {
             fontFamily: "var(--font-medieval-sharp)",
             letterSpacing: "-0.09em",
           }}
-          className={`pointer-events-auto absolute -translate-x-1/2 -translate-y-1/2 whitespace-nowrap font-sans uppercase leading-none text-charcoal will-change-transform ${
+          className={`pointer-events-auto absolute z-10 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap font-sans uppercase leading-none text-charcoal will-change-transform ${
             isHidden ? "pointer-events-none" : ""
           }`}
         >
@@ -317,7 +332,7 @@ export default function Navigation() {
 
         <div
           ref={loadingLineRef}
-          className="fixed left-1/2 h-[2px] w-24 -translate-x-1/2 overflow-hidden rounded-full bg-charcoal/15 opacity-0 sm:w-32"
+          className="fixed z-10 left-1/2 h-[2px] w-24 -translate-x-1/2 overflow-hidden rounded-full bg-charcoal/15 opacity-0 sm:w-32"
         >
           <div ref={loadingBarRef} className="h-full w-full rounded-full bg-charcoal" />
         </div>

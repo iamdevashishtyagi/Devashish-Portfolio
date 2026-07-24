@@ -7,7 +7,7 @@ export default function SkillMarquee() {
   const skills = [...skillMarquee, ...skillMarquee];
 
   return (
-    <div className="skill-marquee relative overflow-hidden">
+    <div className="skill-marquee skill-marquee-viewport relative overflow-hidden">
       <div className="skill-marquee-track flex w-max animate-marquee whitespace-nowrap">
         {skills.map((skill, i) => (
           <span

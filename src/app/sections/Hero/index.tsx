@@ -85,11 +85,13 @@ export default function Hero() {
   return (
     <section
       ref={containerRef}
-      className="relative min-h-screen flex items-center justify-center overflow-hidden"
+      id="home"
+      className="relative isolate flex min-h-screen items-center justify-center overflow-hidden"
     >
+      <div className="hero-geometry" aria-hidden="true" />
       <div
         ref={windowRef}
-        className="w-full max-w-7xl mx-auto px-6 md:px-12 lg:px-24 py-20"
+        className="hero-window relative z-10 w-full max-w-7xl mx-auto overflow-hidden px-6 py-20 md:px-12 lg:px-24"
       >
         <div ref={contentRef} className="space-y-6 opacity-0">
           <p className="text-sm uppercase tracking-widest text-gray-400 hero-title">
