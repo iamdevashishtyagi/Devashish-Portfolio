@@ -108,12 +108,12 @@ export default function ProjectShowcase({
   return (
     <div
       ref={canvasRef}
-      className="relative rounded-3xl border border-current/10 overflow-hidden"
+      className="relative overflow-hidden rounded-3xl border border-current/10 bg-white/65 shadow-[0_18px_60px_rgb(10_10_10_/_0.06)] backdrop-blur-[2px]"
       style={{ ["--accent" as string]: accent }}
     >
       {/* BACKGROUND ATMOSPHERE — the layer that gives each project type its own weather */}
       <div ref={atmosphereRef} className="absolute inset-0 pointer-events-none">
-        <div className="absolute inset-0 opacity-[0.06]" style={{ background: `linear-gradient(135deg, ${accent}, transparent 65%)` }} />
+        <div className="absolute inset-0 opacity-[0.08]" style={{ background: `linear-gradient(135deg, ${accent}, transparent 68%)` }} />
         <AtmospherePattern pattern={atmosphere.pattern} accent={accent} reduced={reduced} />
       </div>
 
@@ -316,36 +316,51 @@ function AtmospherePattern({
   accent: string;
   reduced: boolean;
 }) {
-  const spin = reduced ? "" : "animate-[spin_60s_linear_infinite]";
-  const pulse = reduced ? "" : "animate-[pulse_4s_ease-in-out_infinite]";
+  const animation = (name: string) => (reduced ? undefined : name);
 
   switch (pattern) {
     case "grid":
       return (
-        <div
-          className="absolute inset-0 opacity-[0.07]"
-          style={{
-            backgroundImage: `linear-gradient(${accent} 1px, transparent 1px), linear-gradient(90deg, ${accent} 1px, transparent 1px)`,
-            backgroundSize: "28px 28px",
-          }}
-        />
+        <>
+          <div
+            className="absolute inset-0 opacity-[0.12]"
+            style={{
+              backgroundImage: `linear-gradient(${accent} 1px, transparent 1px), linear-gradient(90deg, ${accent} 1px, transparent 1px)`,
+              backgroundSize: "28px 28px",
+              animation: animation("project-grid-drift 18s linear infinite"),
+            }}
+          />
+          <div
+            className="absolute inset-y-0 w-1/3 opacity-40 blur-2xl"
+            style={{ background: `linear-gradient(90deg, transparent, ${accent}, transparent)`, animation: animation("project-sweep 7s ease-in-out infinite") }}
+          />
+        </>
       );
     case "ledger":
       return (
-        <div
-          className="absolute inset-0 opacity-[0.08]"
-          style={{
-            backgroundImage: `repeating-linear-gradient(0deg, ${accent} 0, ${accent} 1px, transparent 1px, transparent 34px)`,
-          }}
-        />
+        <>
+          <div
+            className="absolute inset-0 opacity-[0.12]"
+            style={{ backgroundImage: `repeating-linear-gradient(0deg, ${accent} 0, ${accent} 1px, transparent 1px, transparent 34px)` }}
+          />
+          <div className="absolute inset-y-0 left-[18%] w-px opacity-30" style={{ backgroundColor: accent }} />
+          <div
+            className="absolute left-0 right-0 h-16 opacity-30 blur-xl"
+            style={{ background: `linear-gradient(180deg, transparent, ${accent}, transparent)`, animation: animation("project-ledger-scan 6s ease-in-out infinite") }}
+          />
+        </>
       );
     case "pulse":
       return (
-        <div className={`absolute -right-24 -top-24 w-96 h-96 rounded-full blur-3xl opacity-[0.12] ${pulse}`} style={{ backgroundColor: accent }} />
+        <>
+          <div className="absolute -right-24 -top-24 h-96 w-96 rounded-full blur-3xl opacity-[0.18]" style={{ backgroundColor: accent, animation: animation("project-pulse 5s ease-in-out infinite") }} />
+          <div className="absolute -right-12 top-8 h-64 w-64 rounded-full border opacity-25" style={{ borderColor: accent, animation: animation("project-orbit 14s linear infinite") }} />
+          <div className="absolute -right-2 top-20 h-40 w-40 rounded-full border opacity-20" style={{ borderColor: accent, animation: animation("project-orbit 9s linear infinite reverse") }} />
+        </>
       );
     case "network":
       return (
-        <div className={`absolute inset-0 opacity-[0.1] ${spin}`} style={{ transformOrigin: "80% 20%" }}>
+        <div className="absolute inset-0 opacity-[0.16]" style={{ transformOrigin: "80% 20%", animation: animation("project-network-breathe 12s ease-in-out infinite") }}>
           <svg viewBox="0 0 400 300" className="w-full h-full">
             {[
               [40, 40, 160, 90],
@@ -356,16 +371,20 @@ function AtmospherePattern({
             ].map(([x1, y1, x2, y2], i) => (
               <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke={accent} strokeWidth="1" />
             ))}
+            {[[40, 40], [160, 90], [300, 50], [220, 220], [340, 200], [90, 200]].map(([cx, cy], i) => (
+              <circle key={i} cx={cx} cy={cy} r="3" fill={accent} style={{ animation: animation(`project-node-pulse 2.8s ease-in-out ${i * 0.3}s infinite`) }} />
+            ))}
           </svg>
         </div>
       );
     case "editorial":
     default:
       return (
-        <div
-          className="absolute inset-y-0 right-0 w-1/3 opacity-[0.06]"
-          style={{ background: `linear-gradient(180deg, ${accent}, transparent)` }}
-        />
+        <>
+          <div className="absolute inset-y-0 right-0 w-1/3 opacity-[0.14]" style={{ background: `linear-gradient(180deg, ${accent}, transparent)` }} />
+          <div className="absolute -right-20 top-0 h-full w-32 -skew-x-12 opacity-25" style={{ background: `linear-gradient(90deg, transparent, ${accent}, transparent)`, animation: animation("project-editorial-slide 9s ease-in-out infinite") }} />
+          <div className="absolute bottom-8 left-8 h-px w-40 opacity-35" style={{ backgroundColor: accent, animation: animation("project-rule-expand 5s ease-in-out infinite") }} />
+        </>
       );
   }
 }

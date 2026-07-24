@@ -256,6 +256,50 @@ body[data-theme="dark"] #architecture .border-current\/10 {
   animation: marquee 30s linear infinite;
 }
 
+@keyframes project-grid-drift {
+  from { background-position: 0 0, 0 0; }
+  to { background-position: 56px 56px, 56px 56px; }
+}
+
+@keyframes project-sweep {
+  from { transform: translateX(-140%); }
+  to { transform: translateX(440%); }
+}
+
+@keyframes project-ledger-scan {
+  from { transform: translateY(-120%); }
+  to { transform: translateY(720%); }
+}
+
+@keyframes project-pulse {
+  0%, 100% { transform: scale(0.85); opacity: 0.12; }
+  50% { transform: scale(1.12); opacity: 0.24; }
+}
+
+@keyframes project-orbit {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes project-network-breathe {
+  0%, 100% { transform: scale(0.98) rotate(-1deg); opacity: 0.11; }
+  50% { transform: scale(1.04) rotate(1deg); opacity: 0.2; }
+}
+
+@keyframes project-node-pulse {
+  0%, 100% { r: 2.5px; opacity: 0.35; }
+  50% { r: 5px; opacity: 1; }
+}
+
+@keyframes project-editorial-slide {
+  0%, 100% { transform: translateX(-20%) skewX(-12deg); opacity: 0.08; }
+  50% { transform: translateX(-220%) skewX(-12deg); opacity: 0.3; }
+}
+
+@keyframes project-rule-expand {
+  0%, 100% { transform: scaleX(0.35); transform-origin: left; opacity: 0.2; }
+  50% { transform: scaleX(1); transform-origin: left; opacity: 0.65; }
+}
+
 /* Theme-aware triangular grid used exclusively by the home section. */
 .hero-geometry {
   --hero-grid-line: rgb(176 137 104 / 0.2);

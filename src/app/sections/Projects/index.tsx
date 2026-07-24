@@ -73,10 +73,6 @@ export default function Projects() {
       className="relative section-layout overflow-hidden"
       onPointerEnter={() => setPaused(true)}
     >
-      <div className="projects-bg absolute inset-0 opacity-5">
-        <div className="absolute inset-0 bg-gradient-to-br from-current via-transparent to-current" />
-      </div>
-
       <div className="projects-content relative container-narrow">
         <div className="mb-10">
           <span className="text-sm uppercase tracking-widest text-current/50">Archive</span>
