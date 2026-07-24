@@ -53,9 +53,10 @@ export default function Contact() {
     <section
       ref={sectionRef}
       id="contact"
-      className="section-layout border-t border-gray-800"
+      className="relative isolate overflow-hidden section-layout border-t border-gray-800"
     >
-      <div className="container-narrow">
+      <div className="contact-atmosphere" aria-hidden="true" />
+      <div className="relative z-10 container-narrow">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Left Section */}
           <div>
@@ -90,12 +91,12 @@ export default function Contact() {
                 </div>
               </a>
 
-              <div className="contact-item flex gap-4 pt-4 border-t border-gray-800">
+              <div className="contact-item contact-divider flex gap-4 border-t pt-4">
                 <a
                   href={profile.github}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="p-3 bg-gray-800 rounded-full hover:bg-gray-700 transition-colors"
+                  className="contact-social rounded-full p-3 transition-colors"
                 >
                   <FaGithub className="w-5 h-5" />
                 </a>
@@ -104,7 +105,7 @@ export default function Contact() {
                   href={profile.linkedin}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="p-3 bg-gray-800 rounded-full hover:bg-gray-700 transition-colors"
+                  className="contact-social rounded-full p-3 transition-colors"
                 >
                   <FaLinkedin className="w-5 h-5" />
                 </a>
@@ -115,7 +116,7 @@ export default function Contact() {
           {/* Right Section */}
           <form onSubmit={handleSubmit} className="contact-item space-y-4">
             <div>
-              <label className="text-sm text-gray-400 block mb-1">Name</label>
+              <label className="contact-label mb-1 block text-sm">Name</label>
               <input
                 type="text"
                 value={formData.name}
@@ -123,13 +124,13 @@ export default function Contact() {
                   setFormData({ ...formData, name: e.target.value })
                 }
                 required
-                className="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg text-cream placeholder-gray-500 focus:outline-none focus:border-gray-500 transition-colors"
+                className="contact-field w-full rounded-lg border px-4 py-3 transition-colors focus:outline-none"
                 placeholder="Your name"
               />
             </div>
 
             <div>
-              <label className="text-sm text-gray-400 block mb-1">Email</label>
+              <label className="contact-label mb-1 block text-sm">Email</label>
               <input
                 type="email"
                 value={formData.email}
@@ -137,13 +138,13 @@ export default function Contact() {
                   setFormData({ ...formData, email: e.target.value })
                 }
                 required
-                className="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg text-cream placeholder-gray-500 focus:outline-none focus:border-gray-500 transition-colors"
+                className="contact-field w-full rounded-lg border px-4 py-3 transition-colors focus:outline-none"
                 placeholder="you@example.com"
               />
             </div>
 
             <div>
-              <label className="text-sm text-gray-400 block mb-1">
+              <label className="contact-label mb-1 block text-sm">
                 Message
               </label>
               <textarea
@@ -153,7 +154,7 @@ export default function Contact() {
                 }
                 required
                 rows={4}
-                className="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg text-cream placeholder-gray-500 focus:outline-none focus:border-gray-500 transition-colors resize-none"
+                className="contact-field w-full resize-none rounded-lg border px-4 py-3 transition-colors focus:outline-none"
                 placeholder="Leave a message or Tell me about your project..."
               />
             </div>

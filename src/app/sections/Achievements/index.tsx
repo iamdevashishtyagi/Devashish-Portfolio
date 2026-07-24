@@ -100,14 +100,14 @@ export default function Achievements() {
             return (
               <div
                 key={stat.label}
-                className="text-center p-6 bg-cream rounded-2xl border border-gray-200"
+                className="achievement-card text-center rounded-2xl border p-6"
               >
-                <Icon className="w-6 h-6 mx-auto text-gray-400 mb-2" />
-                <div className="stat-number text-3xl font-medium">
+                <Icon className="achievement-icon mx-auto mb-2 h-6 w-6" />
+                <div className="achievement-value stat-number text-3xl font-medium">
                   {stat.value}
                   {stat.suffix}
                 </div>
-                <p className="text-sm text-gray-500 mt-1">{stat.label}</p>
+                <p className="achievement-label mt-1 text-sm">{stat.label}</p>
               </div>
             );
           })}
@@ -115,12 +115,12 @@ export default function Achievements() {
 
         {/* Principles */}
         <div className="mb-16">
-          <h3 className="text-xl font-medium mb-6">Working principles</h3>
+          <h3 className="achievement-heading mb-6 text-xl font-medium">Working principles</h3>
           <div className="principles-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {principles.map((principle) => (
               <div
                 key={principle}
-                className="principle-item p-4 bg-cream rounded-xl border border-gray-200 hover:border-charcoal/20 transition-all duration-300"
+                className="principle-item achievement-card rounded-xl border p-4 transition-all duration-300"
               >
                 <p className="text-sm">“{principle}”</p>
               </div>

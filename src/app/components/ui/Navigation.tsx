@@ -63,16 +63,8 @@ export default function Navigation() {
         },
         {
           x: () => {
-            const finalFontSize = 24;
-            const initialFontSize = Number.parseFloat(initialStyles.fontSize);
-            const initialWidth = wordmark.getBoundingClientRect().width;
-            const finalWidth = initialWidth * (finalFontSize / initialFontSize);
-
-            return (
-              slot.getBoundingClientRect().left -
-              window.innerWidth / 2 +
-              finalWidth / 2
-            );
+            const rect = slot.getBoundingClientRect();
+            return rect.left + rect.width / 2 - window.innerWidth / 2;
           },
 
           y: () => {

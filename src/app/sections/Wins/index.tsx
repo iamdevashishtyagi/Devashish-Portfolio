@@ -109,29 +109,22 @@ export default function Wins() {
     return () => ctx.revert();
   }, []);
 
-  const cardColors = [
-    "#190d72",
-    "#ac5817",
-    "#15804c",
-    "#7a1585",
-    "#DB2348",
-    "#827b13",
+  const cardThemes = [
+    { base: "#111c33", accent: "#60a5fa", effect: "bubbles" },
+    { base: "#35200f", accent: "#fbbf24", effect: "circuit" },
+    { base: "#102b23", accent: "#5eead4", effect: "ripple" },
+    { base: "#29143a", accent: "#d8b4fe", effect: "aurora" },
+    { base: "#35131e", accent: "#fda4af", effect: "dots" },
+    { base: "#2c2b10", accent: "#fde68a", effect: "rays" },
   ];
-  // const cardColors = [
-  //   "#303A36",
-  //   "#765548",
-  //   "#646B4D",
-  //   "#5A5262",
-  //   "#814C46",
-  //   "#8D7A4F",
-  // ];
   return (
     <section
       ref={sectionRef}
       id="wins"
-      className="section-layout border-t border-gray-100"
+      className="relative isolate overflow-hidden section-layout border-t border-gray-100"
     >
-      <div className="container-narrow">
+      <div className="hero-geometry wins-geometry" aria-hidden="true" />
+      <div className="relative z-10 container-narrow">
         <span className="text-sm uppercase tracking-widest text-gray-400">
           Wins
         </span>
@@ -150,16 +143,44 @@ export default function Wins() {
           }}
         >
           {engineeringWins.map((win, index) => (
-            <div
+            <WinCard
               key={win.id}
-              className="win-card absolute inset-0 overflow-hidden rounded-3xl p-7 text-white shadow-2xl md:p-12"
-              style={{
-                backgroundColor: cardColors[index % cardColors.length],
-                transformStyle: "preserve-3d",
-                backfaceVisibility: "hidden",
-              }}
-            >
-              <div className="relative flex h-full max-w-4xl flex-col justify-between">
+              win={win}
+              index={index}
+              theme={cardThemes[index % cardThemes.length]}
+            />
+          ))}
+        </div>
+        <div
+          ref={lastCardTriggerRef}
+          className="pointer-events-none h-px"
+        />
+      </div>
+    </section>
+  );
+}
+
+function WinCard({
+  win,
+  index,
+  theme,
+}: {
+  win: (typeof engineeringWins)[number];
+  index: number;
+  theme: { base: string; accent: string; effect: string };
+}) {
+  return (
+    <div
+      className="win-card absolute inset-0 overflow-hidden rounded-3xl p-7 text-white shadow-[0_25px_70px_rgb(0_0_0_/_0.2)] md:p-12"
+      style={{
+        background: `linear-gradient(145deg, ${theme.base}, #0a0a0a)`,
+        transformStyle: "preserve-3d",
+        backfaceVisibility: "hidden",
+        ["--win-accent" as string]: theme.accent,
+      }}
+    >
+      <WinAtmosphere effect={theme.effect} index={index} />
+      <div className="relative z-10 flex h-full max-w-4xl flex-col justify-between">
                 <div>
                   <span className="inline-flex rounded-full border border-white/30 bg-white/15 px-3 py-1 text-xs font-semibold uppercase tracking-widest">
                     {win.tag}
@@ -187,15 +208,25 @@ export default function Wins() {
                     Impact — {win.impact}
                   </p>
                 </div>
-              </div>
-            </div>
-          ))}
-        </div>
-        <div
-          ref={lastCardTriggerRef}
-          className="pointer-events-none h-px"
-        />
       </div>
-    </section>
+    </div>
   );
+}
+
+function WinAtmosphere({ effect, index }: { effect: string; index: number }) {
+  switch (effect) {
+    case "bubbles":
+      return <div className="win-effect win-effect-bubbles" aria-hidden="true"><i /><i /><i /><i /></div>;
+    case "circuit":
+      return <div className="win-effect win-effect-circuit" aria-hidden="true"><i /><i /></div>;
+    case "ripple":
+      return <div className="win-effect win-effect-ripple" aria-hidden="true"><i /><i /><i /></div>;
+    case "aurora":
+      return <div className="win-effect win-effect-aurora" aria-hidden="true"><i /><i /></div>;
+    case "dots":
+      return <div className="win-effect win-effect-dots" aria-hidden="true"><i /></div>;
+    case "rays":
+    default:
+      return <div className="win-effect win-effect-rays" aria-hidden="true"><i style={{ animationDelay: `${index * -0.4}s` }} /></div>;
+  }
 }
