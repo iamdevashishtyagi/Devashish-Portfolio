@@ -70,7 +70,7 @@ export default function Projects() {
     <section
       ref={sectionRef}
       id="projects"
-      className="relative section-layout overflow-hidden"
+      className="relative section-layout overflow-hidden border-t border-current/10"
       onPointerEnter={() => setPaused(true)}
     >
       <div className="projects-content relative container-narrow">

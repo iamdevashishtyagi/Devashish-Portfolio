@@ -33,7 +33,7 @@ export default function About() {
     <section
       ref={sectionRef}
       id="about"
-      className="section-layout border-t border-gray-100"
+      className="section-layout"
     >
       <div className="container-narrow">
         <div className="max-w-4xl">

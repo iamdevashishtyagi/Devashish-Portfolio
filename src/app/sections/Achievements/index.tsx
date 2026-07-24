@@ -85,7 +85,7 @@ export default function Achievements() {
     <section
       ref={sectionRef}
       id="achievements"
-      className="section-layout border-t border-gray-100"
+      className="section-layout"
     >
       <div className="container-narrow">
         <span className="text-sm uppercase tracking-widest text-gray-400">

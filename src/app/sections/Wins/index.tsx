@@ -121,7 +121,7 @@ export default function Wins() {
     <section
       ref={sectionRef}
       id="wins"
-      className="relative isolate overflow-hidden section-layout border-t border-gray-100"
+      className="relative isolate overflow-hidden section-layout"
     >
       <div className="hero-geometry wins-geometry" aria-hidden="true" />
       <div className="relative z-10 container-narrow">

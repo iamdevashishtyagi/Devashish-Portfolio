@@ -53,7 +53,7 @@ export default function Contact() {
     <section
       ref={sectionRef}
       id="contact"
-      className="relative isolate overflow-hidden section-layout border-t border-gray-800"
+      className="relative isolate overflow-hidden section-layout"
     >
       <div className="contact-atmosphere" aria-hidden="true" />
       <div className="relative z-10 container-narrow">
