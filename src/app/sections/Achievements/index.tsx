@@ -127,31 +127,6 @@ export default function Achievements() {
             ))}
           </div>
         </div>
-
-        {/* Journey Stops */}
-        <div>
-          <h3 className="text-xl font-medium mb-6">Your journey so far</h3>
-          <div className="flex flex-wrap gap-3">
-            {journeyStops.map((stop) => {
-              const isUnlocked = visibleJourney.includes(stop.id);
-              return (
-                <div
-                  key={stop.id}
-                  className={`px-4 py-2 rounded-full text-sm transition-all duration-500 ${
-                    isUnlocked
-                      ? "bg-charcoal text-cream"
-                      : "bg-gray-100 text-gray-400"
-                  }`}
-                >
-                  {isUnlocked ? "🔓" : "🔒"} {stop.title}
-                </div>
-              );
-            })}
-          </div>
-          <p className="text-xs text-gray-400 mt-4">
-            Scroll through the page to unlock achievements.
-          </p>
-        </div>
       </div>
     </section>
   );
