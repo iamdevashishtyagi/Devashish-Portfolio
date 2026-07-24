@@ -53,7 +53,7 @@ export default function Contact() {
     <section
       ref={sectionRef}
       id="contact"
-      className="section-padding border-t border-gray-800"
+      className="section-layout border-t border-gray-800"
     >
       <div className="container-narrow">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">

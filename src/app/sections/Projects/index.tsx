@@ -70,7 +70,7 @@ export default function Projects() {
     <section
       ref={sectionRef}
       id="projects"
-      className="relative section-padding overflow-hidden"
+      className="relative section-layout overflow-hidden"
       onPointerEnter={() => setPaused(true)}
     >
       <div className="projects-bg absolute inset-0 opacity-5">

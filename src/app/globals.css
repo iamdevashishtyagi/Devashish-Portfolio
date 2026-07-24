@@ -38,10 +38,18 @@ html {
 }
 
 body {
+  margin: 0;
+  padding: 0;
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
   transition: background-color 0.7s ease, color 0.7s ease;
+}
+
+/* The page shell owns no visual spacing. Each section controls its own layout. */
+main {
+  margin: 0;
+  padding: 0;
 }
 
 /* Default light theme */
@@ -105,11 +113,12 @@ body[data-theme="dark"] #architecture .border-current\/10 {
 
 /* Custom utilities */
 @layer utilities {
-  .section-padding {
-    padding-left: 1.5rem;
-    padding-right: 1.5rem;
-    padding-top: 5rem;
-    padding-bottom: 2rem;
+  .section-layout {
+    --section-space-inline: 1.5rem;
+    --section-space-block-start: 5rem;
+    --section-space-block-end: 2rem;
+    padding-inline: var(--section-space-inline);
+    padding-block: var(--section-space-block-start) var(--section-space-block-end);
   }
 
   .container-narrow {
@@ -181,11 +190,10 @@ body[data-theme="dark"] #architecture .border-current\/10 {
   }
 
   @media (min-width: 768px) {
-    .section-padding {
-      padding-left: 3rem;
-      padding-right: 3rem;
-      padding-top: 7rem;
-      padding-bottom: 3rem;
+    .section-layout {
+      --section-space-inline: 3rem;
+      --section-space-block-start: 7rem;
+      --section-space-block-end: 3rem;
     }
 
     .heading-1 {
@@ -206,11 +214,10 @@ body[data-theme="dark"] #architecture .border-current\/10 {
   }
 
   @media (min-width: 1024px) {
-    .section-padding {
-      padding-left: 6rem;
-      padding-right: 6rem;
-      padding-top: 9rem;
-      padding-bottom: 4rem;
+    .section-layout {
+      --section-space-inline: 6rem;
+      --section-space-block-start: 9rem;
+      --section-space-block-end: 4rem;
     }
 
     .heading-1 {

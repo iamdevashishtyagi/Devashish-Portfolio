@@ -92,7 +92,7 @@ export default function Skills() {
   // }, [activeId]);
 
   return (
-    <section ref={sectionRef} id="skills" className="section-padding border-t border-current/10">
+    <section ref={sectionRef} id="skills" className="section-layout border-t border-current/10">
       <div className="container-narrow">
         <div className="skills-band mb-4">
           <span className="text-sm uppercase tracking-widest text-current/50">The Signal Path</span>

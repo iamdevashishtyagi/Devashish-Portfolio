@@ -124,7 +124,7 @@ export default function Architecture() {
     <section
       ref={sectionRef}
       id="architecture"
-      className="section-padding border-t border-gray-800"
+      className="section-layout border-t border-gray-800"
     >
       <div className="container-narrow">
         {/* Make the section title adapt to background */}

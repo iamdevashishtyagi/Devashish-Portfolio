@@ -129,7 +129,7 @@ export default function Wins() {
     <section
       ref={sectionRef}
       id="wins"
-      className="section-padding border-t border-gray-100"
+      className="section-layout border-t border-gray-100"
     >
       <div className="container-narrow">
         <span className="text-sm uppercase tracking-widest text-gray-400">

@@ -104,7 +104,7 @@ export default function Projects() {
     <section
       ref={sectionRef}
       id="projects"
-      className="relative overflow-hidden section-padding"
+      className="relative overflow-hidden section-layout"
     >
       {/* Ambient background */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">

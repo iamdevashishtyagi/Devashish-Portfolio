@@ -42,7 +42,7 @@ export default function Experience() {
   }, []);
 
   return (
-    <section ref={sectionRef} id="experience" className="section-padding border-t border-current/10">
+    <section ref={sectionRef} id="experience" className="section-layout border-t border-current/10">
       <div className="container-narrow">
         <div className="ascent-intro">
           <span className="text-sm uppercase tracking-widest text-current/50">The Ascent</span>
