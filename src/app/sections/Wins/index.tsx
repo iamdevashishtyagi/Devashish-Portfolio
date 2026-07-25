@@ -23,7 +23,6 @@ export default function Wins() {
       const cards = gsap.utils.toArray<HTMLElement>(".win-card");
       const transitions = Math.max(cards.length - 1, 1);
 
-      // Check if mobile
       const isMobile = window.innerWidth < 768;
       const yOffset = isMobile ? 8 : 14;
       const scaleOffset = isMobile ? 0.01 : 0.02;
@@ -105,22 +104,14 @@ export default function Wins() {
     return () => ctx.revert();
   }, []);
 
-  // const cardThemes = [
-  //   { base: "#111c33", accent: "#60a5fa" },
-  //   { base: "#35200f", accent: "#fbbf24" },
-  //   { base: "#102b23", accent: "#5eead4" },
-  //   { base: "#29143a", accent: "#d8b4fe" },
-  //   { base: "#35131e", accent: "#fda4af" },
-  //   { base: "#2c2b10", accent: "#fde68a" },
-  // ];
-const cardThemes = [
-  { base: "#2a5ecf", accent: "#3B82F6" },
-  { base: "#c82222", accent: "#F59E0B" },
-  { base: "#ceb121", accent: "#F59E0B" },
-  { base: "#c71f1f", accent: "#fda4af" },
-  { base: "#e51d1d", accent: "#8B5CF6" },
-  { base: "#9621c0", accent: "#8B5CF6" },
-];
+  const cardThemes = [
+    { base: "#2a5ecf", accent: "#2a5ecf" },
+    { base: "#c82222", accent: "#c82222" },
+    { base: "#bc7c21", accent: "#bc7c21" },
+    { base: "#ceb121", accent: "#ceb121" },
+    { base: "#e51d1d", accent: "#e51d1d" },
+    { base: "#c71f1f", accent: "#c71f1f" },
+  ];
 
   return (
     <section
@@ -175,36 +166,38 @@ function WinCard({
     <div
       className="win-card absolute inset-0 overflow-hidden rounded-2xl md:rounded-3xl p-5 md:p-7 lg:p-12 text-white shadow-[0_25px_70px_rgb(0_0_0_/_0.2)]"
       style={{
-        background: `radial-gradient(circle at 82% 18%, ${theme.accent}2b, transparent 34%), linear-gradient(145deg, ${theme.base}, #0a0a0a)`,
+        background: theme.base, // Solid color, no gradient
         transformStyle: "preserve-3d",
         backfaceVisibility: "hidden",
       }}
     >
       <div className="relative z-10 flex h-full max-w-4xl flex-col justify-between">
+        {/* TOP SECTION - Reduced gaps on mobile */}
         <div>
-          <span className="inline-flex rounded-full border border-white/30 bg-white/15 px-3 py-1 text-[10px] md:text-xs font-semibold uppercase tracking-widest">
+          <span className="inline-flex rounded-full border border-white/30 bg-white/15 px-2.5 py-0.5 md:px-3 md:py-1 text-[9px] md:text-xs font-semibold uppercase tracking-widest">
             {win.tag}
           </span>
 
-          <h3 className="mt-4 md:mt-6 max-w-3xl text-xl sm:text-2xl md:text-3xl lg:text-5xl font-semibold tracking-tight">
+          <h3 className="mt-2 md:mt-6 max-w-3xl text-lg sm:text-2xl md:text-3xl lg:text-5xl font-semibold tracking-tight">
             {win.title}
           </h3>
 
-          <p className="mt-3 md:mt-6 max-w-3xl text-sm md:text-base lg:text-lg leading-relaxed text-white/80">
+          <p className="mt-1.5 md:mt-6 max-w-3xl text-xs sm:text-sm md:text-base lg:text-lg leading-relaxed text-white/80">
             {win.problem}
           </p>
         </div>
 
-        <div className="border-t border-white/25 pt-4 md:pt-6">
-          <div className="flex items-start gap-2 md:gap-3">
-            <CheckCircle2 className="mt-1 h-4 w-4 md:h-5 md:w-5 flex-shrink-0" />
+        {/* BOTTOM SECTION - Reduced gaps on mobile */}
+        <div className="border-t border-white/25 pt-2 md:pt-6">
+          <div className="flex items-start gap-1.5 md:gap-3">
+            <CheckCircle2 className="mt-0.5 md:mt-1 h-3.5 w-3.5 md:h-5 md:w-5 flex-shrink-0" />
 
-            <p className="max-w-3xl text-xs md:text-sm lg:text-base leading-relaxed text-white/90">
+            <p className="text-[10px] sm:text-xs md:text-sm lg:text-base leading-relaxed text-white/90">
               {win.solution}
             </p>
           </div>
 
-          <p className="mt-3 md:mt-5 text-xs md:text-sm font-semibold uppercase tracking-wider text-white/90">
+          <p className="mt-1.5 md:mt-5 text-[10px] sm:text-xs md:text-sm font-semibold uppercase tracking-wider text-white/90">
             Impact — {win.impact}
           </p>
         </div>
