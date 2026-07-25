@@ -253,42 +253,67 @@ body[data-theme="dark"] #contact .contact-social {
 }
 
 .contact-atmosphere {
-  --contact-line: rgb(176 137 104 / 0.24);
-  --contact-glow: rgb(176 137 104 / 0.3);
+  --contact-star: rgb(128 92 57 / 0.5);
+  --contact-star-bright: rgb(176 137 104 / 0.85);
   position: absolute;
-  inset: -8%;
+  inset: 0;
   z-index: 0;
   overflow: hidden;
   pointer-events: none;
-  background:
-    radial-gradient(circle at 82% 18%, var(--contact-glow), transparent 22rem),
-    radial-gradient(circle at 16% 82%, var(--contact-glow), transparent 24rem),
-    linear-gradient(30deg, transparent 49.4%, var(--contact-line) 50%, transparent 50.6%) 0 0 / 72px 62px,
-    linear-gradient(150deg, transparent 49.4%, var(--contact-line) 50%, transparent 50.6%) 0 0 / 72px 62px;
+  contain: layout style paint;
 }
-
-.contact-atmosphere::before,
-.contact-atmosphere::after {
-  position: absolute;
-  width: 28rem;
-  aspect-ratio: 1;
-  border: 1px solid var(--contact-line);
-  border-radius: 50%;
-  content: "";
-  filter: drop-shadow(0 0 2rem var(--contact-glow));
-  animation: contact-orbit 18s linear infinite;
-}
-
-.contact-atmosphere::before { top: -14rem; right: -8rem; }
-.contact-atmosphere::after { bottom: -18rem; left: -10rem; animation-direction: reverse; animation-duration: 25s; }
 
 body[data-theme="dark"] .contact-atmosphere {
-  --contact-line: rgb(251 249 239 / 0.24);
-  --contact-glow: rgba(12, 0, 78, 0.482);
+  --contact-star: rgb(251 249 239 / 0.55);
+  --contact-star-bright: rgb(147 197 253 / 0.95);
 }
 
-@keyframes contact-orbit {
-  to { transform: rotate(360deg) scale(1.08); }
+/* Individual twinkling stars. Only opacity + transform (scale) animate, so
+   each star is compositor-only and never triggers layout or paint by itself
+   — cheap even with 40-50 of them on screen at once. */
+.contact-star {
+  position: absolute;
+  border-radius: 999px;
+  background: var(--contact-star);
+  opacity: var(--star-min, 0.15);
+  animation-name: contact-star-twinkle;
+  animation-iteration-count: infinite;
+  animation-timing-function: ease-in-out;
+}
+
+.contact-star--bright {
+  background: var(--contact-star-bright);
+  box-shadow: 0 0 4px 0.5px var(--contact-star-bright);
+}
+
+@keyframes contact-star-twinkle {
+  0%, 100% { opacity: var(--star-min, 0.15); transform: scale(0.75); }
+  50% { opacity: var(--star-max, 1); transform: scale(1.2); }
+}
+
+/* Shooting stars: a small number of short streaks crossing at randomised
+   offsets, angles and timings. Kept to a handful since these move further
+   and are the more "active" elements on screen. */
+.contact-shooting-star {
+  position: absolute;
+  left: -10rem;
+  width: 8rem;
+  height: 1.5px;
+  background: linear-gradient(90deg, transparent, var(--contact-star-bright), transparent);
+  box-shadow: 0 0 0.6rem var(--contact-star-bright);
+  opacity: 0;
+  transform: rotate(var(--angle, -22deg)) translate3d(0, 0, 0);
+  animation-name: contact-star-shoot;
+  animation-iteration-count: infinite;
+  animation-timing-function: ease-in;
+  will-change: transform, opacity;
+}
+
+@keyframes contact-star-shoot {
+  0%, 60% { opacity: 0; transform: rotate(var(--angle, -22deg)) translate3d(0, 0, 0); }
+  63% { opacity: 0.9; }
+  80% { opacity: 0; transform: rotate(var(--angle, -22deg)) translate3d(130vw, 60vh, 0); }
+  100% { opacity: 0; transform: rotate(var(--angle, -22deg)) translate3d(130vw, 60vh, 0); }
 }
 
 ::selection {
@@ -644,11 +669,12 @@ body[data-theme="dark"] .contact-atmosphere {
 @media (prefers-reduced-motion: reduce) {
   .win-effect,
   .win-effect *,
-  .contact-atmosphere::before,
-  .contact-atmosphere::after,
+  .contact-star,
+  .contact-shooting-star,
   .achievements-atmosphere,
   .achievements-atmosphere::after {
     animation: none !important;
+    opacity: var(--star-max, 0.6);
   }
 }
 

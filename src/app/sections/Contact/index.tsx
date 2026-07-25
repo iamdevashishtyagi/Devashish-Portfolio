@@ -55,7 +55,41 @@ export default function Contact() {
       id="contact"
       className="relative isolate overflow-hidden section-layout"
     >
-      <div className="contact-atmosphere" aria-hidden="true" />
+      <div className="contact-atmosphere" aria-hidden="true">
+        {CONTACT_STARS.map((star, index) => (
+          <span
+            key={index}
+            className={`contact-star${star.bright ? " contact-star--bright" : ""}`}
+            style={
+              {
+                left: star.left,
+                top: star.top,
+                width: star.size,
+                height: star.size,
+                animationDelay: star.delay,
+                animationDuration: star.duration,
+                "--star-min": star.min,
+                "--star-max": star.max,
+              } as React.CSSProperties
+            }
+          />
+        ))}
+        {SHOOTING_STARS.map((star, index) => (
+          <span
+            key={index}
+            className="contact-shooting-star"
+            style={
+              {
+                top: star.top,
+                width: star.length,
+                animationDelay: star.delay,
+                animationDuration: star.duration,
+                "--angle": star.angle,
+              } as React.CSSProperties
+            }
+          />
+        ))}
+      </div>
       <div className="relative z-10 container-narrow">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Left Section */}
@@ -181,3 +215,53 @@ export default function Contact() {
     </section>
   );
 }
+
+// --- Star field data -------------------------------------------------------
+// Generated once at module load with fixed math (no Math.random) so the
+// server-rendered markup matches the client on hydration, while still
+// looking scattered/random. Keeping this as plain data (not refs/state)
+// means there is zero per-frame JS work — every star animates purely in
+// CSS on the compositor thread.
+
+function pseudoRandom(seed: number) {
+  // Deterministic 0..1 "random" value from an integer seed.
+  const x = Math.sin(seed * 12.9898) * 43758.5453;
+  return x - Math.floor(x);
+}
+
+const CONTACT_STARS = Array.from({ length: 46 }, (_, index) => {
+  const r1 = pseudoRandom(index * 3.1 + 1);
+  const r2 = pseudoRandom(index * 5.7 + 2);
+  const r3 = pseudoRandom(index * 7.3 + 3);
+  const r4 = pseudoRandom(index * 2.3 + 4);
+  const r5 = pseudoRandom(index * 9.1 + 5);
+
+  const bright = index % 5 === 0;
+  const size = bright ? 2 + r3 * 1.5 : 1 + r3 * 1.2;
+
+  return {
+    left: `${(r1 * 100).toFixed(2)}%`,
+    top: `${(r2 * 96).toFixed(2)}%`,
+    size: `${size.toFixed(2)}px`,
+    delay: `-${(r4 * 6).toFixed(2)}s`,
+    duration: `${(2.2 + r5 * 3.6).toFixed(2)}s`,
+    min: bright ? 0.25 : 0.1,
+    max: bright ? 1 : 0.75,
+    bright,
+  };
+});
+
+const SHOOTING_STARS = Array.from({ length: 6 }, (_, index) => {
+  const r1 = pseudoRandom(index * 4.4 + 11);
+  const r2 = pseudoRandom(index * 6.6 + 12);
+  const r3 = pseudoRandom(index * 8.8 + 13);
+  const r4 = pseudoRandom(index * 3.3 + 14);
+
+  return {
+    top: `${(6 + r1 * 80).toFixed(2)}%`,
+    angle: `${(32 + r2 * 20).toFixed(1)}deg`,
+    length: `${(6 + r3 * 5).toFixed(1)}rem`,
+    delay: `-${(r4 * 14).toFixed(2)}s`,
+    duration: `${(9 + r4 * 8).toFixed(2)}s`,
+  };
+});
