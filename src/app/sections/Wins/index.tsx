@@ -10,19 +10,17 @@ gsap.registerPlugin(ScrollTrigger);
 
 export default function Wins() {
   const sectionRef = useRef<HTMLElement>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
   const stackRef = useRef<HTMLDivElement>(null);
-  const lastCardTriggerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    const stage = stageRef.current;
     const stack = stackRef.current;
-    const lastCardTrigger = lastCardTriggerRef.current;
 
-    if (!stack || !lastCardTrigger) return;
+    if (!stage || !stack) return;
 
     const ctx = gsap.context(() => {
       const cards = gsap.utils.toArray<HTMLElement>(".win-card");
-      const transitions = Math.max(cards.length - 1, 1);
-
       const isMobile = window.innerWidth < 768;
       const yOffset = isMobile ? 8 : 14;
       const scaleOffset = isMobile ? 0.01 : 0.02;
@@ -44,9 +42,9 @@ export default function Wins() {
 
       const timeline = gsap.timeline({
         scrollTrigger: {
-          trigger: stack,
-          start: "top 80vh",
-          end: () => `+=${transitions * 100}%`,
+          trigger: stage,
+          start: "top top",
+          end: () => `+=${cards.length * window.innerHeight * 0.55}`,
           pin: true,
           scrub: 1.1,
           anticipatePin: 1,
@@ -84,20 +82,11 @@ export default function Wins() {
 
       const lastCard = cards[cards.length - 1];
 
-      const rotateX = isMobile ? 90 : 110;
-      const yPercent = isMobile ? -180 : -230;
-
-      gsap.to(lastCard, {
-        rotateX: rotateX,
-        yPercent: yPercent,
+      timeline.to(lastCard, {
+        rotateX: isMobile ? 90 : 110,
+        yPercent: isMobile ? -180 : -230,
+        duration: 1,
         ease: "power2.inOut",
-
-        scrollTrigger: {
-          trigger: lastCardTrigger,
-          start: "top bottom",
-          end: "top top",
-          scrub: 0.8,
-        },
       });
     }, sectionRef);
 
@@ -121,11 +110,12 @@ export default function Wins() {
     >
       <div className="hero-geometry wins-geometry" aria-hidden="true" />
       <div className="relative z-10 container-narrow">
+        <div ref={stageRef} className="wins-stage flex flex-col">
         <span className="text-sm uppercase tracking-widest text-gray-400">
           Wins
         </span>
 
-        <h2 className="heading-2 mt-4 mb-6">ENGINEERING WINS</h2>
+        <h2 className="heading-2 mt-1 mb-1">ENGINEERING WINS</h2>
 
         <p className="body-large mb-12 max-w-2xl">
           Real problems, real fixes — the how, not just the what.
@@ -146,10 +136,7 @@ export default function Wins() {
             />
           ))}
         </div>
-        <div
-          ref={lastCardTriggerRef}
-          className="pointer-events-none h-px"
-        />
+        </div>
       </div>
     </section>
   );
