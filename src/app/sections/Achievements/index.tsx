@@ -62,7 +62,7 @@ export default function Achievements() {
   }, [activeIndex]);
 
   return (
-    <section ref={sectionRef} id="achievements" className="relative isolate overflow-hidden py-16 md:py-20">
+    <section ref={sectionRef} id="achievements" className="section-layout">
       <div className="achievements-atmosphere" aria-hidden="true" />
       <div className="relative container-narrow">
         {/* Pin the heading and story as one unit, starting when this heading reaches the viewport top. */}
