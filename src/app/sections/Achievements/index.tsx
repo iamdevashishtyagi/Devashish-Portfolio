@@ -24,8 +24,8 @@ export default function Achievements() {
       if (storyStageRef.current) {
         ScrollTrigger.create({
           trigger: storyStageRef.current,
-          start: "top top",
-          end: () => `+=${achievements.length * window.innerHeight * 0.4}`,
+          start: "top 5%",
+          end: () => `+=${achievements.length * window.innerHeight * 0.55}`,
           pin: true,
           scrub: reduced ? false : 0.7,
           anticipatePin: 1,
@@ -65,40 +65,40 @@ export default function Achievements() {
     <section ref={sectionRef} id="achievements" className="relative isolate overflow-hidden py-16 md:py-20">
       <div className="achievements-atmosphere" aria-hidden="true" />
       <div className="relative container-narrow">
-        {/* Header - Reduced bottom margin */}
-        <div className="mb-1 md:mb-1">
-          <span className="text-sm uppercase tracking-widest text-current/50">The pattern behind the work</span>
-          <h2 className="heading-2 mt-2 text-current">
-            Every yes widened the aperture.
-          </h2>
-          <p className="mt-3 text-current/50 max-w-lg">
-            I don&apos;t measure growth in finished tickets. I measure it in how much I was willing to stand in front of before I felt ready for it.
-          </p>
-        </div>
-
-        {/* Scroll Animation Section - Reduced height and padding */}
-        <div ref={storyStageRef} className="achievement-stage grid min-h-[80vh] items-center gap-8 lg:grid-cols-[280px_1fr] lg:gap-12 lg:min-h-[70vh]">
-          <div className="achievement-intro">
-            <div>
-              <ApertureDial activeIndex={activeIndex} total={achievements.length} />
-              <div className="max-w-[200px]">
-                <span className="achievement-label block text-xs uppercase tracking-widest opacity-50">Scope, at the time</span>
-                <p className="achievement-heading mt-2 text-sm font-medium leading-snug">{activeAchievement.scope}</p>
-              </div>
-            </div>
+        {/* Pin the heading and story as one unit, starting when this heading reaches the viewport top. */}
+        <div ref={storyStageRef} className="achievement-stage flex min-h-[100svh] flex-col">
+          <div className="shrink-0">
+            <span className="text-sm uppercase tracking-widest text-current/50">The pattern behind the work</span>
+            <h2 className="heading-2 mt-1 text-current">
+              Every yes widened the aperture.
+            </h2>
+            <p className="mt-3 max-w-lg text-current/50">
+              I don&apos;t measure growth in finished tickets. I measure it in how much I was willing to stand in front of before I felt ready for it.
+            </p>
           </div>
 
-          <div ref={storyRef} className="achievement-story relative min-h-[300px] overflow-hidden rounded-3xl border border-current/15 bg-current/[0.03] p-6 md:min-h-[380px] md:p-10 lg:translate-y-8">
-            <article key={activeAchievement.title} className="h-full [perspective:900px]">
-              <div className="achievement-story-piece flex items-center justify-between gap-4">
-                <span className="achievement-label font-mono text-sm uppercase tracking-[0.2em]">{activeAchievement.year}</span>
-                <span className="rounded-full border border-current/20 px-3 py-1 text-xs opacity-70">{activeAchievement.tag}</span>
+          <div className="grid flex-1 items-center gap-8 pt-8 lg:grid-cols-[280px_1fr] lg:gap-12 lg:pt-10">
+            <div className="achievement-intro">
+              <div>
+                <ApertureDial activeIndex={activeIndex} total={achievements.length} />
+                <div className="max-w-[200px]">
+                  <span className="achievement-label block text-xs uppercase tracking-widest opacity-50">Scope, at the time</span>
+                  <p className="achievement-heading mt-2 text-sm font-medium leading-snug">{activeAchievement.scope}</p>
+                </div>
               </div>
-              <div className="achievement-story-piece mt-8 h-px w-20 bg-current/30" />
-              <h3 className="achievement-story-piece mt-6 max-w-2xl text-2xl font-medium tracking-tight md:text-4xl">{activeAchievement.title}</h3>
-              <p className="achievement-story-piece mt-6 max-w-2xl text-base leading-relaxed opacity-75 md:text-lg">{activeAchievement.description}</p>
-              {/* <p className="achievement-story-piece absolute bottom-6 left-6 right-6 border-t border-current/15 pt-4 text-xs opacity-55 md:bottom-8 md:left-8 md:right-8">{activeAchievement.scope}</p> */}
-            </article>
+            </div>
+
+            <div ref={storyRef} className="achievement-story relative min-h-[300px] overflow-hidden rounded-3xl border border-current/15 bg-current/[0.03] p-6 md:min-h-[380px] md:p-10 lg:translate-y-8">
+              <article key={activeAchievement.title} className="h-full [perspective:900px]">
+                <div className="achievement-story-piece flex items-center justify-between gap-4">
+                  <span className="achievement-label font-mono text-sm uppercase tracking-[0.2em]">{activeAchievement.year}</span>
+                  <span className="rounded-full border border-current/20 px-3 py-1 text-xs opacity-70">{activeAchievement.tag}</span>
+                </div>
+                <div className="achievement-story-piece mt-8 h-px w-20 bg-current/30" />
+                <h3 className="achievement-story-piece mt-6 max-w-2xl text-2xl font-medium tracking-tight md:text-4xl">{activeAchievement.title}</h3>
+                <p className="achievement-story-piece mt-6 max-w-2xl text-base leading-relaxed opacity-75 md:text-lg">{activeAchievement.description}</p>
+              </article>
+            </div>
           </div>
         </div>
 

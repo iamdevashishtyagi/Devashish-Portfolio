@@ -279,7 +279,7 @@ export const projects: Project[] = [
       "Subscription & billing cycles",
       "Owner analytics dashboard",
     ],
-    stack: ["Vue.js", "Pinia", "Node.js", "Express", "MongoDB", "Auth", "TypeScript"],
+    stack: ["Vue.js", "Pinia", "Node.js", "Express", "MongoDB", "System Design", "Auth", "TypeScript", "Tailwind", "Git & GitHub"],
     metrics: [
       { label: "Core modules", value: "4" },
       { label: "Tenant model", value: "Multi-gym" },
@@ -336,7 +336,7 @@ export const projects: Project[] = [
       "Semantic search over embeddings",
       "OpenAI-powered grounded answers",
     ],
-    stack: ["OpenAI API", "Vector Search", "Node.js", "Embeddings", "RAG"],
+    stack: ["OpenAI API", "Vector Search", "Node.js", "Express", "Embeddings", "RAG", "Redis", "Prompt Engineering", "System Design", "Git & GitHub"],
     metrics: [
       { label: "Architecture", value: "RAG" },
       { label: "Tenancy", value: "Isolated" },
@@ -391,7 +391,7 @@ export const projects: Project[] = [
       "Optimized images & fonts",
       "Vercel deployment pipeline",
     ],
-    stack: ["Next.js", "TypeScript", "SEO", "Vercel", "Render"],
+    stack: ["Next.js", "TypeScript", "SEO", "Vercel", "Render", "Tailwind", "Git & GitHub"],
     metrics: [
       { label: "Lighthouse", value: "90+" },
       { label: "Hosting", value: "Vercel" },

@@ -334,6 +334,7 @@ body[data-theme="dark"] .contact-atmosphere {
     font-weight: 500;
     letter-spacing: -0.025em;
     line-height: 1.05;
+    color: #2c1400;
   }
 
   .contact-heading-2 {
@@ -350,7 +351,12 @@ body[data-theme="dark"] .contact-atmosphere {
     font-weight: 600;
     letter-spacing: -0.025em;
     line-height: 1.1;
-    color: #b08968;
+    /* color: #572802; */
+    color: #5f2b00;
+  }
+
+  .heading-s {
+    color: #9e4700;
   }
 
   /* .heading-2 {
@@ -707,7 +713,7 @@ body[data-theme="dark"] .hero-geometry {
 .skill-marquee {
   --marquee-background: rgb(251 249 239 / 0.7);
   --marquee-border: #d4d4cc;
-  --marquee-text: #1a1a1a;
+  --marquee-text: #432100;
   border-top: 1px solid var(--marquee-border);
   border-bottom: 1px solid var(--marquee-border);
   background-color: var(--marquee-background);
@@ -783,3 +789,8 @@ body[data-theme="dark"] .skill-marquee {
   perspective: 800px;
   transform-style: preserve-3d;
 }
+
+/* 
+.text-current{
+  color: pink
+} */

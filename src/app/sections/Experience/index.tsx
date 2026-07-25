@@ -11,7 +11,7 @@ import { useReducedMotion } from "./stages";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const ACCENT = "#3B82F6";
+const ACCENT = "#002052";
 
 export default function Experience() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -45,7 +45,7 @@ export default function Experience() {
     <section ref={sectionRef} id="experience" className="section-layout border-t border-current/10">
       <div className="container-narrow">
         <div className="ascent-intro">
-          <span className="text-sm uppercase tracking-widest text-current/50">The Ascent</span>
+          <span className="text-sm uppercase tracking-widest heading-s">The Ascent</span>
           <h2 className="heading-2 mt-2 text-current">
             Not years — <span className="text-current/60">responsibility earned</span>
           </h2>
