@@ -23,6 +23,11 @@ export default function Wins() {
       const cards = gsap.utils.toArray<HTMLElement>(".win-card");
       const transitions = Math.max(cards.length - 1, 1);
 
+      // Check if mobile
+      const isMobile = window.innerWidth < 768;
+      const yOffset = isMobile ? 8 : 14;
+      const scaleOffset = isMobile ? 0.01 : 0.02;
+
       gsap.set(cards, {
         transformOrigin: "center bottom",
         transformStyle: "preserve-3d",
@@ -31,10 +36,10 @@ export default function Wins() {
       cards.forEach((card, index) => {
         gsap.set(card, {
           zIndex: cards.length - index,
-          y: index * 14,
-          scale: 1 - index * 0.02,
-          width: "90%",
-          left: "5%",
+          y: index * yOffset,
+          scale: 1 - index * scaleOffset,
+          width: isMobile ? "94%" : "90%",
+          left: isMobile ? "3%" : "5%",
         });
       });
 
@@ -52,11 +57,14 @@ export default function Wins() {
       cards.slice(0, -1).forEach((card, index) => {
         const nextCard = cards[index + 1];
 
+        const rotateX = isMobile ? 90 : 110;
+        const yPercent = isMobile ? -180 : -230;
+
         timeline.to(
           card,
           {
-            rotateX: 110,
-            yPercent: -230,
+            rotateX: rotateX,
+            yPercent: yPercent,
             duration: 1,
             ease: "power2.inOut",
           },
@@ -77,21 +85,18 @@ export default function Wins() {
 
       const lastCard = cards[cards.length - 1];
 
+      const rotateX = isMobile ? 90 : 110;
+      const yPercent = isMobile ? -180 : -230;
+
       gsap.to(lastCard, {
-        rotateX: 110,
-        yPercent: -230,
+        rotateX: rotateX,
+        yPercent: yPercent,
         ease: "power2.inOut",
 
         scrollTrigger: {
           trigger: lastCardTrigger,
-
-          // The trigger is reached by normal page scrolling
-          // immediately after the pinned stack releases.
           start: "top bottom",
-
-          // The last card flips while the next section is entering.
           end: "top top",
-
           scrub: 0.8,
         },
       });
@@ -100,14 +105,23 @@ export default function Wins() {
     return () => ctx.revert();
   }, []);
 
-  const cardThemes = [
-    { base: "#111c33", accent: "#60a5fa" },
-    { base: "#35200f", accent: "#fbbf24" },
-    { base: "#102b23", accent: "#5eead4" },
-    { base: "#29143a", accent: "#d8b4fe" },
-    { base: "#35131e", accent: "#fda4af" },
-    { base: "#2c2b10", accent: "#fde68a" },
-  ];
+  // const cardThemes = [
+  //   { base: "#111c33", accent: "#60a5fa" },
+  //   { base: "#35200f", accent: "#fbbf24" },
+  //   { base: "#102b23", accent: "#5eead4" },
+  //   { base: "#29143a", accent: "#d8b4fe" },
+  //   { base: "#35131e", accent: "#fda4af" },
+  //   { base: "#2c2b10", accent: "#fde68a" },
+  // ];
+const cardThemes = [
+  { base: "#2a5ecf", accent: "#3B82F6" },
+  { base: "#c82222", accent: "#F59E0B" },
+  { base: "#ceb121", accent: "#F59E0B" },
+  { base: "#c71f1f", accent: "#fda4af" },
+  { base: "#e51d1d", accent: "#8B5CF6" },
+  { base: "#9621c0", accent: "#8B5CF6" },
+];
+
   return (
     <section
       ref={sectionRef}
@@ -128,7 +142,7 @@ export default function Wins() {
 
         <div
           ref={stackRef}
-          className="relative h-[72vh] min-h-[540px]"
+          className="relative h-[72vh] min-h-[380px] md:min-h-[540px]"
           style={{
             perspective: "1800px",
           }}
@@ -159,7 +173,7 @@ function WinCard({
 }) {
   return (
     <div
-      className="win-card absolute inset-0 overflow-hidden rounded-3xl p-7 text-white shadow-[0_25px_70px_rgb(0_0_0_/_0.2)] md:p-12"
+      className="win-card absolute inset-0 overflow-hidden rounded-2xl md:rounded-3xl p-5 md:p-7 lg:p-12 text-white shadow-[0_25px_70px_rgb(0_0_0_/_0.2)]"
       style={{
         background: `radial-gradient(circle at 82% 18%, ${theme.accent}2b, transparent 34%), linear-gradient(145deg, ${theme.base}, #0a0a0a)`,
         transformStyle: "preserve-3d",
@@ -167,33 +181,33 @@ function WinCard({
       }}
     >
       <div className="relative z-10 flex h-full max-w-4xl flex-col justify-between">
-                <div>
-                  <span className="inline-flex rounded-full border border-white/30 bg-white/15 px-3 py-1 text-xs font-semibold uppercase tracking-widest">
-                    {win.tag}
-                  </span>
+        <div>
+          <span className="inline-flex rounded-full border border-white/30 bg-white/15 px-3 py-1 text-[10px] md:text-xs font-semibold uppercase tracking-widest">
+            {win.tag}
+          </span>
 
-                  <h3 className="mt-6 max-w-3xl text-3xl font-semibold tracking-tight md:text-5xl">
-                    {win.title}
-                  </h3>
+          <h3 className="mt-4 md:mt-6 max-w-3xl text-xl sm:text-2xl md:text-3xl lg:text-5xl font-semibold tracking-tight">
+            {win.title}
+          </h3>
 
-                  <p className="mt-6 max-w-3xl text-base leading-relaxed text-white/80 md:text-lg">
-                    {win.problem}
-                  </p>
-                </div>
+          <p className="mt-3 md:mt-6 max-w-3xl text-sm md:text-base lg:text-lg leading-relaxed text-white/80">
+            {win.problem}
+          </p>
+        </div>
 
-                <div className="border-t border-white/25 pt-6">
-                  <div className="flex items-start gap-3">
-                    <CheckCircle2 className="mt-1 h-5 w-5 flex-shrink-0" />
+        <div className="border-t border-white/25 pt-4 md:pt-6">
+          <div className="flex items-start gap-2 md:gap-3">
+            <CheckCircle2 className="mt-1 h-4 w-4 md:h-5 md:w-5 flex-shrink-0" />
 
-                    <p className="max-w-3xl text-sm leading-relaxed text-white/90 md:text-base">
-                      {win.solution}
-                    </p>
-                  </div>
+            <p className="max-w-3xl text-xs md:text-sm lg:text-base leading-relaxed text-white/90">
+              {win.solution}
+            </p>
+          </div>
 
-                  <p className="mt-5 text-sm font-semibold uppercase tracking-wider text-white/90">
-                    Impact — {win.impact}
-                  </p>
-                </div>
+          <p className="mt-3 md:mt-5 text-xs md:text-sm font-semibold uppercase tracking-wider text-white/90">
+            Impact — {win.impact}
+          </p>
+        </div>
       </div>
     </div>
   );
