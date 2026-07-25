@@ -100,6 +100,50 @@ body[data-theme="dark"] #architecture .border-current\/10 {
   transition: background-color 0.7s ease, border-color 0.7s ease, color 0.7s ease;
 }
 
+#achievements {
+  --achievement-grid: rgb(176 137 104 / 0.13);
+  --achievement-glow: rgb(245 158 11 / 0.16);
+  background: #fbf9ef;
+  color: #1a1a1a;
+  transition: background-color 0.7s ease, color 0.7s ease;
+}
+
+.achievements-atmosphere {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 0.9;
+  background:
+    radial-gradient(circle at 16% 20%, var(--achievement-glow), transparent 20rem),
+    radial-gradient(circle at 86% 76%, var(--achievement-glow), transparent 22rem),
+    linear-gradient(var(--achievement-grid) 1px, transparent 1px) 0 0 / 46px 46px,
+    linear-gradient(90deg, var(--achievement-grid) 1px, transparent 1px) 0 0 / 46px 46px;
+  mask-image: radial-gradient(ellipse at center, black 18%, rgb(0 0 0 / 0.8) 56%, transparent 95%);
+  -webkit-mask-image: radial-gradient(ellipse at center, black 18%, rgb(0 0 0 / 0.8) 56%, transparent 95%);
+  animation: achievements-grid-drift 24s linear infinite;
+}
+
+.achievements-atmosphere::after {
+  position: absolute;
+  inset: 14%;
+  border: 1px solid var(--achievement-grid);
+  content: "";
+  box-shadow: 0 0 4rem var(--achievement-glow), inset 0 0 4rem rgb(255 255 255 / 0.08);
+  transform: rotate(12deg);
+  animation: achievements-frame-float 12s ease-in-out infinite alternate;
+}
+
+@keyframes achievements-grid-drift {
+  to { background-position: 0 0, 0 0, 46px 46px, 46px 46px; }
+}
+
+@keyframes achievements-frame-float {
+  from { transform: rotate(10deg) scale(0.94); opacity: 0.45; }
+  to { transform: rotate(15deg) scale(1.05); opacity: 0.9; }
+}
+
 #achievements .achievement-icon,
 #achievements .achievement-label {
   color: #707068;
@@ -115,6 +159,18 @@ body[data-theme="dark"] #achievements .achievement-card {
   color: #fbf9ef;
 }
 
+body[data-theme="dark"] #achievements {
+  --achievement-grid: rgb(251 249 239 / 0.15);
+  --achievement-glow: rgb(59 130 246 / 0.26);
+  background: #0a0a0a;
+  color: #fbf9ef;
+}
+
+body[data-theme="dark"] #achievements .heading-2,
+body[data-theme="dark"] #achievements .achievement-heading {
+  color: #fbf9ef;
+}
+
 body[data-theme="dark"] #achievements .achievement-icon,
 body[data-theme="dark"] #achievements .achievement-label {
   color: #b8b8b0;
@@ -122,6 +178,11 @@ body[data-theme="dark"] #achievements .achievement-label {
 
 #contact .body-large {
   color: inherit;
+}
+
+#contact {
+  background-color: #fbf9ef;
+  transition: background-color 0.7s ease, color 0.7s ease;
 }
 
 #contact .contact-label {
@@ -160,6 +221,10 @@ body[data-theme="dark"] #contact .contact-heading-2 {
   color: #fbf9ef;
 }
 
+body[data-theme="dark"] #contact {
+  background-color: #000000;
+}
+
 body[data-theme="dark"] #contact .contact-label {
   color: #d4d4cc;
 }
@@ -188,10 +253,10 @@ body[data-theme="dark"] #contact .contact-social {
 }
 
 .contact-atmosphere {
-  --contact-line: rgb(176 137 104 / 0.2);
-  --contact-glow: rgb(176 137 104 / 0.22);
+  --contact-line: rgb(176 137 104 / 0.24);
+  --contact-glow: rgb(176 137 104 / 0.3);
   position: absolute;
-  inset: 0;
+  inset: -8%;
   z-index: 0;
   overflow: hidden;
   pointer-events: none;
@@ -200,8 +265,6 @@ body[data-theme="dark"] #contact .contact-social {
     radial-gradient(circle at 16% 82%, var(--contact-glow), transparent 24rem),
     linear-gradient(30deg, transparent 49.4%, var(--contact-line) 50%, transparent 50.6%) 0 0 / 72px 62px,
     linear-gradient(150deg, transparent 49.4%, var(--contact-line) 50%, transparent 50.6%) 0 0 / 72px 62px;
-  mask-image: linear-gradient(90deg, transparent 4%, black 24%, black 76%, transparent 96%);
-  -webkit-mask-image: linear-gradient(90deg, transparent 4%, black 24%, black 76%, transparent 96%);
 }
 
 .contact-atmosphere::before,
@@ -220,8 +283,8 @@ body[data-theme="dark"] #contact .contact-social {
 .contact-atmosphere::after { bottom: -18rem; left: -10rem; animation-direction: reverse; animation-duration: 25s; }
 
 body[data-theme="dark"] .contact-atmosphere {
-  --contact-line: rgb(251 249 239 / 0.2);
-  --contact-glow: rgb(139 92 246 / 0.34);
+  --contact-line: rgb(251 249 239 / 0.24);
+  --contact-glow: rgba(12, 0, 78, 0.482);
 }
 
 @keyframes contact-orbit {
@@ -576,7 +639,9 @@ body[data-theme="dark"] .contact-atmosphere {
   .win-effect,
   .win-effect *,
   .contact-atmosphere::before,
-  .contact-atmosphere::after {
+  .contact-atmosphere::after,
+  .achievements-atmosphere,
+  .achievements-atmosphere::after {
     animation: none !important;
   }
 }

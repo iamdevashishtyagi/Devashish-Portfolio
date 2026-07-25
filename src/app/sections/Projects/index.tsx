@@ -33,39 +33,6 @@ export default function Projects() {
     }, AUTO_ADVANCE_MS);
     return () => clearInterval(id);
   }, [paused, reduced]);
-
-  // useEffect(() => {
-  //   const ctx = gsap.context(() => {
-  //     gsap.to(".projects-bg", {
-  //       y: 100,
-  //       scale: 1.05,
-  //       scrollTrigger: {
-  //         trigger: sectionRef.current,
-  //         start: "top bottom",
-  //         end: "bottom top",
-  //         scrub: 1.5,
-  //       },
-  //     });
-
-  //     gsap.fromTo(
-  //       ".projects-content",
-  //       { opacity: 0, y: 60 },
-  //       {
-  //         opacity: 1,
-  //         y: 0,
-  //         duration: 1.2,
-  //         scrollTrigger: {
-  //           trigger: sectionRef.current,
-  //           start: "top 80%",
-  //           once: true,
-  //         },
-  //       }
-  //     );
-  //   }, sectionRef);
-
-  //   return () => ctx.revert();
-  // }, []);
-
   return (
     <section
       ref={sectionRef}
@@ -77,7 +44,7 @@ export default function Projects() {
         <div className="mb-10">
           <span className="text-sm uppercase tracking-widest text-current/50">Archive</span>
           <h2 className="heading-2 mt-2 text-current">
-            Engineering <span className="text-current/60">Exhibits</span>
+            Engineering Exhibits
           </h2>
           <p className="mt-3 text-current/50 max-w-lg">
             Five systems, five different sets of constraints. Step through each case

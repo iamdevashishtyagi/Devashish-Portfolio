@@ -44,17 +44,8 @@ export default function Wins() {
           start: "top 80vh",
           end: () => `+=${transitions * 100}%`,
           pin: true,
-          scrub: 0.8,
+          scrub: 1.1,
           anticipatePin: 1,
-
-          snap: {
-            snapTo: 1 / transitions,
-            duration: {
-              min: 0.2,
-              max: 0.45,
-            },
-            ease: "power2.inOut",
-          },
         },
       });
 
@@ -110,12 +101,12 @@ export default function Wins() {
   }, []);
 
   const cardThemes = [
-    { base: "#111c33", accent: "#60a5fa", effect: "bubbles" },
-    { base: "#35200f", accent: "#fbbf24", effect: "circuit" },
-    { base: "#102b23", accent: "#5eead4", effect: "ripple" },
-    { base: "#29143a", accent: "#d8b4fe", effect: "aurora" },
-    { base: "#35131e", accent: "#fda4af", effect: "dots" },
-    { base: "#2c2b10", accent: "#fde68a", effect: "rays" },
+    { base: "#111c33", accent: "#60a5fa" },
+    { base: "#35200f", accent: "#fbbf24" },
+    { base: "#102b23", accent: "#5eead4" },
+    { base: "#29143a", accent: "#d8b4fe" },
+    { base: "#35131e", accent: "#fda4af" },
+    { base: "#2c2b10", accent: "#fde68a" },
   ];
   return (
     <section
@@ -146,7 +137,6 @@ export default function Wins() {
             <WinCard
               key={win.id}
               win={win}
-              index={index}
               theme={cardThemes[index % cardThemes.length]}
             />
           ))}
@@ -162,24 +152,20 @@ export default function Wins() {
 
 function WinCard({
   win,
-  index,
   theme,
 }: {
   win: (typeof engineeringWins)[number];
-  index: number;
-  theme: { base: string; accent: string; effect: string };
+  theme: { base: string; accent: string };
 }) {
   return (
     <div
       className="win-card absolute inset-0 overflow-hidden rounded-3xl p-7 text-white shadow-[0_25px_70px_rgb(0_0_0_/_0.2)] md:p-12"
       style={{
-        background: `linear-gradient(145deg, ${theme.base}, #0a0a0a)`,
+        background: `radial-gradient(circle at 82% 18%, ${theme.accent}2b, transparent 34%), linear-gradient(145deg, ${theme.base}, #0a0a0a)`,
         transformStyle: "preserve-3d",
         backfaceVisibility: "hidden",
-        ["--win-accent" as string]: theme.accent,
       }}
     >
-      <WinAtmosphere effect={theme.effect} index={index} />
       <div className="relative z-10 flex h-full max-w-4xl flex-col justify-between">
                 <div>
                   <span className="inline-flex rounded-full border border-white/30 bg-white/15 px-3 py-1 text-xs font-semibold uppercase tracking-widest">
@@ -211,22 +197,4 @@ function WinCard({
       </div>
     </div>
   );
-}
-
-function WinAtmosphere({ effect, index }: { effect: string; index: number }) {
-  switch (effect) {
-    case "bubbles":
-      return <div className="win-effect win-effect-bubbles" aria-hidden="true"><i /><i /><i /><i /></div>;
-    case "circuit":
-      return <div className="win-effect win-effect-circuit" aria-hidden="true"><i /><i /></div>;
-    case "ripple":
-      return <div className="win-effect win-effect-ripple" aria-hidden="true"><i /><i /><i /></div>;
-    case "aurora":
-      return <div className="win-effect win-effect-aurora" aria-hidden="true"><i /><i /></div>;
-    case "dots":
-      return <div className="win-effect win-effect-dots" aria-hidden="true"><i /></div>;
-    case "rays":
-    default:
-      return <div className="win-effect win-effect-rays" aria-hidden="true"><i style={{ animationDelay: `${index * -0.4}s` }} /></div>;
-  }
 }

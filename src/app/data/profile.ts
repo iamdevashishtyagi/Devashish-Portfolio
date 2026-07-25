@@ -119,7 +119,7 @@ export type Project = {
   stack: string[];
   metrics: { label: string; value: string }[];
   links: { demo?: string; github?: string; caseStudy?: string };
-  accent: "blue" | "violet" | "amber";
+  accent: "blue" | "royalBlue" | "amber" | "violet" | "emerald" | "red";
   images: ProjectImage[];
 };
 
@@ -606,19 +606,6 @@ export const skillMarquee = [
   "CI/CD",
 ];
 
-// Short working principles — used as a texture band between sections,
-// not as a claim of process maturity, just an honest set of habits.
-export const principles = [
-  "Ship it, then earn the right to redesign it",
-  "Read before you refactor",
-  "Validation is a feature",
-  "Retrieval quality over model choice",
-  "Own the bug after launch",
-  "Boring code is a compliment",
-  "Ask the dumb question early",
-  "Optimize for the next developer",
-];
-
 export const leadership = [
   {
     title: "Leading Interns",
@@ -652,15 +639,89 @@ export const leadership = [
   },
 ];
 
-export const achievements = [
-  { label: "Projects Delivered", value: 8, suffix: "+" },
-  { label: "Production Systems", value: 4, suffix: "" },
-  { label: "Happy Clients", value: 5, suffix: "+" },
-  { label: "Technologies", value: 15, suffix: "+" },
-  { label: "Years Experience", value: 1.5, suffix: "" },
-  { label: "Lines of Code", value: 120, suffix: "K+" },
+export const principles = [
+  {
+    title: "Make the happy path fast",
+    description:
+      "Make the core task obvious and quick; then protect edge cases without making everyday work feel complicated.",
+  },
+  {
+    title: "Measure before optimizing",
+    description:
+      "Use real traces, user feedback, and performance data to find the bottleneck before changing working code.",
+  },
+  {
+    title: "Design for the next developer",
+    description:
+      "Clear names, small boundaries, and useful documentation keep a feature maintainable after its original author moves on.",
+  },
+  {
+    title: "Treat accessibility as product quality",
+    description:
+      "Keyboard access, readable contrast, and resilient layouts are requirements, not a final polish pass.",
+  },
+  {
+    title: "Automate repeated decisions",
+    description:
+      "Turn recurring checks into tests, tooling, and guardrails so attention is saved for the problems that need judgment.",
+  },
+  {
+    title: "Turn incidents into safeguards",
+    description:
+      "A production issue is valuable only when it leaves behind a clearer signal, stronger test, or safer system.",
+  },
 ];
 
+export const achievements = [
+  {
+    year: "2025 - Feb",
+    title: "Said yes to production",
+    description:
+      "Started learning through a live ERP instead of a controlled tutorial project — where every change had real users and real consequences.",
+    tag: "First production systems",
+    scope: "One codebase, real users",
+  },
+  {
+    year: "2025 - Sept",
+    title: "Said yes to ambiguity",
+    description:
+      "Took on European invoice compliance, a problem that required understanding unfamiliar regulations, incomplete documentation, and edge cases.",
+    tag: "European client",
+    scope: "One country's regulations",
+  },
+  {
+    year: "2025 - Dec",
+    title: "Said yes to direct ownership",
+    description:
+      "Moved beyond writing assigned code into requirements, planning, client conversations, debugging, delivery, and the responsibility that comes after launch.",
+    tag: "End-to-end ownership",
+    scope: "One relationship, unscripted",
+  },
+  {
+    year: "2026 - Jan",
+    title: "Said yes to leadership",
+    description:
+      "Started mentoring interns and helping other developers become productive — learning that leadership is more about creating capability than holding a title.",
+    tag: "Mentorship",
+    scope: "Other people's growth",
+  },
+  {
+    year: "2026 - April",
+    title: "Said yes to AI",
+    description:
+      "Started moving into RAG systems, embeddings, vector databases, and the engineering required to make AI useful beyond a simple API call.",
+    tag: "AI systems",
+    scope: "An unfamiliar discipline",
+  },
+  {
+    year: "Now",
+    title: "Still saying yes",
+    description:
+      "The problems are getting broader, the technologies are changing, and the learning curve is getting steeper. I have no intention of stepping back.",
+    tag: "Next chapter",
+    scope: "Whatever is next",
+  },
+];
 export type EngineeringWin = {
   id: string;
   tag: "Performance" | "Security" | "Integration" | "Business Logic" | "Leadership";
