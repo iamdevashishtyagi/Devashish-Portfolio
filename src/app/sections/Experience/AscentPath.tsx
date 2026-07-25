@@ -90,7 +90,7 @@ export default function AscentPath({ containerRef, markerRefs, order, accent, re
   }, [d, reduced]);
 
   return (
-    <div ref={svgWrapRef} className="absolute inset-0 pointer-events-none hidden md:block">
+    <div ref={svgWrapRef} className="absolute inset-0 pointer-events-none md:block">
       <svg width={box.w} height={box.h} className="overflow-visible">
         <path ref={pathRef} d={d} fill="none" stroke={accent} strokeWidth={1.5} strokeLinecap="round" opacity={0.5} />
       </svg>
