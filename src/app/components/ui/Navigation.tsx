@@ -82,7 +82,8 @@ export default function Navigation() {
             trigger: document.documentElement,
             start: "top top",
             end: "+=420",
-            scrub: true,
+            // scrub: true,
+            scrub: 1.0,
             invalidateOnRefresh: true,
           },
         }
@@ -163,7 +164,7 @@ export default function Navigation() {
         loadingBar,
         {
           scaleX: 1,
-          duration: 1.3,
+          duration: 1.5,
           ease: "power2.inOut",
         },
         0.2
@@ -174,7 +175,7 @@ export default function Navigation() {
         {
           opacity: 0,
           scaleY: 0,
-          duration: 0.1,
+          duration: 0.3,
           ease: "power1.in",
           onComplete: () => {
             gsap.set(loadingLine, { display: "none" });
