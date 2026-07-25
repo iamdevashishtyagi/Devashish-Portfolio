@@ -149,8 +149,8 @@ export default function Navigation() {
 
           gsap.to(scrollProxy, {
             value: 420,
-            duration: 1.8,
-            ease: "power2.inOut",
+            duration: 0.5,
+            ease: "power1.inOut",
             onUpdate: () => {
               window.scrollTo(0, scrollProxy.value);
             },

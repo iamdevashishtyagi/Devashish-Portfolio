@@ -66,7 +66,7 @@ export default function Achievements() {
       <div className="achievements-atmosphere" aria-hidden="true" />
       <div className="relative container-narrow">
         {/* Pin the heading and story as one unit, starting when this heading reaches the viewport top. */}
-        <div ref={storyStageRef} className="achievement-stage flex min-h-[100svh] flex-col">
+        <div ref={storyStageRef} className="achievement-stage flex flex-col">
           <div className="shrink-0">
             <span className="text-sm uppercase tracking-widest text-current/50">The pattern behind the work</span>
             <h2 className="heading-2 mt-1 text-current">
@@ -77,8 +77,8 @@ export default function Achievements() {
             </p>
           </div>
 
-          <div className="grid flex-1 items-center gap-8 pt-8 lg:grid-cols-[280px_1fr] lg:gap-12 lg:pt-10">
-            <div className="achievement-intro">
+          <div className="grid shrink-0 items-start gap-6 pt-5 lg:grid-cols-[280px_1fr] lg:gap-10 lg:pt-6">
+            <div className="achievement-intro lg:self-center lg:translate-y-8">
               <div>
                 <ApertureDial activeIndex={activeIndex} total={achievements.length} />
                 <div className="max-w-[200px]">
