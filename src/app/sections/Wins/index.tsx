@@ -43,7 +43,7 @@ export default function Wins() {
       const timeline = gsap.timeline({
         scrollTrigger: {
           trigger: stage,
-          start: "top top",
+          start: "top 2%",
           end: () => `+=${cards.length * window.innerHeight * 0.55}`,
           pin: true,
           scrub: 1.1,
@@ -123,7 +123,7 @@ export default function Wins() {
 
         <div
           ref={stackRef}
-          className="relative h-[72vh] min-h-[380px] md:min-h-[540px]"
+          className="relative h-[52vh] min-h-[380px] md:min-h-[540px]"
           style={{
             perspective: "1800px",
           }}
@@ -158,7 +158,7 @@ function WinCard({
         backfaceVisibility: "hidden",
       }}
     >
-      <div className="relative z-10 flex h-full max-w-4xl flex-col justify-between">
+      <div className="relative z-10 flex h-full max-w-4xl flex-col justify-start gap-4 md:justify-between md:gap-0">
         {/* TOP SECTION - Reduced gaps on mobile */}
         <div>
           <span className="inline-flex rounded-full border border-white/30 bg-white/15 px-2.5 py-0.5 md:px-3 md:py-1 text-[9px] md:text-xs font-semibold uppercase tracking-widest">

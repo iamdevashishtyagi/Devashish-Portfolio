@@ -82,8 +82,7 @@ export default function Navigation() {
             trigger: document.documentElement,
             start: "top top",
             end: "+=420",
-            // scrub: true,
-            scrub: 1.0,
+            scrub: true,
             invalidateOnRefresh: true,
           },
         }
