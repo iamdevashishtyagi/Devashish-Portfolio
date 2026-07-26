@@ -161,15 +161,15 @@ function WinCard({
       <div className="relative z-10 flex h-full max-w-4xl flex-col justify-start gap-4 md:justify-between md:gap-0">
         {/* TOP SECTION - Reduced gaps on mobile */}
         <div>
-          <span className="inline-flex rounded-full border border-white/30 bg-white/15 px-2.5 py-0.5 md:px-3 md:py-1 text-[9px] md:text-xs font-semibold uppercase tracking-widest">
+          <span className="inline-flex rounded-full border border-white/30 bg-white/15 px-2.5 py-0.5 md:px-3 md:py-1 text-[10px] md:text-xs font-semibold uppercase tracking-widest">
             {win.tag}
           </span>
 
-          <h3 className="mt-2 md:mt-6 max-w-3xl text-lg sm:text-2xl md:text-3xl lg:text-5xl font-semibold tracking-tight">
+          <h3 className="mt-2 md:mt-6 max-w-3xl text-xl sm:text-2xl md:text-3xl lg:text-5xl font-semibold tracking-tight">
             {win.title}
           </h3>
 
-          <p className="mt-1.5 md:mt-6 max-w-3xl text-xs sm:text-sm md:text-base lg:text-lg leading-relaxed text-white/80">
+          <p className="mt-1.5 md:mt-6 max-w-3xl text-sm sm:text-sm md:text-base lg:text-lg leading-relaxed text-white/80">
             {win.problem}
           </p>
         </div>
@@ -179,12 +179,12 @@ function WinCard({
           <div className="flex items-start gap-1.5 md:gap-3">
             <CheckCircle2 className="mt-0.5 md:mt-1 h-3.5 w-3.5 md:h-5 md:w-5 flex-shrink-0" />
 
-            <p className="text-[10px] sm:text-xs md:text-sm lg:text-base leading-relaxed text-white/90">
+            <p className="text-[12px] sm:text-xs md:text-sm lg:text-base leading-relaxed text-white/90">
               {win.solution}
             </p>
           </div>
 
-          <p className="mt-1.5 md:mt-5 text-[10px] sm:text-xs md:text-sm font-semibold uppercase tracking-wider text-white/90">
+          <p className="mt-1.5 md:mt-5 text-[12px] sm:text-xs md:text-sm font-semibold uppercase tracking-wider text-white/90">
             Impact — {win.impact}
           </p>
         </div>

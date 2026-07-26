@@ -20,7 +20,7 @@ const STEPS = [
   { key: "overview", label: "Overview", verb: "Seeing the product" },
   { key: "problem", label: "Problem", verb: "Understanding the context" },
   { key: "solution", label: "Approach", verb: "Seeing the engineering" },
-  { key: "evidence", label: "Evidence", verb: "Examining the artifacts" },
+  { key: "evidence", label: "Snapshots", verb: "Examining the artifacts" },
   { key: "outcome", label: "Outcome", verb: "Seeing the consequence" },
 ] as const;
 
