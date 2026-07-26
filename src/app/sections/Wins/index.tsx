@@ -12,15 +12,18 @@ export default function Wins() {
   const sectionRef = useRef<HTMLElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const stackRef = useRef<HTMLDivElement>(null);
+  const lastCardTriggerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const stage = stageRef.current;
     const stack = stackRef.current;
+    const lastCardTrigger = lastCardTriggerRef.current;
 
-    if (!stage || !stack) return;
+    if (!stage || !stack || !lastCardTrigger) return;
 
     const ctx = gsap.context(() => {
       const cards = gsap.utils.toArray<HTMLElement>(".win-card");
+      const transitions = Math.max(cards.length - 1, 1);
       const isMobile = window.innerWidth < 768;
       const yOffset = isMobile ? 8 : 14;
       const scaleOffset = isMobile ? 0.01 : 0.02;
@@ -44,7 +47,7 @@ export default function Wins() {
         scrollTrigger: {
           trigger: stage,
           start: "top 2%",
-          end: () => `+=${cards.length * window.innerHeight * 0.55}`,
+          end: () => `+=${transitions * 100}%`,
           pin: true,
           scrub: 1.1,
           anticipatePin: 1,
@@ -87,6 +90,12 @@ export default function Wins() {
         yPercent: isMobile ? -180 : -230,
         duration: 1,
         ease: "power2.inOut",
+        scrollTrigger: {
+          trigger: lastCardTrigger,
+          start: "top bottom",
+          end: "top top",
+          scrub: 0.8,
+        },
       });
     }, sectionRef);
 
@@ -111,32 +120,36 @@ export default function Wins() {
       <div className="hero-geometry wins-geometry" aria-hidden="true" />
       <div className="relative z-10 container-narrow">
         <div ref={stageRef} className="wins-stage flex flex-col">
-        <span className="text-sm uppercase tracking-widest text-gray-400">
-          Wins
-        </span>
+          <span className="text-sm uppercase tracking-widest text-gray-400">
+            Wins
+          </span>
 
-        <h2 className="heading-2 mt-1 mb-1">ENGINEERING WINS</h2>
+          <h2 className="heading-2 mt-1 mb-1">ENGINEERING WINS</h2>
 
-        <p className="body-large mb-12 max-w-2xl">
-          Real problems, real fixes — the how, not just the what.
-        </p>
+          <p className="body-large mb-12 max-w-2xl">
+            Real problems, real fixes — the how, not just the what.
+          </p>
 
+          <div
+            ref={stackRef}
+            className="relative h-[52vh] min-h-[380px] md:min-h-[540px]"
+            style={{
+              perspective: "1800px",
+            }}
+          >
+            {engineeringWins.map((win, index) => (
+              <WinCard
+                key={win.id}
+                win={win}
+                theme={cardThemes[index % cardThemes.length]}
+              />
+            ))}
+        </div>
+        </div>
         <div
-          ref={stackRef}
-          className="relative h-[52vh] min-h-[380px] md:min-h-[540px]"
-          style={{
-            perspective: "1800px",
-          }}
-        >
-          {engineeringWins.map((win, index) => (
-            <WinCard
-              key={win.id}
-              win={win}
-              theme={cardThemes[index % cardThemes.length]}
-            />
-          ))}
-        </div>
-        </div>
+          ref={lastCardTriggerRef}
+          className="pointer-events-none h-px"
+        />
       </div>
     </section>
   );

@@ -34,20 +34,36 @@ export const aboutParagraphs = [
 ];
 
 export const experience = [
+  // {
+  //   id: "erp",
+  //   period: "2024 — Present",
+  //   role: "Full Stack Developer",
+  //   org: "College ERP Platform",
+  //   summary:
+  //     "Own frontend and backend workstreams on a production ERP used daily across multiple colleges — attendance, admissions, fee management, and academic records.",
+  //   details: [
+  //     "Led development of three major modules end-to-end, from schema design to UI, now used by staff and students without a single rollback.",
+  //     "Refactored a slow-moving reporting module, cutting average query time and removing a recurring source of support tickets.",
+  //     "Paired with and reviewed code from newer contributors, turning tribal knowledge into documented conventions the team still uses.",
+  //     "Became the person pulled in when a module broke in production — the reliability work nobody assigns but everybody needs.",
+  //   ],
+  //   stack: ["Vue.js", "Node.js", "Express", "MongoDB", "REST APIs", "AWS"],
+  // },
   {
-    id: "erp",
-    period: "2024 — Present",
-    role: "Full Stack Developer",
-    org: "College ERP Platform",
+    id: "worldmedia",
+    period: "2025 - present",
+    role: "UI/UX Designer and Developer",
+    org: "World Media",
     summary:
-      "Own frontend and backend workstreams on a production ERP used daily across multiple colleges — attendance, admissions, fee management, and academic records.",
+      "Built for businesses looking to scale their presence online, strengthen their digital reach, and turn the internet into a growth channel.",
     details: [
-      "Led development of three major modules end-to-end, from schema design to UI, now used by staff and students without a single rollback.",
-      "Refactored a slow-moving reporting module, cutting average query time and removing a recurring source of support tickets.",
-      "Paired with and reviewed code from newer contributors, turning tribal knowledge into documented conventions the team still uses.",
-      "Became the person pulled in when a module broke in production — the reliability work nobody assigns but everybody needs.",
+      "Built and shipped a fast, SEO-first marketing site with Next.js and TypeScript, from responsive UI implementation to production deployment.",
+      "Implemented disciplined SEO fundamentals including semantic markup, structured metadata, and page-level optimization for search visibility.",
+      "Optimized images, fonts, and page delivery to achieve strong Lighthouse performance across the site.",
+      "Designed and maintained responsive marketing pages across devices with a focus on preventing layout regressions.",
+      "Set up a streamlined deployment workflow with Vercel and GitHub for reliable production releases.",
     ],
-    stack: ["Vue.js", "Node.js", "Express", "MongoDB", "REST APIs", "AWS"],
+    stack: [ "Next.js", "TypeScript", "Tailwind CSS", "SEO", "Vercel", "Render", "Git & GitHub" ],
   },
   {
     id: "invoice",

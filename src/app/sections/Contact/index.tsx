@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { profile } from "@/src/app/data/profile";
-import { Mail, MapPin, Send } from "lucide-react";
+import { Mail, MapPin, Send, CheckCircle } from "lucide-react";
 import { FaGithub, FaLinkedin } from "react-icons/fa";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -18,6 +18,7 @@ export default function Contact() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -40,13 +41,40 @@ export default function Contact() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Prevent submission if already submitted or submitting
+    if (isSubmitted || isSubmitting) return;
+    
     setIsSubmitting(true);
-    // Simulate submit
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    setIsSubmitting(false);
-    setIsSubmitted(true);
-    setFormData({ name: "", email: "", message: "" });
-    setTimeout(() => setIsSubmitted(false), 3000);
+    setError(null);
+    
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+      
+      const json = await res.json();
+      
+      if (res.ok && json?.success) {
+        setIsSubmitted(true);
+        setFormData({ name: '', email: '', message: '' });
+      } else {
+        setError(json?.error || "Failed to send message. Please try again.");
+      }
+    } catch (err) {
+      console.error("Contact submit error:", err);
+      setError("Network error. Please check your connection and try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleReset = () => {
+    setIsSubmitted(false);
+    setError(null);
+    setFormData({ name: '', email: '', message: '' });
   };
 
   return (
@@ -95,16 +123,18 @@ export default function Contact() {
           {/* Left Section */}
           <div>
             <span className="text-sm uppercase tracking-widest text-gray-400">
-              Contact
+              Start a conversation
             </span>
 
-            <h2 className="contact-heading-2 mt-4 mb-6">Let's build something</h2>
+            <h2 className="contact-heading-2 mt-4 mb-6">
+              Have a system{" "}
+              <span className="text-current/50">worth building?</span>
+            </h2>
 
             <p className="body-large max-w-2xl mb-12 text-current">
               Got a project, a problem, or just want to talk systems? I'm
               always open to interesting conversations.
             </p>
-
             <div className="space-y-8">
               <div className="contact-item flex items-start gap-4">
                 <MapPin className="w-5 h-5 text-gray-400 mt-1" />
@@ -147,81 +177,107 @@ export default function Contact() {
             </div>
           </div>
 
-          {/* Right Section */}
+          {/* Right Section - Form */}
           <form onSubmit={handleSubmit} className="contact-item space-y-4">
-            <div>
-              <label className="contact-label mb-1 block text-sm">Name</label>
-              <input
-                type="text"
-                value={formData.name}
-                onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
-                required
-                className="contact-field w-full rounded-lg border px-4 py-3 transition-colors focus:outline-none"
-                placeholder="Your name"
-              />
-            </div>
+            {isSubmitted ? (
+              // Success state - show message with option to send another
+              <div className="text-center py-8 space-y-4">
+                <div className="flex justify-center">
+                  <CheckCircle className="w-16 h-16 text-green-500" />
+                </div>
+                <h3 className="text-xl font-semibold">Message Sent! 🎉</h3>
+                <p className="text-gray-400">
+                  Thanks for reaching out. I'll get back to you soon.
+                </p>
+                <button
+                  type="button"
+                  onClick={handleReset}
+                  className="px-6 py-2 text-sm bg-cream/20 hover:bg-cream/30 rounded-lg transition-colors"
+                >
+                  Send another message
+                </button>
+              </div>
+            ) : (
+              // Form fields
+              <>
+                <div>
+                  <label className="contact-label mb-1 block text-sm">Name</label>
+                  <input
+                    type="text"
+                    value={formData.name}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
+                    required
+                    className="contact-field w-full rounded-lg border px-4 py-3 transition-colors focus:outline-none"
+                    placeholder="Your name"
+                    disabled={isSubmitting}
+                  />
+                </div>
 
-            <div>
-              <label className="contact-label mb-1 block text-sm">Email</label>
-              <input
-                type="email"
-                value={formData.email}
-                onChange={(e) =>
-                  setFormData({ ...formData, email: e.target.value })
-                }
-                required
-                className="contact-field w-full rounded-lg border px-4 py-3 transition-colors focus:outline-none"
-                placeholder="you@example.com"
-              />
-            </div>
+                <div>
+                  <label className="contact-label mb-1 block text-sm">Email</label>
+                  <input
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) =>
+                      setFormData({ ...formData, email: e.target.value })
+                    }
+                    required
+                    className="contact-field w-full rounded-lg border px-4 py-3 transition-colors focus:outline-none"
+                    placeholder="you@example.com"
+                    disabled={isSubmitting}
+                  />
+                </div>
 
-            <div>
-              <label className="contact-label mb-1 block text-sm">
-                Message
-              </label>
-              <textarea
-                value={formData.message}
-                onChange={(e) =>
-                  setFormData({ ...formData, message: e.target.value })
-                }
-                required
-                rows={4}
-                className="contact-field w-full resize-none rounded-lg border px-4 py-3 transition-colors focus:outline-none"
-                placeholder="Leave a message or Tell me about your project..."
-              />
-            </div>
+                <div>
+                  <label className="contact-label mb-1 block text-sm">
+                    Message
+                  </label>
+                  <textarea
+                    value={formData.message}
+                    onChange={(e) =>
+                      setFormData({ ...formData, message: e.target.value })
+                    }
+                    required
+                    rows={4}
+                    className="contact-field w-full resize-none rounded-lg border px-4 py-3 transition-colors focus:outline-none"
+                    placeholder="Leave a message or Tell me about your project..."
+                    disabled={isSubmitting}
+                  />
+                </div>
 
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="w-full px-6 py-3 bg-cream text-charcoal rounded-lg font-medium hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-            >
-              {isSubmitting ? (
-                "Sending..."
-              ) : isSubmitted ? (
-                "Sent! 🎉"
-              ) : (
-                <>
-                  Send message
-                  <Send className="w-4 h-4" />
-                </>
-              )}
-            </button>
+                {error && (
+                  <div className="text-red-500 text-sm p-3 bg-red-500/10 rounded-lg">
+                    {error}
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full px-6 py-3 bg-cream text-charcoal rounded-lg font-medium hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <span className="animate-spin inline-block w-4 h-4 border-2 border-charcoal border-t-transparent rounded-full"></span>
+                      Sending...
+                    </>
+                  ) : (
+                    <>
+                      Send message
+                      <Send className="w-4 h-4" />
+                    </>
+                  )}
+                </button>
+              </>
+            )}
           </form>
         </div>
       </div>
     </section>
   );
 }
-
-// --- Star field data -------------------------------------------------------
-// Generated once at module load with fixed math (no Math.random) so the
-// server-rendered markup matches the client on hydration, while still
-// looking scattered/random. Keeping this as plain data (not refs/state)
-// means there is zero per-frame JS work — every star animates purely in
-// CSS on the compositor thread.
 
 function pseudoRandom(seed: number) {
   // Deterministic 0..1 "random" value from an integer seed.

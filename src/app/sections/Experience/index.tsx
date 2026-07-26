@@ -47,7 +47,7 @@ export default function Experience() {
         <div className="ascent-intro">
           <span className="text-sm uppercase tracking-widest heading-s">The Ascent</span>
           <h2 className="heading-2 mt-2 text-current">
-            Not years — <span className="text-current/60">responsibility earned</span>
+            NOT JUST CODE — <span style={{ color: "rgb(71, 36, 0)" }}>RESPONSIBILITY EARNED</span>
           </h2>
           <p className="body-large max-w-2xl mt-3 text-current/55">
             Every chapter changed what I could be trusted with next. Scroll to watch

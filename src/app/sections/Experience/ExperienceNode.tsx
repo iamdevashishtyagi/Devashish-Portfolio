@@ -109,7 +109,7 @@ export default function ExperienceNode({
             >
               {stage.label}
             </span>
-            <span className="text-xs text-current/35">{exp.period}</span>
+            {/* <span className="text-xs text-current/35">{exp.period}</span> */}
           </div>
 
           <h3 className="text-xl md:text-2xl font-medium text-current mt-1.5 group-hover:text-current/80 transition-colors">
@@ -120,7 +120,7 @@ export default function ExperienceNode({
           <p className="text-current/55 mt-2 max-w-2xl leading-relaxed">{exp.summary}</p>
 
           <span className="inline-flex items-center gap-1.5 mt-3 text-xs text-current/35 group-hover:text-current/60 transition-colors">
-            {expanded ? "Collapse the evidence" : "See how this actually played out"}
+            {expanded ? "Collapse the details" : "See how this actually played out"}
             <span
               className={`inline-block transition-transform duration-300 ${expanded ? "rotate-180" : ""}`}
             >

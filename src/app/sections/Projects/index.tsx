@@ -43,8 +43,8 @@ export default function Projects() {
       <div className="projects-content relative container-narrow">
         <div className="mb-10">
           <span className="text-sm uppercase tracking-widest text-current/50">Archive</span>
-          <h2 className="heading-2 mt-2 text-current">
-            Engineering Exhibits
+          <h2 className="heading-2 mt-1 text-current">
+            ENGINEERING EXHIBITS
           </h2>
           <p className="mt-3 text-current/50 max-w-lg">
             Five systems, five different sets of constraints. Step through each case

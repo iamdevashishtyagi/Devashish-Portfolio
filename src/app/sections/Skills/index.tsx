@@ -96,8 +96,8 @@ export default function Skills() {
       <div className="container-narrow">
         <div className="skills-band mb-4">
           <span className="text-sm uppercase tracking-widest text-current/50">The Signal Path</span>
-          <h2 className="heading-2 mt-2 text-current">
-            How it actually <span className="text-current/60">gets built</span>
+          <h2 className="heading-2 mt-1 text-current">
+            HOW IT ACTUALLY GETS BUILT
           </h2>
           <p className="body-large max-w-2xl mt-3 text-current/55">
             Not a list of technologies — the four layers a request moves through, and what I

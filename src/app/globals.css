@@ -219,6 +219,7 @@ body[data-theme="dark"] #achievements .achievement-label {
 
 body[data-theme="dark"] #contact .contact-heading-2 {
   color: #fbf9ef;
+  font-weight: 600;
 }
 
 body[data-theme="dark"] #contact {

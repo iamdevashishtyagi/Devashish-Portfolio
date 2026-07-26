@@ -22,10 +22,11 @@ export default function Achievements() {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const ctx = gsap.context(() => {
       if (storyStageRef.current) {
+        const transitions = Math.max(achievements.length, 1);
         ScrollTrigger.create({
           trigger: storyStageRef.current,
           start: "top 5%",
-          end: () => `+=${achievements.length * window.innerHeight * 0.55}`,
+          end: () => `+=${transitions * 100}%`,
           pin: true,
           scrub: reduced ? false : 0.7,
           anticipatePin: 1,
@@ -70,7 +71,7 @@ export default function Achievements() {
           <div className="shrink-0">
             <span className="text-sm uppercase tracking-widest text-current/50">The pattern behind the work</span>
             <h2 className="heading-2 mt-1 text-current">
-              Every yes widened the aperture.
+              EVERY YES WIDENED THE APERTURE
             </h2>
             <p className="mt-3 max-w-lg text-current/50">
               I don&apos;t measure growth in finished tickets. I measure it in how much I was willing to stand in front of before I felt ready for it.

@@ -141,7 +141,7 @@ export default function ProjectShowcase({
               <span className="px-2.5 py-1 text-[10px] uppercase tracking-wider rounded-full border border-current/15 text-current/60">
                 {project.category}
               </span>
-              <span className="px-2.5 py-1 text-[10px] rounded-full text-current/35">{project.year}</span>
+              {/* <span className="px-2.5 py-1 text-[10px] rounded-full text-current/35">{project.year}</span> */}
             </div>
             <h3 className="text-3xl md:text-4xl font-medium text-current leading-tight">{project.title}</h3>
             <p className="text-current/60 text-base md:text-lg max-w-xl">{project.oneLiner}</p>
