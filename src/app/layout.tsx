@@ -7,6 +7,9 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://iamdevashishtyagi.v
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
+  verification: {
+    google: "rFYMNWoOZu9iSzbyet9es9-9J44P3zWxQT7vOtVDIw4"
+  },
   title: "Devashish Tyagi | Full Stack Developer",
   description:
     "Devashish Tyagi is a Full Stack Developer in India with 1.5+ years of experience building production web applications, backend systems, and AI-powered products.",

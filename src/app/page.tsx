@@ -14,7 +14,7 @@ import Contact from "@/src/app/sections/Contact";
 import Footer from "@/src/app/components/ui/Footer";
 import { profile } from "@/src/app/data/profile";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://devashish-portfolio.vercel.app";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://iamdevashishtyagi.vercel.app";
 
 const personSchema = {
   "@context": "https://schema.org",
