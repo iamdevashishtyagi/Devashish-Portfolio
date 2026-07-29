@@ -285,7 +285,7 @@ export default function Navigation() {
           isHidden ? "opacity-0" : "opacity-100"
         }`}
       >
-        <div ref={introBackdropRef} className="hero-geometry hero-geometry-intro" aria-hidden="true" />
+        <div ref={introBackdropRef} className="hero-geometry-intro" aria-hidden="true" />
         <a
           ref={wordmarkRef}
           href="#"
