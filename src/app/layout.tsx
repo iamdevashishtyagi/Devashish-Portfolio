@@ -68,7 +68,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable} ${medievalSharp.variable} h-full antialiased`}>
-      <Script src="https://devsai-alpha.vercel.app/rag-chat-widget.js" data-api-key={process.env.NEXT_PUBLIC_RAG_WIDGET_API_KEY} data-api-url="https://rag-api-cb8d.onrender.com/api" data-title="Portfolio assistant" data-theme="light" strategy="afterInteractive" />
+      <Script 
+      src="https://devsai-alpha.vercel.app/rag-chat-widget.js" 
+      data-api-key={process.env.NEXT_PUBLIC_RAG_WIDGET_API_KEY} 
+      data-api-url="https://rag-api-cb8d.onrender.com/api" 
+      data-title="Portfolio assistant" 
+      data-theme="light" 
+      strategy="afterInteractive"
+      />
       <body className="min-h-full flex flex-col transition-colors duration-700">
         {/* <ScrollBackground /> */}
         {children}
