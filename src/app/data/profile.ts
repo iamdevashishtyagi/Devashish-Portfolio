@@ -34,21 +34,6 @@ export const aboutParagraphs = [
 ];
 
 export const experience = [
-  // {
-  //   id: "erp",
-  //   period: "2024 — Present",
-  //   role: "Full Stack Developer",
-  //   org: "College ERP Platform",
-  //   summary:
-  //     "Own frontend and backend workstreams on a production ERP used daily across multiple colleges — attendance, admissions, fee management, and academic records.",
-  //   details: [
-  //     "Led development of three major modules end-to-end, from schema design to UI, now used by staff and students without a single rollback.",
-  //     "Refactored a slow-moving reporting module, cutting average query time and removing a recurring source of support tickets.",
-  //     "Paired with and reviewed code from newer contributors, turning tribal knowledge into documented conventions the team still uses.",
-  //     "Became the person pulled in when a module broke in production — the reliability work nobody assigns but everybody needs.",
-  //   ],
-  //   stack: ["Vue.js", "Node.js", "Express", "MongoDB", "REST APIs", "AWS"],
-  // },
   {
     id: "worldmedia",
     period: "2025 - present",
