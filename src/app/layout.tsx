@@ -5,6 +5,7 @@ import "./globals.css";
 import Script from 'next/script'
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://iamdevashishtyagi.vercel.app";
+const GoogleAuthClientID = process.env.Google_Auth_Client_ID;
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -73,7 +74,10 @@ export default function RootLayout({
       data-api-key={process.env.NEXT_PUBLIC_RAG_WIDGET_API_KEY} 
       data-api-url="https://rag-api-cb8d.onrender.com/api" 
       data-title="Portfolio assistant" 
-      data-theme="light" 
+      data-theme="light"
+      data-user-data="true"
+      data-auto-open="false"
+      data-google-client-id={GoogleAuthClientID}
       strategy="afterInteractive"
       />
       <body className="min-h-full flex flex-col transition-colors duration-700">
