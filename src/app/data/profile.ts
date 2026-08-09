@@ -11,8 +11,8 @@ export const profile = {
   experienceYears: "1.5+",
   email: "iamdevashishtyagi@gmail.com",
   github: "https://github.com/iamdevashishtyagi", 
-  linkedin: "https://www.linkedin.com/in/devashish-tyagi-34a38a268/",
-  resumeUrl: "/Devashish_Resume.pdf",
+  linkedin: "https://www.linkedin.com/in/iamdevashishtyagi",
+  resumeUrl: "/Devashish_Tyagi_Resume.pdf",
 };
 
 export const navLinks = [
@@ -35,8 +35,40 @@ export const aboutParagraphs = [
 
 export const experience = [
   {
-    id: "worldmedia",
+    id: "",
+    period: "",
+    role: "New Opportunities and Challenges.",
+    org: "",
+    summary:
+      "",
+    details: [
+      "Looking for opportunities to build systems that solve meaningful, real-world problems at scale.",
+      "Ready to take ownership of more complex products, architectures, and engineering decisions.",
+      "Continuing to deepen expertise across full-stack engineering, AI systems, and product development.",
+      "The goal is simple: keep building, keep learning, and earn the responsibility that comes next.",
+    ],
+    stack: [],
+  },
+  {
+    id: "althea",
     period: "2025 - present",
+    role: "Full Stack & AI Engineer",
+    org: "Althea Multi-Tenant RAG Engine",
+    summary:
+      "Built a multi-tenant RAG platform that lets businesses create AI-powered knowledge assistants and embed them into their own websites through a lightweight chat widget.",
+    details: [
+      "Designed the multi-tenant architecture across an admin platform, AI API, and embeddable chat widget, keeping projects and their knowledge isolated.",
+      "Built the RAG pipeline for ingesting project knowledge, generating embeddings, retrieving relevant context, and producing grounded AI responses.",
+      "Implemented API-key-based project authentication and request-level isolation so each embedded chatbot can securely access only its configured knowledge base.",
+      "Built an embeddable chat widget that can be integrated into external websites through a lightweight loader and iframe-based architecture.",
+      "Implemented chat sessions, message persistence, request rate limiting, and backend validation for reliable production usage.",
+      "Deployed the admin platform and widget on Vercel with the backend API on Render, establishing a complete production-ready deployment flow.",
+    ],
+    stack: [ "Vue.js", "Node.js", "Express", "TypeScript", "MongoDB", "RAG", "Gemini Embeddings", "Gemini/OpenAI LLM", "Redis", "Vercel", "Render" ],
+  },
+  {
+    id: "worldmedia",
+    period: "2026",
     role: "UI/UX Designer and Developer",
     org: "World Media",
     summary:
@@ -49,21 +81,6 @@ export const experience = [
       "Set up a streamlined deployment workflow with Vercel and GitHub for reliable production releases.",
     ],
     stack: [ "Next.js", "TypeScript", "Tailwind CSS", "SEO", "Vercel", "Render", "Git & GitHub" ],
-  },
-  {
-    id: "invoice",
-    period: "2024",
-    role: "Full Stack Developer",
-    org: "Italian XML Invoice Converter",
-    summary:
-      "Built a compliance-critical conversion platform for an Italian client, turning raw invoice data into the country's mandated XML e-invoice format.",
-    details: [
-      "Designed the XML parsing and generation pipeline against Italy's SDI invoicing schema, handling edge cases the spec only half-documents.",
-      "Wrote validation logic that catches malformed invoices before they reach the client's tax authority, not after.",
-      "Automated a previously manual, error-prone conversion process into a workflow the client now trusts to run unattended.",
-      "Worked directly with a non-technical client across a language and time-zone gap, translating tax rules into deterministic code.",
-    ],
-    stack: ["Vue.js", "Node.js", "Express", "XML/XSD", "Automation", "Validation"],
   },
   {
     id: "gym",
@@ -79,6 +96,21 @@ export const experience = [
       "Shipped the admin dashboard used daily by gym owners to track revenue and member retention at a glance.",
     ],
     stack: ["Vue.js", "Node.js", "Express", "MongoDB", "Auth", "TypeScript"],
+  },
+  {
+    id: "invoice",
+    period: "2024",
+    role: "Full Stack Developer",
+    org: "Italian XML Invoice Converter",
+    summary:
+      "Built a compliance-critical conversion platform for an Italian client, turning raw invoice data into the country's mandated XML e-invoice format.",
+    details: [
+      "Designed the XML parsing and generation pipeline against Italy's SDI invoicing schema, handling edge cases the spec only half-documents.",
+      "Wrote validation logic that catches malformed invoices before they reach the client's tax authority, not after.",
+      "Automated a previously manual, error-prone conversion process into a workflow the client now trusts to run unattended.",
+      "Worked directly with a non-technical client across a language and time-zone gap, translating tax rules into deterministic code.",
+    ],
+    stack: ["Vue.js", "Node.js", "Express", "XML/XSD", "Automation", "Validation"],
   },
   {
     id: "college-start",

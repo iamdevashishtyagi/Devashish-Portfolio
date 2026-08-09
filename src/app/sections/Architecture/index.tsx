@@ -131,7 +131,10 @@ export default function Architecture() {
         <span className="text-sm uppercase tracking-widest text-current opacity-70">
           Systems
         </span>
-        <h2 className="heading-2 mt-4 mb-6 text-current">
+        <h2
+          data-scroll-theme-trigger="architecture"
+          className="heading-2 mt-4 mb-6 text-current"
+        >
           RAG PIPELINE ARCHITECTURE
         </h2>
         <p className="body-large max-w-2xl mb-12 text-current opacity-90">

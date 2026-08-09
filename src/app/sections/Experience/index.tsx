@@ -80,14 +80,14 @@ export default function Experience() {
             />
           ))}
 
-          <div className="relative flex gap-4 md:gap-6" style={{ marginLeft: "clamp(0px, 64px, 15vw)" }}>
+          {/* <div className="relative flex gap-4 md:gap-6" style={{ marginLeft: "clamp(0px, 64px, 15vw)" }}>
             <div className="flex-shrink-0 pt-1.5">
               <div className="w-3 h-3 rounded-full" style={{ backgroundColor: ACCENT }} />
             </div>
             <p className="text-sm text-current/45 pt-0.5">
               Still climbing — the next chapter is whatever gets built next.
             </p>
-          </div>
+          </div> */}
         </div>
       </div>
     </section>

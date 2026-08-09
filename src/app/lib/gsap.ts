@@ -5,36 +5,84 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
+const legacyBackgroundSectionIds = new Set([
+  "about",
+  "experience",
+  "projects",
+  "wins",
+  "skills",
+  "architecture",
+  "achievements",
+  "contact",
+]);
+
 export function initScrollBackground() {
-  const sections = [
-    { id: "#about", bg: "#FFFFFF", textColor: "#1A1A1A", theme: "light" },
-    { id: "#experience", bg: "#FFFFFF", textColor: "#1A1A1A", theme: "light" },
-    { id: "#projects", bg: "#FBF9EF", textColor: "#1A1A1A", theme: "light" },
-    { id: "#wins", bg: "#FFFFFF", textColor: "#1A1A1A", theme: "light" },
-    { id: "#skills", bg: "#FBF9EF", textColor: "#1A1A1A", theme: "light" },
-    { id: "#architecture", bg: "#000000", textColor: "#ad9f90", theme: "dark" },
-    { id: "#achievements", bg: "#FFFFFF", textColor: "#ad9f90", theme: "light" },
-    { id: "#contact", bg: "#000000", textColor: "#FBF9EF", theme: "dark" },
-  ];
+  const lightTheme = { bg: "#FBF9EF", textColor: "#000000", theme: "light" };
+  const architectureTheme = { bg: "#000000", textColor: "#ad9f90", theme: "dark" };
+  const contactTheme = { bg: "#000000", textColor: "#FBF9EF", theme: "dark" };
+  const architectureHeading = document.querySelector<HTMLElement>(
+    "[data-scroll-theme-trigger='architecture']"
+  );
+  const architecture = document.querySelector<HTMLElement>("#architecture");
+  const contact = document.querySelector<HTMLElement>("#contact");
+  let activeTheme = "";
 
-  sections.forEach((section) => {
-    const el = document.querySelector(section.id);
-    if (!el) return;
+  const applyTheme = (theme: typeof lightTheme) => {
+    const themeKey = `${theme.theme}-${theme.textColor}`;
+    if (activeTheme === themeKey) return;
 
-    ScrollTrigger.create({
-      trigger: el,
-      start: "top center",
-      end: "bottom center",
-      onEnter: () => {
-        document.body.style.backgroundColor = section.bg;
-        document.body.style.color = section.textColor;
-        document.body.dataset.theme = section.theme;
-      },
-      onEnterBack: () => {
-        document.body.style.backgroundColor = section.bg;
-        document.body.style.color = section.textColor;
-        document.body.dataset.theme = section.theme;
-      },
-    });
+    activeTheme = themeKey;
+    document.body.style.backgroundColor = theme.bg;
+    document.body.style.color = theme.textColor;
+    document.body.dataset.theme = theme.theme;
+  };
+
+  // Remove all older versions of this controller. Pinned sections change
+  // document scroll positions, so theme changes must not use ScrollTrigger.
+  ScrollTrigger.getAll().forEach((scrollTrigger) => {
+    const trigger = scrollTrigger.vars.trigger;
+    const id = scrollTrigger.vars.id;
+    if (
+      (typeof id === "string" && id.startsWith("scroll-background-")) ||
+      (trigger instanceof HTMLElement &&
+        legacyBackgroundSectionIds.has(trigger.id) &&
+        scrollTrigger.vars.start === "top center" &&
+        scrollTrigger.vars.end === "bottom center")
+    ) {
+      scrollTrigger.kill();
+    }
   });
+
+  const updateTheme = () => {
+    const viewportMiddle = window.innerHeight / 2;
+    const architectureIsActive =
+      Boolean(architectureHeading && architecture) &&
+      architectureHeading!.getBoundingClientRect().top <= viewportMiddle &&
+      architecture!.getBoundingClientRect().bottom > 0;
+    const contactBounds = contact?.getBoundingClientRect();
+    const contactIsActive =
+      Boolean(contactBounds) && contactBounds!.top < window.innerHeight && contactBounds!.bottom > 0;
+
+    applyTheme(contactIsActive ? contactTheme : architectureIsActive ? architectureTheme : lightTheme);
+  };
+
+  let animationFrame: number | null = null;
+  const requestThemeUpdate = () => {
+    if (animationFrame !== null) return;
+    animationFrame = requestAnimationFrame(() => {
+      animationFrame = null;
+      updateTheme();
+    });
+  };
+
+  updateTheme();
+  window.addEventListener("scroll", requestThemeUpdate, { passive: true });
+  window.addEventListener("resize", requestThemeUpdate);
+
+  return () => {
+    window.removeEventListener("scroll", requestThemeUpdate);
+    window.removeEventListener("resize", requestThemeUpdate);
+    if (animationFrame !== null) cancelAnimationFrame(animationFrame);
+    applyTheme(lightTheme);
+  };
 }

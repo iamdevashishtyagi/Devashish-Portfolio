@@ -11,9 +11,11 @@ import { useEffect, useState } from "react";
  */
 const STAGE_VOCABULARY = [
   { label: "Entry Point", note: "Learning to read a system before touching it." },
+  { label: "First International Project", note: "Needed to prove myself rather than my coding." },
   { label: "First Ownership", note: "Shipping something real, independently." },
   { label: "Client Trust", note: "Turning ambiguity into deterministic decisions." },
   { label: "System Owner", note: "Trusted with production, and with people." },
+  { label: "Still Going", note: "New Opportunities and Challenges." },
 ];
 
 export function stageOf(index: number, total: number) {

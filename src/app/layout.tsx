@@ -81,7 +81,7 @@ export default function RootLayout({
       strategy="afterInteractive"
       />
       <body className="min-h-full flex flex-col transition-colors duration-700">
-        {/* <ScrollBackground /> */}
+        <ScrollBackground />
         {children}
       </body>
     </html>
