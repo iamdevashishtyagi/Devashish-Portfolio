@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, MedievalSharp  } from "next/font/google";
 import ScrollBackground from "./components/layout/ScrollBackground";
 import "./globals.css";
 import Script from 'next/script'
+import { Analytics } from "@vercel/analytics/next"
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://iamdevashishtyagi.vercel.app";
 const GoogleAuthClientID = process.env.Google_Auth_Client_ID;
@@ -82,6 +83,7 @@ export default function RootLayout({
       />
       <body className="min-h-full flex flex-col transition-colors duration-700">
         <ScrollBackground />
+        <Analytics />
         {children}
       </body>
     </html>
