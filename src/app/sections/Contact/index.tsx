@@ -159,7 +159,8 @@ export default function Contact() {
                 <a
                   href={profile.github}
                   target="_blank"
-                  rel="noopener noreferrer"
+                  rel="me noopener noreferrer"
+                  aria-label="Devashish Tyagi on GitHub"
                   className="contact-social rounded-full p-3 transition-colors"
                 >
                   <FaGithub className="w-5 h-5" />
@@ -168,7 +169,8 @@ export default function Contact() {
                 <a
                   href={profile.linkedin}
                   target="_blank"
-                  rel="noopener noreferrer"
+                  rel="me noopener noreferrer"
+                  aria-label="Devashish Tyagi on LinkedIn"
                   className="contact-social rounded-full p-3 transition-colors"
                 >
                   <FaLinkedin className="w-5 h-5" />

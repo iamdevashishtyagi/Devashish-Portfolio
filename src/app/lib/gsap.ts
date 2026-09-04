@@ -13,6 +13,7 @@ const legacyBackgroundSectionIds = new Set([
   "skills",
   "architecture",
   "achievements",
+  "faq",
   "contact",
 ]);
 

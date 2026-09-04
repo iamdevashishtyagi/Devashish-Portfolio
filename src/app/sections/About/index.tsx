@@ -38,7 +38,7 @@ export default function About() {
       <div className="container-narrow">
         <div className="max-w-4xl">
           <span className="text-sm uppercase tracking-widest text-gray-400">
-            About
+            About Devashish Tyagi
           </span>
           <h2 className="heading-2 mt-4 mb-12">THE SHORT VERSION</h2>
 
@@ -67,7 +67,7 @@ export default function About() {
               <span className="text-sm uppercase tracking-widest text-gray-400">
                 Available
               </span>
-              <p className="text-lg font-medium">For freelance & full-time</p>
+              <p className="text-lg font-medium">For freelance &amp; full-time</p>
             </div>
           </div>
         </div>

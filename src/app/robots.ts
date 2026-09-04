@@ -4,10 +4,17 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://iamdevashishtyagi.v
 
 export default function robots(): MetadataRoute.Robots {
   return {
-    rules: {
-      userAgent: "*",
-      allow: "/",
-    },
+    rules: [
+      {
+        userAgent: "*",
+        allow: "/",
+      },
+      {
+        userAgent: ["Googlebot", "Googlebot-Image"],
+        allow: "/",
+      },
+    ],
     sitemap: `${siteUrl}/sitemap.xml`,
+    host: siteUrl,
   };
 }

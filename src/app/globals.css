@@ -176,6 +176,21 @@ body[data-theme="dark"] #achievements .achievement-label {
   color: #b8b8b0;
 }
 
+body[data-theme="dark"] #faq .heading-2,
+body[data-theme="dark"] #faq h2 {
+  color: #ffffff;
+  transition: color 0.7s ease;
+}
+
+body[data-theme="dark"] #faq {
+  color: #fbf9ef;
+  transition: color 0.7s ease;
+}
+
+body[data-theme="dark"] #faq button {
+  color: #ffffff;
+}
+
 #contact .body-large {
   color: inherit;
 }

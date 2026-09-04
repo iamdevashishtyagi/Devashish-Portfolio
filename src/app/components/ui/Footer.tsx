@@ -19,7 +19,8 @@ export default function Footer() {
             <a
               href={profile.github}
               target="_blank"
-              rel="noopener noreferrer"
+              rel="me noopener noreferrer"
+              aria-label="Devashish Tyagi on GitHub"
               className="text-gray-400 hover:text-cream transition-colors"
             >
               <FaGithub className="w-4 h-4" />
@@ -27,13 +28,15 @@ export default function Footer() {
             <a
               href={profile.linkedin}
               target="_blank"
-              rel="noopener noreferrer"
+              rel="me noopener noreferrer"
+              aria-label="Devashish Tyagi on LinkedIn"
               className="text-gray-400 hover:text-cream transition-colors"
             >
               <FaLinkedin className="w-4 h-4" />
             </a>
             <a
               href={`mailto:${profile.email}`}
+              aria-label="Email Devashish Tyagi"
               className="text-gray-400 hover:text-cream transition-colors"
             >
               <Mail className="w-4 h-4" />

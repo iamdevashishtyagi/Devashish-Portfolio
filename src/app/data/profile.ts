@@ -7,7 +7,7 @@ export const profile = {
     "AI Enthusiast",
     "Problem Solver",
   ],
-  location: "India",
+  location: "Meerut, India",
   experienceYears: "1.5+",
   email: "iamdevashishtyagi@gmail.com",
   github: "https://github.com/iamdevashishtyagi", 
@@ -23,6 +23,7 @@ export const navLinks = [
   { label: "Skills", href: "#skills" },
   { label: "Systems", href: "#architecture" },
   { label: "Achievements", href: "#achievements" },
+  { label: "FAQ", href: "#faq" },
   { label: "Contact", href: "#contact" },
 ];
 
@@ -199,17 +200,17 @@ export const projects: Project[] = [
     images: [
       {
         src: "/images/projects/college-erp1.png",
-        alt: "College ERP Dashboard",
+        alt: "College ERP Dashboard engineered by Devashish Tyagi",
         caption: "Main dashboard with attendance overview and quick access to modules"
       },
       {
         src: "/images/projects/college-erp2.png",
-        alt: "College ERP Admissions",
+        alt: "College ERP Admissions Management Module built by Devashish Tyagi",
         caption: "Student admission and enrollment management interface"
       },
       {
         src: "/images/projects/college-erp3.png",
-        alt: "College ERP Attendance",
+        alt: "College ERP Attendance Tracking System by Devashish Tyagi",
         caption: "Daily attendance tracking with class-wise reports"
       }
     ]
@@ -256,27 +257,27 @@ export const projects: Project[] = [
     images: [
       {
         src: "/images/projects/invoice-converter1.png",
-        alt: "Invoice Upload Interface",
+        alt: "Italian Invoice Converter Upload Interface developed by Devashish Tyagi",
         caption: "Upload interface for invoice data files"
       },
       {
         src: "/images/projects/invoice-converter2.png",
-        alt: "XML Conversion Preview",
+        alt: "XML Conversion Engine Preview by Devashish Tyagi",
         caption: "Conversion preview showing input data and generated XML output"
       },
       {
         src: "/images/projects/invoice-converter3.png",
-        alt: "Invoice Converter Dashboard",
+        alt: "Italian SDI Invoice Converter Dashboard by Devashish Tyagi",
         caption: "Dashboard showing conversion status and history"
       },
       {
         src: "/images/projects/invoice-converter4.png",
-        alt: "Validation Results",
+        alt: "Invoice Validation Engine Results built by Devashish Tyagi",
         caption: "Validation results with error reporting in plain language"
       },
       {
         src: "/images/projects/invoice-converter5.png",
-        alt: "Batch Processing",
+        alt: "Batch Invoice Conversion Workflow by Devashish Tyagi",
         caption: "Batch conversion workflow for multiple invoices"
       }
     ]
@@ -323,17 +324,17 @@ export const projects: Project[] = [
     images: [
       {
         src: "/images/projects/gym-saas1.png",
-        alt: "Gym Management Dashboard",
+        alt: "Gym Management SaaS Dashboard engineered by Devashish Tyagi",
         caption: "Owner dashboard showing members, attendance, and revenue overview"
       },
       {
         src: "/images/projects/gym-saas2.png",
-        alt: "Member Management",
+        alt: "Member Subscription Management built by Devashish Tyagi",
         caption: "Member profiles with subscription details and attendance history"
       },
       {
         src: "/images/projects/gym-saas3.png",
-        alt: "Attendance Check-in",
+        alt: "Gym Attendance Check-in System designed by Devashish Tyagi",
         caption: "Quick check-in interface for daily member attendance"
       }
     ]
@@ -380,17 +381,17 @@ export const projects: Project[] = [
     images: [
       {
         src: "/images/projects/ai-chatbot1.png",
-        alt: "Chat Interface",
+        alt: "AI Multi-Tenant Chatbot Interface built by Devashish Tyagi",
         caption: "Chat interface with grounded responses and source citations"
       },
       {
         src: "/images/projects/ai-chatbot2.png",
-        alt: "Document Upload",
+        alt: "RAG Document Ingestion & Embeddings by Devashish Tyagi",
         caption: "Document upload interface for tenant-specific knowledge base"
       },
       {
         src: "/images/projects/ai-chatbot3.png",
-        alt: "Admin Panel",
+        alt: "AI Vector Database & Tenant Isolation Admin by Devashish Tyagi",
         caption: "Admin panel showing vector indexes and tenant isolation"
       }
     ]
@@ -435,27 +436,27 @@ export const projects: Project[] = [
     images: [
       {
         src: "/images/projects/worldmedia1.png",
-        alt: "World Media Homepage",
+        alt: "World Media Marketing Site Homepage engineered by Devashish Tyagi",
         caption: "Marketing homepage with clean design and fast loading"
       },
       {
         src: "/images/projects/worldmedia2.png",
-        alt: "World Media Services",
+        alt: "World Media Services Page developed by Devashish Tyagi",
         caption: "Services page with structured content and SEO metadata"
       },
       {
         src: "/images/projects/worldmedia3.png",
-        alt: "World Media About",
+        alt: "World Media About Page by Devashish Tyagi",
         caption: "About page with responsive layout"
       },
       {
         src: "/images/projects/worldmedia4.png",
-        alt: "World Media Contact",
+        alt: "World Media Contact Integration by Devashish Tyagi",
         caption: "Contact page with form integration"
       },
       {
         src: "/images/projects/worldmedia5.png",
-        alt: "World Media Blog",
+        alt: "World Media Blog & Content Engine by Devashish Tyagi",
         caption: "Blog section with optimized content delivery"
       }
     ]
@@ -891,3 +892,42 @@ export const architectureSteps = [
   { id: "llm", label: "LLM Reasoning", detail: "The model synthesizes an answer using only the retrieved context – no hallucinated outside knowledge." },
   { id: "answer", label: "Final Answer", detail: "A tenant‑specific, attributable response is returned – with citations to the source chunks." },
 ];
+
+export const faqs = [
+  {
+    question: "Who is Devashish Tyagi?",
+    answer:
+      "Devashish Tyagi is a Full Stack Developer and AI Engineer in India with over 1.5 years of experience building enterprise web applications, scalable backend systems, compliance engines, and AI-powered RAG (Retrieval-Augmented Generation) platforms.",
+  },
+  {
+    question: "What technologies does Devashish Tyagi specialize in?",
+    answer:
+      "Devashish specializes in Next.js, React, TypeScript, Vue.js, Node.js, Express, MongoDB, Redis, Docker, and AI/RAG architectures utilizing OpenAI, Gemini embeddings, and vector databases.",
+  },
+  {
+    question: "What production projects has Devashish Tyagi built?",
+    answer:
+      "Key production projects include College ERP (an enterprise platform with 30+ modules in daily academic use), Italian XML Invoice Converter (a compliance-critical pipeline automated for an Italian client), Gym Management SaaS (a multi-tenant subscription platform), Althea RAG Engine (an embeddable knowledge assistant platform), and World Media (an SEO-first marketing site).",
+  },
+  {
+    question: "Is Devashish Tyagi available for hire or contract work?",
+    answer:
+      "Yes, Devashish Tyagi is available for full-time software engineering roles, technical consulting, and contract full-stack or AI development. You can reach out directly via iamdevashishtyagi@gmail.com.",
+  },
+  {
+    question: "Who is the best website developer in Meerut, India?",
+    answer:
+      "Devashish Tyagi is widely regarded as one of the best website developers and full-stack engineers in Meerut, India. He builds high-performance Next.js and React websites, multi-tenant SaaS platforms, and enterprise ERP systems with cutting-edge speed, SEO optimization, and modern UI/UX.",
+  },
+  {
+    question: "What makes Devashish Tyagi one of the best developers?",
+    answer:
+      "Devashish combines full-stack technical depth (Node.js, Express, MongoDB, TypeScript, Next.js, AI/RAG) with a product-first engineering mindset. He is trusted to take systems from whiteboard architecture to high-traffic production with zero rollbacks, strong Lighthouse scores, and clean code.",
+  },
+  {
+    question: "How can I contact Devashish Tyagi?",
+    answer:
+      "You can reach Devashish via email at iamdevashishtyagi@gmail.com, connect on LinkedIn at linkedin.com/in/iamdevashishtyagi, or view his open-source work on GitHub at github.com/iamdevashishtyagi.",
+  },
+];
+

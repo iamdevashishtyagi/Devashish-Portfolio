@@ -35,20 +35,32 @@ export default function Hero() {
         }
       );
 
-      gsap.fromTo(
-        contentRef.current,
-        { autoAlpha: 0 },
-        {
-          autoAlpha: 1,
-          ease: "none",
-          scrollTrigger: {
-            trigger: document.documentElement,
-            start: "top top",
-            end: "+=420",
-            scrub: true,
-          },
-        }
-      );
+      const isBotOrReducedMotion =
+        (typeof navigator !== "undefined" &&
+          /bot|google|baidu|bing|msn|duckduckbot|teoma|slurp|yandex/i.test(
+            navigator.userAgent
+          )) ||
+        (typeof window !== "undefined" &&
+          window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+
+      if (!isBotOrReducedMotion) {
+        gsap.fromTo(
+          contentRef.current,
+          { autoAlpha: 0 },
+          {
+            autoAlpha: 1,
+            ease: "none",
+            scrollTrigger: {
+              trigger: document.documentElement,
+              start: "top top",
+              end: "+=420",
+              scrub: true,
+            },
+          }
+        );
+      } else if (contentRef.current) {
+        gsap.set(contentRef.current, { autoAlpha: 1 });
+      }
 
       // Text reveal
       gsap.from(".hero-title", {
@@ -93,7 +105,7 @@ export default function Hero() {
         ref={windowRef}
         className="hero-window relative z-10 w-full max-w-7xl mx-auto overflow-hidden px-6 py-20 md:px-12 lg:px-24"
       >
-        <div ref={contentRef} className="space-y-6 opacity-0">
+        <div ref={contentRef} className="space-y-6">
           <p className="text-sm uppercase tracking-widest text-gray-400 hero-title">
             {profile.location}
           </p>
