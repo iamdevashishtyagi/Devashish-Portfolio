@@ -341,7 +341,7 @@ export const projects: Project[] = [
   },
   {
     id: "ai-chatbot",
-    title: "AI Multi-Tenant Chatbot",
+    title: "Althea AI Multi-Tenant RAG System",
     category: "AI / RAG System",
     filter: "ai",
     mockup: "chat",
