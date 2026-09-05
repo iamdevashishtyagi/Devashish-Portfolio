@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     template: "%s | Devashish Tyagi",
   },
   description:
-    "Official portfolio of Devashish Tyagi (iamdevashishtyagi) — Top-rated website developer and full stack engineer in Meerut & India with 1.5+ years of experience building enterprise web applications, Next.js/React platforms, and AI-powered systems.",
+    "Official portfolio of Devashish Tyagi (iamdevashishtyagi) — Top-rated website developer and full stack engineer in Meerut & India with 2+ years of experience building enterprise web applications, Next.js/React platforms, and AI-powered systems.",
   applicationName: "Devashish Tyagi Portfolio",
   authors: [{ name: "Devashish Tyagi", url: siteUrl }],
   creator: "Devashish Tyagi",

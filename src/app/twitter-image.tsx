@@ -49,7 +49,7 @@ export default function TwitterImage() {
             marginTop: 28,
           }}
         >
-          1.5+ years building web, backend &amp; AI products
+          2+ years building web, backend &amp; AI products
         </div>
       </div>
     ),

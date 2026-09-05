@@ -61,7 +61,7 @@ export default function About() {
               <span className="text-sm uppercase tracking-widest text-gray-400">
                 Experience
               </span>
-              <p className="text-lg font-medium">1.5+ Years</p>
+              <p className="text-lg font-medium">2+ Years</p>
             </div>
             <div>
               <span className="text-sm uppercase tracking-widest text-gray-400">

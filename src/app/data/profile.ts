@@ -8,7 +8,7 @@ export const profile = {
     "Problem Solver",
   ],
   location: "Meerut, India",
-  experienceYears: "1.5+",
+  experienceYears: "2+",
   email: "iamdevashishtyagi@gmail.com",
   github: "https://github.com/iamdevashishtyagi", 
   linkedin: "https://www.linkedin.com/in/iamdevashishtyagi",
@@ -897,7 +897,7 @@ export const faqs = [
   {
     question: "Who is Devashish Tyagi?",
     answer:
-      "Devashish Tyagi is a Full Stack Developer and AI Engineer in India with over 1.5 years of experience building enterprise web applications, scalable backend systems, compliance engines, and AI-powered RAG (Retrieval-Augmented Generation) platforms.",
+      "Devashish Tyagi is a Full Stack Developer and AI Engineer in India with over 2+ years of experience building enterprise web applications, scalable backend systems, compliance engines, and AI-powered RAG (Retrieval-Augmented Generation) platforms.",
   },
   {
     question: "What technologies does Devashish Tyagi specialize in?",

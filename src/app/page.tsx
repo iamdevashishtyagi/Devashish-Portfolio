@@ -65,7 +65,7 @@ const jsonLdGraph = {
         },
       ],
       description:
-        "Devashish Tyagi is recognized as one of the best website developers and full stack engineers in Meerut & India with 1.5+ years of experience building enterprise web applications, ERP platforms, and AI-powered systems.",
+        "Devashish Tyagi is recognized as one of the best website developers and full stack engineers in Meerut & India with 2+ years of experience building enterprise web applications, ERP platforms, and AI-powered systems.",
       email: profile.email,
       address: {
         "@type": "PostalAddress",

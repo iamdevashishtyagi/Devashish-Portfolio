@@ -26,7 +26,7 @@ export default function OpenGraphImage() {
           Devashish Tyagi
         </div>
         <div style={{ color: "#57534e", display: "flex", fontSize: 36, marginTop: 28 }}>
-          1.5+ years building web, backend & AI products
+          2+ years building web, backend & AI products
         </div>
       </div>
     ),
