@@ -25,7 +25,12 @@ export const metadata: Metadata = {
   },
   description:
     "Official portfolio of Devashish Tyagi (iamdevashishtyagi) — Top-rated website developer and full stack engineer in Meerut & India with 2+ years of experience building enterprise web applications, Next.js/React platforms, and AI-powered systems.",
-  applicationName: "Devashish Tyagi Portfolio",
+  applicationName: "Devashish Tyagi",
+  appleWebApp: {
+    capable: true,
+    title: "Devashish Tyagi",
+    statusBarStyle: "default",
+  },
   authors: [{ name: "Devashish Tyagi", url: siteUrl }],
   creator: "Devashish Tyagi",
   publisher: "Devashish Tyagi",
@@ -62,7 +67,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     url: siteUrl,
-    siteName: "Devashish Tyagi Portfolio",
+    siteName: "Devashish Tyagi",
     title: "Devashish Tyagi | Best Website Developer & Full Stack Engineer",
     description:
       "Top-rated website developer and full stack engineer building production web applications, ERP platforms, and AI-powered systems.",

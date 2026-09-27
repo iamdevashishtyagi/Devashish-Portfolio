@@ -22,8 +22,12 @@ const jsonLdGraph = {
       "@type": "WebSite",
       "@id": `${siteUrl}/#website`,
       url: siteUrl,
-      name: "Devashish Tyagi Portfolio",
-      alternateName: ["iamdevashishtyagi", "Devashish Tyagi"],
+      name: "Devashish Tyagi",
+      alternateName: [
+        "iamdevashishtyagi",
+        "Devashish Tyagi Portfolio",
+        "iamdevashishtyagi.vercel.app",
+      ],
       description:
         "Official portfolio of Devashish Tyagi — Full Stack Developer & AI Engineer specializing in Next.js, React, Node.js, TypeScript, and RAG systems.",
       inLanguage: "en-US",
