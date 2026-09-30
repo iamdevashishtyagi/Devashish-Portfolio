@@ -125,24 +125,7 @@ body[data-theme="dark"] #architecture .border-current\/10 {
   animation: achievements-grid-drift 24s linear infinite;
 }
 
-.achievements-atmosphere::after {
-  position: absolute;
-  inset: 14%;
-  border: 1px solid var(--achievement-grid);
-  content: "";
-  box-shadow: 0 0 4rem var(--achievement-glow), inset 0 0 4rem rgb(255 255 255 / 0.08);
-  transform: rotate(12deg);
-  animation: achievements-frame-float 12s ease-in-out infinite alternate;
-}
 
-@keyframes achievements-grid-drift {
-  to { background-position: 0 0, 0 0, 46px 46px, 46px 46px; }
-}
-
-@keyframes achievements-frame-float {
-  from { transform: rotate(10deg) scale(0.94); opacity: 0.45; }
-  to { transform: rotate(15deg) scale(1.05); opacity: 0.9; }
-}
 
 #achievements .achievement-icon,
 #achievements .achievement-label {
@@ -682,63 +665,7 @@ body[data-theme="dark"] .contact-atmosphere {
   }
 }
 
-/* Theme-aware triangular grid used exclusively by the home section. */
-.hero-geometry {
-  --hero-grid-line: rgb(15 23 42 / 0.06);
-  --hero-glow: rgb(59 130 246 / 0.16);
-  --hero-glow-secondary: rgb(99 102 241 / 0.12);
-  position: absolute;
-  inset: -20%;
-  z-index: 0;
-  overflow: hidden;
-  pointer-events: none;
-  background:
-    linear-gradient(30deg, transparent 49.2%, var(--hero-grid-line) 49.5%, var(--hero-grid-line) 50.5%, transparent 50.8%) 0 0 / 84px 72px,
-    linear-gradient(150deg, transparent 49.2%, var(--hero-grid-line) 49.5%, var(--hero-grid-line) 50.5%, transparent 50.8%) 0 0 / 84px 72px,
-    linear-gradient(90deg, transparent 49.2%, var(--hero-grid-line) 49.5%, var(--hero-grid-line) 50.5%, transparent 50.8%) 0 0 / 84px 72px;
-  mask-image: radial-gradient(ellipse at center, black 12%, rgb(0 0 0 / 0.8) 45%, transparent 78%);
-  -webkit-mask-image: radial-gradient(ellipse at center, black 12%, rgb(0 0 0 / 0.8) 45%, transparent 78%);
-  animation: hero-grid-drift 18s linear infinite;
-}
 
-.hero-geometry::after {
-  position: absolute;
-  inset: 18%;
-  content: "";
-  background:
-    radial-gradient(circle at 25% 25%, var(--hero-glow), transparent 18rem),
-    radial-gradient(circle at 75% 70%, var(--hero-glow-secondary), transparent 19rem);
-  filter: blur(22px);
-  animation: hero-glow-float 10s ease-in-out infinite alternate;
-}
-
-body[data-theme="dark"] .hero-geometry {
-  --hero-grid-line: rgb(248 250 252 / 0.1);
-  --hero-glow: rgb(59 130 246 / 0.3);
-  --hero-glow-secondary: rgb(99 102 241 / 0.22);
-}
-
-.hero-geometry-intro {
-  position: absolute;
-  inset: -20%;
-}
-
-@keyframes hero-grid-drift {
-  from { transform: translate3d(-2%, -2%, 0) rotate(-1deg); }
-  to { transform: translate3d(2%, 2%, 0) rotate(1deg); }
-}
-
-@keyframes hero-glow-float {
-  from { transform: translate3d(-5%, -4%, 0) scale(0.9); opacity: 0.65; }
-  to { transform: translate3d(5%, 4%, 0) scale(1.12); opacity: 1; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .hero-geometry,
-  .hero-geometry::after {
-    animation: none;
-  }
-}
 
 .skill-marquee {
   --marquee-background: rgb(255 255 255 / 0.85);

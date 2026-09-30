@@ -62,7 +62,7 @@ export default function Hero() {
         <div ref={contentRef} className="space-y-6 max-w-3xl pointer-events-auto">
           {/* Location text - clean and clear, no border/shadow box */}
           <div className="hero-title flex items-center gap-2 text-xs uppercase tracking-widest font-semibold text-slate-500">
-            <span className="w-2 h-2 rounded-full bg-blue-500" />
+            <span className="w-2 h-2 rounded-full bg-slate-400" />
             <span>{profile.location}</span>
           </div>
 
@@ -77,7 +77,7 @@ export default function Hero() {
               <span key={i} className="inline-flex items-center">
                 <span className="font-normal text-slate-800">{role}</span>
                 {i < profile.taglineRoles.length - 1 && (
-                  <span className="mx-2.5 text-blue-500/40 font-bold">/</span>
+                  <span className="mx-2.5 text-slate-300 font-bold">/</span>
                 )}
               </span>
             ))}
@@ -95,7 +95,7 @@ export default function Hero() {
               href={profile.resumeUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-7 py-3.5 bg-slate-900 text-white rounded-full hover:bg-blue-600 transition-all duration-200 text-sm font-semibold"
+              className="inline-flex items-center gap-2 px-7 py-3.5 bg-slate-900 text-white rounded-full hover:bg-slate-800 transition-all duration-200 text-sm font-semibold"
             >
               <Download className="w-4 h-4" />
               <span>Resume</span>

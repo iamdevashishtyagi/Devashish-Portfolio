@@ -117,7 +117,6 @@ export default function Wins() {
       id="wins"
       className="relative isolate overflow-hidden section-layout"
     >
-      <div className="hero-geometry wins-geometry" aria-hidden="true" />
       <div className="relative z-10 container-narrow">
         <div ref={stageRef} className="wins-stage flex flex-col">
           <span className="text-sm uppercase tracking-widest text-gray-400">
