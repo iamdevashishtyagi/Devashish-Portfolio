@@ -127,12 +127,12 @@ export default function TechSlingshot() {
   // UN-STRETCHABLE SWING PENDULUM STATE
   // =========================================================================
   const swingRef = useRef({
-    theta: -0.85, // Cocked high to the left ready to swing
+    theta: -1.46, // Cocked high touching the ceiling, just slight right from left boundary
     omega: 0,
     isDragging: false,
-    isArmed: true, // Holds at left peak until released or clicked
-    x: 0,
-    y: 0,
+    isArmed: true, // Holds at ceiling position until released, dragged, or Swing Ball clicked
+    x: BALL_RADIUS + 60,
+    y: BALL_RADIUS + 20,
     vx: 0,
     vy: 0,
   });
@@ -168,18 +168,16 @@ export default function TechSlingshot() {
   const cableLengthRef = useRef(cableLength);
   cableLengthRef.current = cableLength;
 
-  // Safe cocked high-left angle so ball stays comfortably inside the left wall
-  const cockedPeakTheta = useMemo(() => {
-    const ax = ceilingAnchor.x;
-    const L = cableLength;
-    const targetX = BALL_RADIUS + 32;
-    const rawSin = (targetX - ax) / L;
-    const clampedSin = Math.max(-0.94, Math.min(-0.50, rawSin));
-    return Math.asin(clampedSin);
-  }, [ceilingAnchor.x, cableLength]);
+  // Cocked ball position: touching the ceiling, just slight right from the left boundary
+  const initialBallPosition = useMemo(() => {
+    return {
+      x: BALL_RADIUS + 60,
+      y: BALL_RADIUS + 20,
+    };
+  }, []);
 
-  const cockedPeakThetaRef = useRef(cockedPeakTheta);
-  cockedPeakThetaRef.current = cockedPeakTheta;
+  const initialBallPositionRef = useRef(initialBallPosition);
+  initialBallPositionRef.current = initialBallPosition;
 
   // Systematic Grid Slots
   const { positions: systematicPositions, size: iconSize, floorY } = useMemo(() => {
@@ -301,11 +299,10 @@ export default function TechSlingshot() {
     const anchorY = BAR_Y;
     const initialL = Math.max(280, height - 20 - BAR_Y - BALL_RADIUS - 12);
     
-    const targetLeftX = BALL_RADIUS + 32;
-    const initialTheta = Math.asin(Math.max(-0.94, Math.min(-0.50, (targetLeftX - anchorX) / initialL)));
-    
-    const ballX = anchorX + initialL * Math.sin(initialTheta);
-    const ballY = anchorY + initialL * Math.cos(initialTheta);
+    // Initial Ball State: Touching the ceiling, just slight right from the left boundary
+    const ballX = BALL_RADIUS + 60;
+    const ballY = BALL_RADIUS + 20;
+    const initialTheta = Math.atan2(ballX - anchorX, ballY - anchorY);
 
     swingRef.current = {
       theta: initialTheta,
@@ -733,16 +730,13 @@ export default function TechSlingshot() {
         swing.vy = vy;
       }
     } else {
-      // Natural release
-      if (swing.x < ceilingAnchorRef.current.x - 40) {
-        swing.vx = 4.0; // Confident forward swing toward the stack
-        swing.vy = 1.0;
-      }
+      // Natural release without drag history: pure freefall under gravity
+      swing.vx = 0;
+      swing.vy = 0;
     }
 
     setSwingsCount((c) => c + 1);
-    triggerImpactSparks(swing.x, swing.y, "#38BDF8", 12);
-  }, [triggerImpactSparks]);
+  }, []);
 
   // Window-level listeners for smooth dragging anywhere on the screen
   useEffect(() => {
@@ -795,35 +789,42 @@ export default function TechSlingshot() {
     finishBallDrag();
   };
 
-  // Trigger Swing from High-Left Peak (Button Action)
+  // Trigger Swing from High-Left Ceiling Peak (Button Action: Pure Natural Free Fall!)
   const triggerSwing = () => {
     const anchor = ceilingAnchorRef.current;
     const L = cableLengthRef.current;
     const swing = swingRef.current;
-    const peakTheta = cockedPeakThetaRef.current;
+    const targetPos = initialBallPositionRef.current;
 
-    swing.theta = peakTheta;
-    swing.omega = 0.028; // Snappy forward impulse toward the stack!
+    // Reset cleanly to ceiling position if armed or settled
+    if (swing.isArmed || Math.hypot(swing.vx, swing.vy) < 0.5) {
+      swing.x = targetPos.x;
+      swing.y = targetPos.y;
+    }
+
+    const theta = Math.atan2(swing.x - anchor.x, swing.y - anchor.y);
+    swing.theta = theta;
+
+    // Pure free fall under gravity: Zero initial impulse or jerk!
+    swing.omega = 0;
+    swing.vx = 0;
+    swing.vy = 0;
     swing.isDragging = false;
     swing.isArmed = false;
-    swing.x = anchor.x + L * Math.sin(peakTheta);
-    swing.y = anchor.y + L * Math.cos(peakTheta);
-    swing.vx = 4.6;
-    swing.vy = 1.0;
 
     if (ballBodyRef.current) {
       Matter.Body.setPosition(ballBodyRef.current, { x: swing.x, y: swing.y });
+      Matter.Body.setVelocity(ballBodyRef.current, { x: 0, y: 0 });
     }
 
     if (cablePathRef.current) {
       cablePathRef.current.setAttribute(
         "d",
-        getCablePath(anchor.x, anchor.y, swing.x, swing.y - BALL_TOP_OFFSET, swing.vx, swing.vy, L)
+        getCablePath(anchor.x, anchor.y, swing.x, swing.y - BALL_TOP_OFFSET, 0, 0, L)
       );
     }
 
     setSwingsCount((c) => c + 1);
-    triggerImpactSparks(swing.x, swing.y, "#38BDF8", 16);
   };
 
   // =========================================================================
@@ -946,7 +947,9 @@ export default function TechSlingshot() {
 
     const anchor = ceilingAnchorRef.current;
     const L = cableLengthRef.current;
-    const initialCockedTheta = cockedPeakThetaRef.current;
+    const startBallPos = { x: swingRef.current.x, y: swingRef.current.y };
+    const targetBallPos = initialBallPositionRef.current;
+    const targetTheta = Math.atan2(targetBallPos.x - anchor.x, targetBallPos.y - anchor.y);
 
     // Snapshot start positions
     const startBadgeStates = new Map<string, { x: number; y: number; angle: number }>();
@@ -987,10 +990,10 @@ export default function TechSlingshot() {
         }
       });
 
-      // Animate swing back to cocked high-left peak
-      const curTheta = startSwingTheta + (initialCockedTheta - startSwingTheta) * ease;
-      const ballX = anchor.x + L * Math.sin(curTheta);
-      const ballY = anchor.y + L * Math.cos(curTheta);
+      // Animate swing back to touching ceiling, just slight right from left boundary
+      const ballX = startBallPos.x + (targetBallPos.x - startBallPos.x) * ease;
+      const ballY = startBallPos.y + (targetBallPos.y - startBallPos.y) * ease;
+      const curTheta = startSwingTheta + (targetTheta - startSwingTheta) * ease;
 
       const swing = swingRef.current;
       swing.theta = curTheta;
@@ -1033,8 +1036,14 @@ export default function TechSlingshot() {
           Matter.Sleeping.set(body, true); // Stable in formation until touched or struck!
         });
 
-        swing.isArmed = true; // Cocked and ready
+        swing.isArmed = true; // Cocked touching ceiling and ready
         swing.isDragging = false;
+        swing.x = targetBallPos.x;
+        swing.y = targetBallPos.y;
+        swing.theta = targetTheta;
+        swing.vx = 0;
+        swing.vy = 0;
+        swing.omega = 0;
 
         isScatteredRef.current = false;
         setIsScattered(false);
