@@ -31,6 +31,7 @@ export interface PhysicsIconsProps {
   disabled?: boolean;
   showHint?: boolean;
   hintText?: string;
+  bottomOffset?: number;
 }
 
 export default function PhysicsIcons({
@@ -43,8 +44,9 @@ export default function PhysicsIcons({
   itemClassName = "",
   throwPower = 1.2,
   disabled = false,
-  showHint = true,
+  showHint = false,
   hintText = "Interactive · Drag & Toss Icons",
+  bottomOffset = 0,
 }: PhysicsIconsProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<Map<string, HTMLDivElement>>(new Map());
@@ -113,7 +115,7 @@ export default function PhysicsIcons({
     // Left, Right, Bottom
     const bottomWall = Matter.Bodies.rectangle(
       width / 2,
-      height + WALL_THICKNESS / 2 - 10,
+      height + WALL_THICKNESS / 2 + bottomOffset,
       WALL_SPAN,
       WALL_THICKNESS,
       {
@@ -292,7 +294,7 @@ export default function PhysicsIcons({
         if (wallsRef.current) {
           Matter.Body.setPosition(wallsRef.current.bottom, {
             x: newWidth / 2,
-            y: newHeight + WALL_THICKNESS / 2 - 10,
+            y: newHeight + WALL_THICKNESS / 2 + bottomOffset,
           });
           Matter.Body.setPosition(wallsRef.current.left, {
             x: -WALL_THICKNESS / 2,
@@ -328,7 +330,7 @@ export default function PhysicsIcons({
       bodiesRef.current.clear();
       wallsRef.current = null;
     };
-  }, [mounted, reducedMotion, disabled, gravity, bounce, friction, frictionAir, items]);
+  }, [mounted, reducedMotion, disabled, gravity, bounce, friction, frictionAir, items, bottomOffset]);
 
   // Pointer event handlers for grabbing, dragging & throwing with zero jump
   const handlePointerDown = useCallback(
@@ -462,7 +464,7 @@ export default function PhysicsIcons({
         {items.map((item) => (
           <div
             key={item.id}
-            className="flex items-center justify-center p-2 rounded-2xl bg-white/80 border border-slate-200 shadow-sm"
+            className="flex items-center justify-center p-2 rounded-2xl bg-white/80 border border-slate-200"
             title={item.label || item.id}
           >
             <Icon
@@ -483,13 +485,6 @@ export default function PhysicsIcons({
       className={`relative w-full h-full overflow-hidden pointer-events-none select-none ${className}`}
       aria-label="Interactive floating technology icons. Drag and toss them around!"
     >
-      {/* Interactive hint badge */}
-      {showHint && !hasInteracted && (
-        <div className="absolute top-4 right-4 z-30 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/90 backdrop-blur-md border border-slate-200/90 text-xs font-semibold text-slate-700 shadow-sm pointer-events-none transition-opacity duration-300">
-          <span className="w-2 h-2 rounded-full bg-blue-500 animate-ping"></span>
-          <span>{hintText}</span>
-        </div>
-      )}
 
       {items.map((item) => {
         const shape = item.shape || (item.label ? "pill" : "circle");
@@ -518,14 +513,13 @@ export default function PhysicsIcons({
             aria-label={`${item.label || item.id} icon. Drag or press Space to toss.`}
             className={`absolute top-0 left-0 pointer-events-auto cursor-grab active:cursor-grabbing will-change-transform touch-none select-none opacity-0 ${
               isPill
-                ? "inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/95 backdrop-blur-md border border-slate-200 shadow-sm hover:shadow-md transition-shadow"
+                ? "inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/95 backdrop-blur-md border border-slate-200"
                 : "flex items-center justify-center bg-transparent border-0 outline-none p-0"
             } ${itemClassName} ${item.className || ""}`}
             style={
               isPill
                 ? {
                     borderColor: item.borderColor || "rgba(226, 232, 240, 0.9)",
-                    boxShadow: "0 4px 12px -2px rgba(15, 23, 42, 0.08)",
                   }
                 : {
                     width: `${w}px`,
@@ -557,7 +551,7 @@ export default function PhysicsIcons({
                   icon={item.icon}
                   width={item.width || item.size || 108}
                   height={item.height || item.size || 108}
-                  className="shrink-0 filter drop-shadow-[0_12px_24px_rgba(0,0,0,0.15)] select-none pointer-events-none"
+                  className="shrink-0 select-none pointer-events-none"
                   aria-hidden="true"
                 />
               </div>
