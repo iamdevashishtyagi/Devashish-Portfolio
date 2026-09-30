@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  --background: #FBF9EF;
+  --background: #FFFFFF;
   --foreground: #000000;
 }
 
@@ -12,23 +12,23 @@
   --font-mono: var(--font-geist-mono);
 }
 
-/* Custom colors */
+/* Custom colors - smart, clear, modern slate & tech palette */
 @theme {
-  --color-cream: #FBF9EF;
+  --color-cream: #FFFFFF;
   --color-charcoal: #000000;
-  --color-black: #0A0A0A;
-  --color-gray-50: #F8F8F6;
-  --color-gray-100: #EDEDE5;
-  --color-gray-200: #D4D4CC;
-  --color-gray-300: #B8B8B0;
-  --color-gray-400: #94948C;
-  --color-gray-500: #707068;
-  --color-gray-600: #4C4C44;
-  --color-gray-700: #383830;
-  --color-gray-800: #24241C;
-  --color-gray-900: #10100C;
-  --color-accent-blue: #3B82F6;
-  --color-accent-violet: #8B5CF6;
+  --color-black: #000000;
+  --color-gray-50: #F8FAFC;
+  --color-gray-100: #F1F5F9;
+  --color-gray-200: #E2E8F0;
+  --color-gray-300: #CBD5E1;
+  --color-gray-400: #94A3B8;
+  --color-gray-500: #64748B;
+  --color-gray-600: #475569;
+  --color-gray-700: #334155;
+  --color-gray-800: #1E293B;
+  --color-gray-900: #0F172A;
+  --color-accent-blue: #2563EB;
+  --color-accent-violet: #6366F1;
   --color-accent-amber: #F59E0B;
 }
 
@@ -56,35 +56,35 @@ main {
 
 /* Default light theme */
 body[data-theme="light"] #architecture .text-current {
-  /* color: #1A1A1A; */
+  /* color: #0F172A; */
 }
 
 body[data-theme="dark"] #architecture .text-current {
-  color: #FBF9EF;
+  color: #F8FAFC;
 }
 
 body[data-theme="light"] #achievements .text-current {
-  /* color: #1A1A1A; */
+  /* color: #0F172A; */
 }
 
 body[data-theme="dark"] #achievements .text-current {
-  color: #FBF9EF;
+  color: #F8FAFC;
 }
 
 /* For the step icon background and border to adapt softly */
 body[data-theme="light"] #architecture .step-icon {
-  background-color: #f0f0ea;
-  border-color: #d4d4cc;
+  background-color: #F8FAFC;
+  border-color: #E2E8F0;
 }
 
 body[data-theme="dark"] #architecture .step-icon {
-  background-color: #1a1a1a;
-  border-color: #4c4c44;
+  background-color: #1E293B;
+  border-color: #334155;
 }
 
 /* Optional: make the border on the bottom card adapt */
 body[data-theme="light"] #architecture .border-current\/10 {
-  border-color: rgba(0, 0, 0, 0.1);
+  border-color: rgba(15, 23, 42, 0.08);
 }
 
 body[data-theme="dark"] #architecture .border-current\/10 {
@@ -94,17 +94,17 @@ body[data-theme="dark"] #architecture .border-current\/10 {
 /* Components that remain visible during the light-to-dark handoff use the
    active document theme, rather than fixed utility colours. */
 #achievements .achievement-card {
-  background: rgb(251 249 239 / 0.88);
-  border-color: #d4d4cc;
-  color: #1a1a1a;
+  background: rgb(255 255 255 / 0.95);
+  border-color: #E2E8F0;
+  color: #0F172A;
   transition: background-color 0.7s ease, border-color 0.7s ease, color 0.7s ease;
 }
 
 #achievements {
-  --achievement-grid: rgb(176 137 104 / 0.13);
-  --achievement-glow: rgb(245 158 11 / 0.16);
-  background: #fbf9ef;
-  color: #1a1a1a;
+  --achievement-grid: rgb(15 23 42 / 0.06);
+  --achievement-glow: rgb(59 130 246 / 0.15);
+  background: #F8FAFC;
+  color: #0F172A;
   transition: background-color 0.7s ease, color 0.7s ease;
 }
 
@@ -146,7 +146,7 @@ body[data-theme="dark"] #architecture .border-current\/10 {
 
 #achievements .achievement-icon,
 #achievements .achievement-label {
-  color: #707068;
+  color: #64748B;
 }
 
 #achievements .achievement-heading {
@@ -154,26 +154,26 @@ body[data-theme="dark"] #architecture .border-current\/10 {
 }
 
 body[data-theme="dark"] #achievements .achievement-card {
-  background: rgb(26 26 26 / 0.9);
-  border-color: #4c4c44;
-  color: #fbf9ef;
+  background: rgb(20 20 20 / 0.95);
+  border-color: #333333;
+  color: #FFFFFF;
 }
 
 body[data-theme="dark"] #achievements {
-  --achievement-grid: rgb(251 249 239 / 0.15);
-  --achievement-glow: rgb(59 130 246 / 0.26);
-  background: #0a0a0a;
-  color: #fbf9ef;
+  --achievement-grid: rgb(255 255 255 / 0.1);
+  --achievement-glow: rgb(59 130 246 / 0.25);
+  background: #000000;
+  color: #FFFFFF;
 }
 
 body[data-theme="dark"] #achievements .heading-2,
 body[data-theme="dark"] #achievements .achievement-heading {
-  color: #fbf9ef;
+  color: #FFFFFF;
 }
 
 body[data-theme="dark"] #achievements .achievement-icon,
 body[data-theme="dark"] #achievements .achievement-label {
-  color: #b8b8b0;
+  color: #a3a3a3;
 }
 
 body[data-theme="dark"] #faq .heading-2,
@@ -183,7 +183,7 @@ body[data-theme="dark"] #faq h2 {
 }
 
 body[data-theme="dark"] #faq {
-  color: #fbf9ef;
+  color: #FFFFFF;
   transition: color 0.7s ease;
 }
 
@@ -196,44 +196,45 @@ body[data-theme="dark"] #faq button {
 }
 
 #contact {
-  background-color: #fbf9ef;
+  background-color: #000000;
+  color: #FFFFFF;
   transition: background-color 0.7s ease, color 0.7s ease;
 }
 
 #contact .contact-label {
-  color: #707068;
+  color: #a3a3a3;
   transition: color 0.7s ease;
 }
 
 #contact .contact-field {
-  background: rgb(255 255 255 / 0.82);
-  border-color: #d4d4cc;
-  color: #1a1a1a;
+  background: rgb(20 20 20 / 0.9);
+  border-color: #333333;
+  color: #FFFFFF;
 }
 
 #contact .contact-field::placeholder {
-  color: #94948c;
+  color: #737373;
 }
 
 #contact .contact-field:focus {
-  border-color: #707068;
+  border-color: #555555;
 }
 
 #contact .contact-divider {
-  border-color: #d4d4cc;
+  border-color: #222222;
 }
 
 #contact .contact-social {
   background: #1a1a1a;
-  color: #fbf9ef;
+  color: #FFFFFF;
 }
 
 #contact .contact-social:hover {
-  background: #4c4c44;
+  background: #333333;
 }
 
 body[data-theme="dark"] #contact .contact-heading-2 {
-  color: #fbf9ef;
+  color: #FFFFFF;
   font-weight: 600;
 }
 
@@ -242,35 +243,35 @@ body[data-theme="dark"] #contact {
 }
 
 body[data-theme="dark"] #contact .contact-label {
-  color: #d4d4cc;
+  color: #a3a3a3;
 }
 
 body[data-theme="dark"] #contact .contact-field {
-  background: #10100c;
-  border-color: #4c4c44;
-  color: #fbf9ef;
+  background: #111111;
+  border-color: #333333;
+  color: #FFFFFF;
 }
 
 body[data-theme="dark"] #contact .contact-field::placeholder {
-  color: #94948c;
+  color: #737373;
 }
 
 body[data-theme="dark"] #contact .contact-field:focus {
-  border-color: #b8b8b0;
+  border-color: #555555;
 }
 
 body[data-theme="dark"] #contact .contact-divider {
-  border-color: #4c4c44;
+  border-color: #222222;
 }
 
 body[data-theme="dark"] #contact .contact-social {
-  background: #24241c;
-  color: #fbf9ef;
+  background: #1a1a1a;
+  color: #FFFFFF;
 }
 
 .contact-atmosphere {
-  --contact-star: rgb(128 92 57 / 0.5);
-  --contact-star-bright: rgb(176 137 104 / 0.85);
+  --contact-star: rgb(59 130 246 / 0.5);
+  --contact-star-bright: rgb(96 165 250 / 0.9);
   position: absolute;
   inset: 0;
   z-index: 0;
@@ -280,8 +281,8 @@ body[data-theme="dark"] #contact .contact-social {
 }
 
 body[data-theme="dark"] .contact-atmosphere {
-  --contact-star: rgb(251 249 239 / 0.55);
-  --contact-star-bright: rgb(147 197 253 / 0.95);
+  --contact-star: rgb(147 197 253 / 0.55);
+  --contact-star-bright: rgb(191 219 254 / 0.95);
 }
 
 /* Individual twinkling stars. Only opacity + transform (scale) animate, so
@@ -333,8 +334,8 @@ body[data-theme="dark"] .contact-atmosphere {
 }
 
 ::selection {
-  background: #000000;
-  color: #FBF9EF;
+  background: #0F172A;
+  color: #FFFFFF;
 }
 
 /* Scrollbar styles */
@@ -343,16 +344,17 @@ body[data-theme="dark"] .contact-atmosphere {
 }
 
 ::-webkit-scrollbar-track {
-  background: #FBF9EF;
+  background: #F8FAFC;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #000000;
+  background: #CBD5E1;
   border-radius: 9999px;
 }
 
-
-
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
 
 /* Custom utilities */
 @layer utilities {
@@ -372,70 +374,56 @@ body[data-theme="dark"] .contact-atmosphere {
 
   .heading-1 {
     font-size: 3rem;
-    font-weight: 500;
-    letter-spacing: -0.025em;
+    font-weight: 700;
+    letter-spacing: -0.03em;
     line-height: 1.05;
-    color: #2c1400;
+    color: #0F172A;
   }
 
   .contact-heading-2 {
     font-size: 1.875rem;
-    font-weight: 500;
+    font-weight: 600;
     letter-spacing: -0.025em;
     line-height: 1.1;
-    color: #b08968;
+    color: #0F172A;
   }
 
   .heading-2 {
     font-size: 1.875rem;
-    font-weight: 500;
-    font-weight: 600;
+    font-weight: 700;
     letter-spacing: -0.025em;
     line-height: 1.1;
-    /* color: #572802; */
-    color: #5f2b00;
+    color: #0F172A;
   }
 
   .heading-s {
-    color: #9e4700;
+    color: #2563EB;
   }
-
-  /* .heading-2 {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    height: 100%;
-
-    text-align: center;
-    font-size: 2.25rem;
-    font-weight: 700;
-    color: #b08968;
-  } */
 
   .heading-3 {
     font-size: 1.25rem;
-    font-weight: 500;
-    letter-spacing: -0.025em;
+    font-weight: 600;
+    letter-spacing: -0.02em;
     line-height: 1.15;
+    color: #0F172A;
   }
 
   .body-large {
     font-size: 1.125rem;
     line-height: 1.75;
-    color: #4C4C44;
+    color: #475569;
   }
 
   .body-base {
     font-size: 1rem;
     line-height: 1.75;
-    color: #4C4C44;
+    color: #475569;
   }
 
   .body-small {
     font-size: 0.875rem;
     line-height: 1.625;
-    color: #707068;
+    color: #64748B;
   }
 
   @media (min-width: 768px) {
@@ -552,9 +540,9 @@ body[data-theme="dark"] .contact-atmosphere {
 /* Wins uses the home grid as a quiet field, then gives each flip card its
    own piece of atmosphere so the stack feels collected rather than repeated. */
 .wins-geometry {
-  --hero-grid-line: rgb(176 137 104 / 0.22);
-  --hero-glow: rgb(245 158 11 / 0.24);
-  --hero-glow-secondary: rgb(59 130 246 / 0.16);
+  --hero-grid-line: rgb(15 23 42 / 0.06);
+  --hero-glow: rgb(59 130 246 / 0.16);
+  --hero-glow-secondary: rgb(99 102 241 / 0.12);
   opacity: 1;
 }
 
@@ -696,9 +684,9 @@ body[data-theme="dark"] .contact-atmosphere {
 
 /* Theme-aware triangular grid used exclusively by the home section. */
 .hero-geometry {
-  --hero-grid-line: rgb(176 137 104 / 0.2);
-  --hero-glow: rgb(245 158 11 / 0.26);
-  --hero-glow-secondary: rgb(59 130 246 / 0.16);
+  --hero-grid-line: rgb(15 23 42 / 0.06);
+  --hero-glow: rgb(59 130 246 / 0.16);
+  --hero-glow-secondary: rgb(99 102 241 / 0.12);
   position: absolute;
   inset: -20%;
   z-index: 0;
@@ -725,9 +713,9 @@ body[data-theme="dark"] .contact-atmosphere {
 }
 
 body[data-theme="dark"] .hero-geometry {
-  --hero-grid-line: rgb(251 249 239 / 0.16);
-  --hero-glow: rgb(139 92 246 / 0.36);
-  --hero-glow-secondary: rgb(59 130 246 / 0.28);
+  --hero-grid-line: rgb(248 250 252 / 0.1);
+  --hero-glow: rgb(59 130 246 / 0.3);
+  --hero-glow-secondary: rgb(99 102 241 / 0.22);
 }
 
 .hero-geometry-intro {
@@ -753,9 +741,9 @@ body[data-theme="dark"] .hero-geometry {
 }
 
 .skill-marquee {
-  --marquee-background: rgb(251 249 239 / 0.7);
-  --marquee-border: #d4d4cc;
-  --marquee-text: #432100;
+  --marquee-background: rgb(255 255 255 / 0.85);
+  --marquee-border: #E2E8F0;
+  --marquee-text: #000000;
   border-top: 1px solid var(--marquee-border);
   border-bottom: 1px solid var(--marquee-border);
   background-color: var(--marquee-background);
@@ -785,8 +773,8 @@ body[data-theme="dark"] .hero-geometry {
 }
 
 body[data-theme="dark"] .skill-marquee {
-  --marquee-background: rgb(26 26 26 / 0.7);
-  --marquee-border: #4c4c44;
+  --marquee-background: rgb(0 0 0 / 0.9);
+  --marquee-border: #222222;
   --marquee-text: #ffffff;
 }
 

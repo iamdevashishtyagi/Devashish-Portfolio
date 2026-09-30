@@ -154,7 +154,6 @@ export default function Home() {
       <ClientSmoothScroll />
       <Navigation />
       <main>
-        <div className="h-[420px]" aria-hidden="true" />
         <Hero />
         <About />
         <Experience />

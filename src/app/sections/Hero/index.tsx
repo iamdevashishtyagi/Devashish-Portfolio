@@ -2,10 +2,10 @@
 
 import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { profile } from "@/src/app/data/profile";
-
-gsap.registerPlugin(ScrollTrigger);
+import PhysicsIcons from "@/src/app/components/physics/PhysicsIcons";
+import { heroPhysicsIcons } from "@/src/app/data/physicsIcons";
+import { ArrowUpRight, Download } from "lucide-react";
 
 export default function Hero() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -14,81 +14,32 @@ export default function Hero() {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      // Opening window effect
-      gsap.fromTo(
-        windowRef.current,
-        {
-          scale: 0.7,
-          borderRadius: "40px",
-        },
-        {
-          scale: 1,
-          borderRadius: "0px",
-          duration: 1.5,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: document.documentElement,
-            start: "top top",
-            end: "+=420",
-            scrub: 1.2,
-          },
-        }
-      );
+      // Clean entrance animation for hero content
+      gsap.from(".hero-badge", {
+        opacity: 0,
+        y: 20,
+        duration: 0.8,
+        ease: "power3.out",
+        delay: 0.1,
+      });
 
-      const isBotOrReducedMotion =
-        (typeof navigator !== "undefined" &&
-          /bot|google|baidu|bing|msn|duckduckbot|teoma|slurp|yandex/i.test(
-            navigator.userAgent
-          )) ||
-        (typeof window !== "undefined" &&
-          window.matchMedia("(prefers-reduced-motion: reduce)").matches);
-
-      if (!isBotOrReducedMotion) {
-        gsap.fromTo(
-          contentRef.current,
-          { autoAlpha: 0 },
-          {
-            autoAlpha: 1,
-            ease: "none",
-            scrollTrigger: {
-              trigger: document.documentElement,
-              start: "top top",
-              end: "+=420",
-              scrub: true,
-            },
-          }
-        );
-      } else if (contentRef.current) {
-        gsap.set(contentRef.current, { autoAlpha: 1 });
-      }
-
-      // Text reveal
       gsap.from(".hero-title", {
         opacity: 0,
-        y: 60,
-        duration: 1,
+        y: 35,
+        duration: 0.9,
         stagger: 0.1,
         ease: "power3.out",
-        scrollTrigger: {
-          trigger: containerRef.current,
-          start: "top 80%",
-          toggleActions: "play none none reverse",
-        },
+        delay: 0.2,
       });
 
       gsap.from(".hero-roles span", {
         opacity: 0,
-        x: -20,
+        x: -15,
         duration: 0.8,
         stagger: 0.08,
         ease: "power3.out",
-        scrollTrigger: {
-          trigger: containerRef.current,
-          start: "top 70%",
-          toggleActions: "play none none reverse",
-        },
+        delay: 0.35,
       });
-
     }, containerRef);
 
     return () => ctx.revert();
@@ -98,50 +49,71 @@ export default function Hero() {
     <section
       ref={containerRef}
       id="home"
-      className="relative isolate flex min-h-screen items-center justify-center overflow-hidden"
+      className="relative isolate flex min-h-[92vh] lg:min-h-screen items-center justify-center overflow-hidden pt-20 pb-12"
     >
-      <div className="hero-geometry" aria-hidden="true" />
+      {/* Interactive Motion / Physics Icons Playground */}
+      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+        <PhysicsIcons
+          items={heroPhysicsIcons}
+          gravity={0.88}
+          bounce={0.72}
+          showHint={true}
+          hintText="Interactive Tech Stack · Drag & Toss"
+        />
+      </div>
+
+      {/* Foreground Hero Content (Above physics layer, clicks pass through background to icons) */}
       <div
         ref={windowRef}
-        className="hero-window relative z-10 w-full max-w-7xl mx-auto overflow-hidden px-6 py-20 md:px-12 lg:px-24"
+        className="hero-window relative z-10 w-full max-w-7xl mx-auto px-6 py-12 md:px-12 lg:px-24 pointer-events-none"
       >
-        <div ref={contentRef} className="space-y-6">
-          <p className="text-sm uppercase tracking-widest text-gray-400 hero-title">
-            {profile.location}
-          </p>
+        <div ref={contentRef} className="space-y-6 max-w-3xl pointer-events-auto">
+          {/* Location badge */}
+          <div className="hero-badge inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-blue-50/90 border border-blue-200/70 text-blue-700 text-xs font-semibold tracking-wide uppercase shadow-2xs backdrop-blur-xs">
+            <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
+            <span>{profile.location}</span>
+          </div>
 
-          <h1 className="heading-1 hero-title">
+          {/* Main Title */}
+          <h1 className="heading-1 hero-title text-slate-900 font-extrabold tracking-tight">
             {profile.name}
           </h1>
 
-          <div className="hero-roles flex flex-wrap gap-x-4 gap-y-2 text-2xl md:text-3xl lg:text-4xl font-light text-gray-500">
+          {/* Roles */}
+          <div className="hero-roles flex flex-wrap items-center gap-x-3 gap-y-2 text-xl md:text-2xl lg:text-3xl font-light text-slate-600">
             {profile.taglineRoles.map((role, i) => (
-              <span key={i} className="relative">
-                {role}
+              <span key={i} className="inline-flex items-center">
+                <span className="font-normal text-slate-800">{role}</span>
                 {i < profile.taglineRoles.length - 1 && (
-                  <span className="mx-2 text-gray-300">/</span>
+                  <span className="mx-2.5 text-blue-500/40 font-bold">/</span>
                 )}
               </span>
             ))}
           </div>
 
-          <p className="body-large max-w-2xl hero-title mt-8">
+          {/* Description */}
+          <p className="body-large text-slate-600 text-lg md:text-xl font-normal leading-relaxed hero-title pt-2 max-w-2xl">
             {profile.experienceYears} years of shipping production systems —
-            from ERP platforms to AI-powered products.
+            from enterprise platforms to high-performance AI-powered products.
           </p>
 
-          <div className="flex gap-4 pt-6 hero-title">
+          {/* CTA Buttons */}
+          <div className="flex flex-wrap items-center gap-4 pt-4 hero-title">
             <a
               href={profile.resumeUrl}
-              className="px-8 py-3 bg-charcoal text-cream rounded-full hover:bg-gray-800 transition-colors text-sm font-medium"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-7 py-3.5 bg-slate-900 text-white rounded-full hover:bg-blue-600 hover:shadow-lg transition-all duration-200 text-sm font-semibold shadow-sm"
             >
-              Resume
+              <Download className="w-4 h-4" />
+              <span>Resume</span>
             </a>
             <a
               href="#contact"
-              className="px-8 py-3 border border-charcoal/20 rounded-full hover:border-charcoal transition-colors text-sm font-medium"
+              className="inline-flex items-center gap-2 px-7 py-3.5 bg-white/90 border border-slate-300 text-slate-800 rounded-full hover:border-slate-900 hover:bg-white hover:shadow-md transition-all duration-200 text-sm font-semibold backdrop-blur-xs"
             >
-              Get in touch
+              <span>Get in touch</span>
+              <ArrowUpRight className="w-4 h-4 text-slate-500" />
             </a>
           </div>
         </div>

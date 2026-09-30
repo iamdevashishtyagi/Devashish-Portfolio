@@ -148,7 +148,7 @@ export default function Contact() {
                 href={`mailto:${profile.email}`}
                 className="contact-item flex items-start gap-4 hover:text-gray-300 transition-colors group"
               >
-                <Mail className="w-5 h-5 text-gray-400 mt-1 group-hover:text-cream transition-colors" />
+                <Mail className="w-5 h-5 text-gray-400 mt-1 group-hover:text-blue-400 transition-colors" />
                 <div>
                   <p className="text-sm text-gray-400">Email</p>
                   <p className="font-medium">{profile.email}</p>
@@ -194,7 +194,7 @@ export default function Contact() {
                 <button
                   type="button"
                   onClick={handleReset}
-                  className="px-6 py-2 text-sm bg-cream/20 hover:bg-cream/30 rounded-lg transition-colors"
+                  className="px-6 py-2 text-sm bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors"
                 >
                   Send another message
                 </button>
@@ -258,11 +258,11 @@ export default function Contact() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full px-6 py-3 bg-cream text-charcoal rounded-lg font-medium hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="w-full px-6 py-3.5 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-500 hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {isSubmitting ? (
                     <>
-                      <span className="animate-spin inline-block w-4 h-4 border-2 border-charcoal border-t-transparent rounded-full"></span>
+                      <span className="animate-spin inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full"></span>
                       Sending...
                     </>
                   ) : (

@@ -8,11 +8,11 @@ export default function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="bg-charcoal py-8">
+    <footer className="bg-black border-t border-neutral-900 py-8">
       <div className="container-narrow px-6 md:px-12 lg:px-24">
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-sm text-gray-400">
-            © {year} {profile.name}. Built with Next.js & GSAP.
+          <p className="text-sm text-slate-400">
+            © {year} {profile.name}. All rights reserved.
           </p>
 
           <div className="flex items-center gap-4">
@@ -21,7 +21,7 @@ export default function Footer() {
               target="_blank"
               rel="me noopener noreferrer"
               aria-label="Devashish Tyagi on GitHub"
-              className="text-gray-400 hover:text-cream transition-colors"
+              className="text-slate-400 hover:text-blue-400 transition-colors"
             >
               <FaGithub className="w-4 h-4" />
             </a>
@@ -30,14 +30,14 @@ export default function Footer() {
               target="_blank"
               rel="me noopener noreferrer"
               aria-label="Devashish Tyagi on LinkedIn"
-              className="text-gray-400 hover:text-cream transition-colors"
+              className="text-slate-400 hover:text-blue-400 transition-colors"
             >
               <FaLinkedin className="w-4 h-4" />
             </a>
             <a
               href={`mailto:${profile.email}`}
               aria-label="Email Devashish Tyagi"
-              className="text-gray-400 hover:text-cream transition-colors"
+              className="text-slate-400 hover:text-blue-400 transition-colors"
             >
               <Mail className="w-4 h-4" />
             </a>

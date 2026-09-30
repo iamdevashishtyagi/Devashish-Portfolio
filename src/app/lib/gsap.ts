@@ -18,9 +18,9 @@ const legacyBackgroundSectionIds = new Set([
 ]);
 
 export function initScrollBackground() {
-  const lightTheme = { bg: "#FBF9EF", textColor: "#000000", theme: "light" };
-  const architectureTheme = { bg: "#000000", textColor: "#ad9f90", theme: "dark" };
-  const contactTheme = { bg: "#000000", textColor: "#FBF9EF", theme: "dark" };
+  const lightTheme = { bg: "#FFFFFF", textColor: "#000000", theme: "light" };
+  const architectureTheme = { bg: "#000000", textColor: "#FFFFFF", theme: "dark" };
+  const contactTheme = { bg: "#000000", textColor: "#FFFFFF", theme: "dark" };
   const architectureHeading = document.querySelector<HTMLElement>(
     "[data-scroll-theme-trigger='architecture']"
   );
