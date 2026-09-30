@@ -8,8 +8,8 @@ import { RotateCcw, Crosshair, Sparkles, MoveRight } from "lucide-react";
 
 // Top mounting rod vertical position
 const BAR_Y = 24;
-const BALL_RADIUS = 36;
-const BALL_TOP_OFFSET = 30; // Distance from ball center to string attachment knot
+const BALL_RADIUS = 44; // Demolition ball (88px diameter)
+const BALL_TOP_OFFSET = 38; // Distance from ball center to string attachment knot
 const WALL_THICKNESS = 140;
 
 interface Spark {
@@ -24,21 +24,22 @@ interface Spark {
 }
 
 // Order 28 tech stack items systematically into 4 columns of 7 items
-// Positioned a little more to the left of the block as requested
+// Positioned a little more to the left of the block with increased box size
 function getSystematicGridPositions(width: number, height: number, anchorX: number) {
   const isSmall = width < 768;
   const isMedium = width < 1024;
-  const size = isSmall ? 46 : isMedium ? 50 : 54;
-  const gapX = isSmall ? 7 : 8;
+  // Increased box size for prominent visual impact and tactile interaction
+  const size = isSmall ? 64 : isMedium ? 70 : 76;
+  const gapX = isSmall ? 8 : 10;
   const cols = 4;
   const rows = 7; // 4 columns x 7 rows = 28 items
 
   const totalWidth = cols * size + (cols - 1) * gapX;
-  
-  // Positioned a little more toward the left/center rather than far right
-  const idealLeft = Math.max(anchorX + 110, Math.min(width * 0.48, width - totalWidth - (isSmall ? 20 : 100)));
-  const startX = Math.max(anchorX + 80, idealLeft);
-  const floorY = height - 26;
+
+  // Positioned a little more toward the left-center of the arena
+  const targetLeft = Math.max(anchorX + 130, Math.min(width * 0.44, width - totalWidth - (isSmall ? 20 : 100)));
+  const startX = Math.max(anchorX + 90, targetLeft);
+  const floorY = height - 20;
 
   const positions = new Map<string, { x: number; y: number }>();
 
@@ -72,9 +73,9 @@ export default function TechSlingshot() {
   const cableKnotRef = useRef<SVGCircleElement>(null);
   const iconDomRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
-  // Dimensions
-  const [dimensions, setDimensions] = useState({ width: 1000, height: 560 });
-  const arenaSizeRef = useRef({ width: 1000, height: 560 });
+  // Dimensions (Full Viewport)
+  const [dimensions, setDimensions] = useState({ width: 1200, height: 750 });
+  const arenaSizeRef = useRef({ width: 1200, height: 750 });
 
   // Game/UI stats
   const [isScattered, setIsScattered] = useState(false);
@@ -91,7 +92,7 @@ export default function TechSlingshot() {
   // UN-STRETCHABLE SWING PENDULUM STATE
   // =========================================================================
   const swingRef = useRef({
-    theta: -0.88, // Cocked high to the left ready to swing
+    theta: -0.85, // Cocked high to the left ready to swing
     omega: 0,
     isDragging: false,
     isArmed: true, // Holds at left peak until released or clicked
@@ -103,7 +104,7 @@ export default function TechSlingshot() {
 
   const prevBallPointerHistory = useRef<{ theta: number; time: number }[]>([]);
 
-  // Dragging state for individual tech badges (exact hero section drag mechanics)
+  // Dragging state for individual tech badges
   const badgeDragRef = useRef<{
     id: string;
     body: Matter.Body;
@@ -115,7 +116,7 @@ export default function TechSlingshot() {
 
   // Top Mounting Pivot Anchor
   const ceilingAnchor = useMemo(() => {
-    const x = Math.max(240, Math.min(390, dimensions.width * 0.35));
+    const x = Math.max(240, Math.min(460, dimensions.width * 0.32));
     const y = BAR_Y;
     return { x, y };
   }, [dimensions.width]);
@@ -124,9 +125,8 @@ export default function TechSlingshot() {
   ceilingAnchorRef.current = ceilingAnchor;
 
   // Un-stretchable Cable Length (fixed radius)
-  // Lowest point skims ~12px above the floor
   const cableLength = useMemo(() => {
-    const floorLevel = dimensions.height - 26;
+    const floorLevel = dimensions.height - 20;
     return Math.max(280, floorLevel - BAR_Y - BALL_RADIUS - 12);
   }, [dimensions.height]);
 
@@ -137,9 +137,9 @@ export default function TechSlingshot() {
   const cockedPeakTheta = useMemo(() => {
     const ax = ceilingAnchor.x;
     const L = cableLength;
-    const targetX = BALL_RADIUS + 24;
+    const targetX = BALL_RADIUS + 32;
     const rawSin = (targetX - ax) / L;
-    const clampedSin = Math.max(-0.94, Math.min(-0.55, rawSin));
+    const clampedSin = Math.max(-0.94, Math.min(-0.50, rawSin));
     return Math.asin(clampedSin);
   }, [ceilingAnchor.x, cableLength]);
 
@@ -155,10 +155,10 @@ export default function TechSlingshot() {
   systematicPositionsRef.current = systematicPositions;
 
   // Trigger burst of sparks on impact
-  const triggerImpactSparks = useCallback((x: number, y: number, color: string, count = 24) => {
+  const triggerImpactSparks = useCallback((x: number, y: number, color: string, count = 28) => {
     for (let i = 0; i < count; i++) {
       const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.6;
-      const speed = Math.random() * 7 + 2.5;
+      const speed = Math.random() * 8 + 2.5;
       sparksRef.current.push({
         x,
         y,
@@ -167,20 +167,20 @@ export default function TechSlingshot() {
         color,
         size: Math.random() * 4 + 2,
         alpha: 1,
-        decay: Math.random() * 0.03 + 0.02,
+        decay: Math.random() * 0.026 + 0.016,
       });
     }
   }, []);
 
   // =========================================================================
-  // MATTER.JS ENGINE LIFECYCLE (Floater / Low-Gravity physics so icons roam around)
+  // MATTER.JS ENGINE LIFECYCLE (Micro-Gravity: items are ultra-light & roam around)
   // =========================================================================
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
-    const width = container.clientWidth || 1000;
-    const height = container.clientHeight || 560;
+    const width = container.clientWidth || window.innerWidth || 1200;
+    const height = container.clientHeight || window.innerHeight || 750;
     arenaSizeRef.current = { width, height };
     setDimensions({ width, height });
 
@@ -189,27 +189,27 @@ export default function TechSlingshot() {
       canvasRef.current.height = height;
     }
 
-    // Decreased gravity for floaty, graceful roaming around the arena!
+    // Micro-gravity (0.08) so items roam and float gracefully across the arena!
     const engine = Matter.Engine.create({
       gravity: {
         x: 0,
-        y: 0.28, // Low gravity: icons float and roam freely!
+        y: 0.08, // Very light gravity: badges float, drift, and roam around freely!
         scale: 0.001,
       },
       enableSleeping: true,
-      positionIterations: 14,
-      velocityIterations: 14,
+      positionIterations: 16,
+      velocityIterations: 16,
     });
     engineRef.current = engine;
     const world = engine.world;
 
-    // Boundaries with high liveliness and low friction
-    const bounce = 0.82;
-    const wallFriction = 0.05;
+    // Viewport Boundaries with high liveliness and low friction
+    const bounce = 0.88;
+    const wallFriction = 0.03;
 
     const bottomWall = Matter.Bodies.rectangle(
       width / 2,
-      height + WALL_THICKNESS / 2 - 26,
+      height + WALL_THICKNESS / 2 - 20,
       width * 2,
       WALL_THICKNESS,
       {
@@ -262,12 +262,12 @@ export default function TechSlingshot() {
     Matter.Composite.add(world, [bottomWall, topWall, leftWall, rightWall]);
 
     // Initial Pendulum State
-    const anchorX = Math.max(240, Math.min(390, width * 0.35));
+    const anchorX = Math.max(240, Math.min(460, width * 0.32));
     const anchorY = BAR_Y;
-    const initialL = Math.max(280, height - 26 - BAR_Y - BALL_RADIUS - 12);
+    const initialL = Math.max(280, height - 20 - BAR_Y - BALL_RADIUS - 12);
     
-    const targetLeftX = BALL_RADIUS + 24;
-    const initialTheta = Math.asin(Math.max(-0.94, Math.min(-0.55, (targetLeftX - anchorX) / initialL)));
+    const targetLeftX = BALL_RADIUS + 32;
+    const initialTheta = Math.asin(Math.max(-0.94, Math.min(-0.50, (targetLeftX - anchorX) / initialL)));
     
     const ballX = anchorX + initialL * Math.sin(initialTheta);
     const ballY = anchorY + initialL * Math.cos(initialTheta);
@@ -286,8 +286,8 @@ export default function TechSlingshot() {
     // Heavy Ball Matter.js physics body (Driver body for demolition impact)
     const ballBody = Matter.Bodies.circle(ballX, ballY, BALL_RADIUS, {
       isStatic: true,
-      restitution: 0.8,
-      friction: 0.05,
+      restitution: 0.82,
+      friction: 0.03,
       density: 0.08,
       label: "wrecking-ball",
     });
@@ -309,20 +309,20 @@ export default function TechSlingshot() {
       cableKnotRef.current.setAttribute("cy", String(ballY - BALL_TOP_OFFSET));
     }
 
-    // Create 28 Tech Stack Badges (Dynamic bodies with low air resistance to roam around)
+    // Create 28 Tech Stack Badges (Ultra-light bodies with near-zero air drag to float & roam!)
     const { positions: slots, size: itemSize } = getSystematicGridPositions(width, height, anchorX);
     const iconBodies = new Map<string, Matter.Body>();
 
     SLINGSHOT_TECH_STACK.forEach((item) => {
-      const slot = slots.get(item.id) || { x: width * 0.55, y: height * 0.5 };
+      const slot = slots.get(item.id) || { x: width * 0.50, y: height * 0.5 };
 
-      // Square chamfered body with low air friction and high bounce
+      // Square chamfered body: very light density, minimal air drag, high bounce
       const body = Matter.Bodies.rectangle(slot.x, slot.y, itemSize, itemSize, {
-        chamfer: { radius: 6 },
-        restitution: 0.80, // Springy & bouncy!
-        friction: 0.08, // Low ground friction to slide and drift smoothly
-        frictionAir: 0.004, // Very low air drag so icons roam and glide around!
-        density: 0.0024,
+        chamfer: { radius: 8 },
+        restitution: 0.88, // Very springy & bouncy!
+        friction: 0.03, // Glides smoothly across surfaces
+        frictionAir: 0.0018, // Near zero air drag so badges float and roam endlessly!
+        density: 0.001, // Ultra-light mass
         isStatic: false,
         label: `tech-${item.id}`,
       });
@@ -358,12 +358,12 @@ export default function TechSlingshot() {
 
       // 1. Un-stretchable Swing Pendulum Integration
       if (!swing.isDragging && !swing.isArmed && !isResettingRef.current) {
-        const gravityFactor = 0.0036;
-        const damping = 0.001;
+        const gravityFactor = 0.0035;
+        const damping = 0.0009;
 
         const alpha = -gravityFactor * Math.sin(swing.theta) - damping * swing.omega;
         swing.omega += alpha * dt;
-        swing.omega *= Math.pow(0.9994, dt);
+        swing.omega *= Math.pow(0.9995, dt);
         swing.theta += swing.omega * dt;
 
         const curX = anchor.x + L * Math.sin(swing.theta);
@@ -396,7 +396,7 @@ export default function TechSlingshot() {
         cableKnotRef.current.setAttribute("cy", String(swing.y - BALL_TOP_OFFSET));
       }
 
-      // 2. Collision: Smooth, continuous demolition impact into the Tech Stack
+      // 2. Collision: Smooth demolition impact into the Tech Stack
       if (!isResettingRef.current) {
         const ballSpeed = Math.hypot(swing.vx, swing.vy);
         const hitDistance = BALL_RADIUS + itemSize * 0.62;
@@ -416,35 +416,34 @@ export default function TechSlingshot() {
               isScatteredRef.current = true;
               setIsScattered(true);
 
-              // Smooth momentum transfer with quadratic radius falloff
-              const blastRadius = 320;
+              // Smooth momentum wave with cubic falloff across a 380px blast radius
+              const blastRadius = 380;
               iconBodies.forEach((other) => {
                 const odx = other.position.x - swing.x;
                 const ody = other.position.y - swing.y;
                 const odist = Math.hypot(odx, ody);
                 if (odist < blastRadius) {
-                  // Smooth falloff factor
                   const factor = Math.pow((blastRadius - odist) / blastRadius, 1.35);
                   const onx = odx / (odist || 1);
                   const ony = ody / (odist || 1);
 
                   // Fluid velocity impulse: forward and floating upward
-                  const pushX = onx * factor * 14 + swing.vx * 0.65;
-                  const pushY = ony * factor * 12 + swing.vy * 0.45 - 4.5;
+                  const pushX = onx * factor * 16 + swing.vx * 0.65;
+                  const pushY = ony * factor * 14 + swing.vy * 0.45 - 5;
 
                   Matter.Body.setVelocity(other, {
-                    x: other.velocity.x * 0.4 + pushX + (Math.random() - 0.5) * 3,
-                    y: other.velocity.y * 0.4 + pushY + (Math.random() - 0.5) * 3,
+                    x: other.velocity.x * 0.45 + pushX + (Math.random() - 0.5) * 3,
+                    y: other.velocity.y * 0.45 + pushY + (Math.random() - 0.5) * 3,
                   });
-                  Matter.Body.setAngularVelocity(other, (Math.random() - 0.5) * 0.3);
+                  Matter.Body.setAngularVelocity(other, (Math.random() - 0.5) * 0.28);
                 }
               });
 
-              // Smooth ball resistance (doesn't stop abruptly)
-              swing.omega *= 0.96;
+              // Smooth ball resistance
+              swing.omega *= 0.97;
 
               // Spark burst
-              triggerImpactSparks(body.position.x, body.position.y, "#38BDF8", 28);
+              triggerImpactSparks(body.position.x, body.position.y, "#38BDF8", 32);
               setScatterCount((prev) => prev + 1);
               break;
             }
@@ -488,7 +487,7 @@ export default function TechSlingshot() {
               const p = sparks[i];
               p.x += p.vx * dt;
               p.y += p.vy * dt;
-              p.vy += 0.14 * dt;
+              p.vy += 0.12 * dt;
               p.alpha -= p.decay * dt;
 
               if (p.alpha <= 0) {
@@ -516,7 +515,45 @@ export default function TechSlingshot() {
     runnerRef.current = runner;
     Matter.Runner.run(runner, engine);
 
+    // Responsive ResizeObserver tracking full viewport changes
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const newWidth = entry.contentRect.width;
+        const newHeight = entry.contentRect.height;
+        if (newWidth <= 100 || newHeight <= 100) continue;
+
+        arenaSizeRef.current = { width: newWidth, height: newHeight };
+        setDimensions({ width: newWidth, height: newHeight });
+
+        if (canvasRef.current) {
+          canvasRef.current.width = newWidth;
+          canvasRef.current.height = newHeight;
+        }
+
+        // Reposition boundary walls for full width/height
+        Matter.Body.setPosition(bottomWall, {
+          x: newWidth / 2,
+          y: newHeight + WALL_THICKNESS / 2 - 20,
+        });
+        Matter.Body.setPosition(topWall, {
+          x: newWidth / 2,
+          y: -WALL_THICKNESS / 2,
+        });
+        Matter.Body.setPosition(leftWall, {
+          x: -WALL_THICKNESS / 2,
+          y: newHeight / 2,
+        });
+        Matter.Body.setPosition(rightWall, {
+          x: newWidth + WALL_THICKNESS / 2,
+          y: newHeight / 2,
+        });
+      }
+    });
+
+    resizeObserver.observe(container);
+
     return () => {
+      resizeObserver.disconnect();
       Matter.Events.off(engine, "afterUpdate", afterUpdateHandler);
       Matter.Runner.stop(runner);
       Matter.Engine.clear(engine);
@@ -680,7 +717,7 @@ export default function TechSlingshot() {
   };
 
   // =========================================================================
-  // INDIVIDUAL TECH BADGES DRAGGING & FLINGING (Roam freely!)
+  // INDIVIDUAL TECH BADGES DRAGGING & FLINGING (Floaty & roaming!)
   // =========================================================================
 
   const handleBadgePointerDown = (e: React.PointerEvent<HTMLDivElement>, id: string) => {
@@ -894,7 +931,7 @@ export default function TechSlingshot() {
         isResettingRef.current = false;
 
         triggerImpactSparks(
-          arenaSizeRef.current.width * 0.58,
+          arenaSizeRef.current.width * 0.44,
           arenaSizeRef.current.height * 0.6,
           "#10B981",
           28
@@ -908,274 +945,255 @@ export default function TechSlingshot() {
   return (
     <section
       id="playground"
-      className="section-layout border-t border-current/10 bg-white dark:bg-transparent transition-colors duration-700"
+      className="w-full border-t border-slate-200/80 bg-white dark:bg-transparent transition-colors duration-700 pt-12 md:pt-16 pb-0 overflow-x-hidden"
     >
-      <div className="container-narrow">
-        {/* Section Header (Matching the typography and style of RESPONSIBILITY EARNED) */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
-          <div>
-            <span className="text-sm uppercase tracking-widest text-slate-400 font-medium">
-              The Arsenal
+      {/* Section Heading (Cleanly ABOVE the system arena, outside the box) */}
+      <div className="container-narrow px-6 md:px-12 mb-6 md:mb-8">
+        <span className="text-sm uppercase tracking-widest text-slate-400 font-medium font-mono">
+          The Arsenal
+        </span>
+        <h2 className="heading-2 mt-2 text-current text-2xl md:text-3xl font-extrabold tracking-tight">
+          NOT JUST LOGOS — <span style={{ color: "rgb(71, 36, 0)" }}>PRESSURE TESTED</span>
+        </h2>
+        <p className="body-large max-w-2xl mt-2 text-current/60 text-base md:text-lg">
+          Every tool in this stack was forged through real production constraints.
+          Pull the unstretchable swing high to the left and release to test the stack under pressure.
+        </p>
+      </div>
+
+      {/* Full-width & Full-height Viewport Physics Arena System Box */}
+      <div
+        ref={containerRef}
+        className="relative w-full h-screen min-h-[700px] overflow-hidden bg-gradient-to-b from-slate-50/70 via-white to-slate-50/40 select-none touch-none border-y border-slate-200/90 shadow-[inset_0_2px_14px_rgba(0,0,0,0.02)]"
+      >
+        {/* Subtle Full-Viewport Blueprint Grid Pattern */}
+        <div
+          className="absolute inset-0 pointer-events-none opacity-60"
+          style={{
+            backgroundImage: `radial-gradient(#CBD5E1 1px, transparent 1px)`,
+            backgroundSize: "36px 36px",
+          }}
+        />
+
+        {/* The 3 Action Buttons INSIDE the box at Top Right */}
+        <div className="absolute top-4 right-4 md:top-10 md:right-8 z-40 flex flex-wrap items-center gap-2 p-1.5 rounded-2xl bg-white/95 backdrop-blur-md border border-slate-200/90 shadow-md">
+          {/* Status Indicator Pill */}
+          <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-50/90 border border-slate-200/70 text-xs font-medium text-slate-700">
+            <span className={`w-2 h-2 rounded-full ${isScattered ? "bg-amber-500 animate-pulse" : "bg-emerald-500"}`} />
+            <span className="font-mono text-[11px] sm:text-xs">
+              {isScattered ? `Demolished (${scatterCount} hits)` : "Systematic Formation"}
             </span>
-            <h2 className="heading-2 mt-2 text-current">
-              NOT JUST LOGOS — <span style={{ color: "rgb(71, 36, 0)" }}>PRESSURE TESTED</span>
-            </h2>
-            <p className="body-large max-w-2xl mt-3 text-current/60 text-base md:text-lg">
-              Every tool in this stack was forged through real production constraints.
-              Pull the unstretchable swing high to the left and release to test the stack under pressure.
-            </p>
+            <span className="text-slate-300">•</span>
+            <span className="font-mono text-[11px] sm:text-xs">Swings: {swingsCount}</span>
           </div>
 
-          {/* Action HUD / Controls */}
-          <div className="flex flex-wrap items-center gap-3">
-            {/* Status Indicator Pill */}
-            <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-50 border border-slate-200/90 text-xs font-medium text-slate-700 shadow-sm">
-              <span className={`w-2 h-2 rounded-full ${isScattered ? "bg-amber-500 animate-pulse" : "bg-emerald-500"}`} />
-              <span>{isScattered ? `Demolished (${scatterCount} hits)` : "Systematic Formation"}</span>
-              <span className="text-slate-300">•</span>
-              <span>Swings: {swingsCount}</span>
-            </div>
+          {/* Swing Ball Button */}
+          <button
+            type="button"
+            onClick={triggerSwing}
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200/90 text-xs font-semibold transition-all shadow-xs active:scale-95 cursor-pointer"
+            title="Release the heavy swing ball from high left to smash into the stack"
+          >
+            <MoveRight className="w-3.5 h-3.5" />
+            <span>Swing Ball</span>
+          </button>
 
-            {/* Swing Ball Button */}
-            <button
-              type="button"
-              onClick={triggerSwing}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200/80 text-xs font-semibold transition-all shadow-sm active:scale-95 cursor-pointer"
-              title="Release the heavy swing ball from high left to smash into the stack"
-            >
-              <MoveRight className="w-3.5 h-3.5" />
-              <span>Swing Ball</span>
-            </button>
-
-            {/* Rebuild Stack Button */}
-            <button
-              type="button"
-              onClick={handleResetFormation}
-              disabled={isResetting}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold transition-all shadow-sm active:scale-95 disabled:opacity-50 cursor-pointer"
-            >
-              <RotateCcw className={`w-3.5 h-3.5 ${isResetting ? "animate-spin" : ""}`} />
-              <span>Rebuild Stack</span>
-            </button>
-          </div>
+          {/* Rebuild Stack Button */}
+          <button
+            type="button"
+            onClick={handleResetFormation}
+            disabled={isResetting}
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold transition-all shadow-xs active:scale-95 disabled:opacity-50 cursor-pointer"
+          >
+            <RotateCcw className={`w-3.5 h-3.5 ${isResetting ? "animate-spin" : ""}`} />
+            <span>Rebuild Stack</span>
+          </button>
         </div>
 
-        {/* The Physics Arena Box (Crisp Light Theme matching the portfolio aesthetic) */}
-        <div
-          ref={containerRef}
-          className="relative w-full h-[520px] md:h-[580px] rounded-3xl border border-slate-200/90 bg-gradient-to-b from-slate-50/70 via-white to-slate-50/40 shadow-[0_8px_30px_rgba(0,0,0,0.04)] overflow-hidden select-none touch-none cursor-default"
+        {/* Canvas Overlay for Impact Sparks */}
+        <canvas
+          ref={canvasRef}
+          className="absolute inset-0 w-full h-full pointer-events-none z-35"
+        />
+
+        {/* SVG Layer: Top Horizontal Bar, Mounting Grommet, and Un-stretchable Swing Cable */}
+        <svg
+          className="absolute inset-0 w-full h-full pointer-events-none overflow-visible z-20"
+          xmlns="http://www.w3.org/2000/svg"
         >
-          {/* Subtle Blueprint Grid Pattern */}
-          <div
-            className="absolute inset-0 pointer-events-none opacity-60"
+          <defs>
+            {/* Chrome / Polished Steel Rod Gradient */}
+            <linearGradient id="swing-bar-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="#94A3B8" />
+              <stop offset="35%" stopColor="#475569" />
+              <stop offset="70%" stopColor="#1E293B" />
+              <stop offset="100%" stopColor="#475569" />
+            </linearGradient>
+
+            {/* Rod highlight reflection */}
+            <linearGradient id="swing-bar-light" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="transparent" />
+              <stop offset="25%" stopColor="rgba(255,255,255,0.4)" />
+              <stop offset="50%" stopColor="rgba(255,255,255,0.85)" />
+              <stop offset="75%" stopColor="rgba(255,255,255,0.4)" />
+              <stop offset="100%" stopColor="transparent" />
+            </linearGradient>
+
+            {/* Un-stretchable Braided Steel Cable Gradient */}
+            <linearGradient id="swing-cable-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#64748B" />
+              <stop offset="50%" stopColor="#334155" />
+              <stop offset="100%" stopColor="#0F172A" />
+            </linearGradient>
+          </defs>
+
+          {/* Wall mount bracket end-caps spanning full width */}
+          <rect
+            x={4}
+            y={BAR_Y - 7}
+            width={12}
+            height={20}
+            rx={2}
+            fill="#475569"
+          />
+          <rect
+            x={dimensions.width - 16}
+            y={BAR_Y - 7}
+            width={12}
+            height={20}
+            rx={2}
+            fill="#475569"
+          />
+
+          {/* The Horizontal Hanging Bar Rod */}
+          <rect
+            x={12}
+            y={BAR_Y - 4}
+            width={Math.max(10, dimensions.width - 24)}
+            height={8}
+            rx={4}
+            fill="url(#swing-bar-grad)"
+          />
+          <line
+            x1={18}
+            y1={BAR_Y - 2}
+            x2={dimensions.width - 18}
+            y2={BAR_Y - 2}
+            stroke="url(#swing-bar-light)"
+            strokeWidth="1.2"
+          />
+
+          {/* Anchor Grommet & Bearing on the top rod */}
+          <circle
+            cx={ceilingAnchor.x}
+            cy={BAR_Y + 3}
+            r="8"
+            fill="#1E293B"
+            stroke="#64748B"
+            strokeWidth="2.5"
+          />
+          <circle
+            cx={ceilingAnchor.x}
+            cy={BAR_Y + 3}
+            r="3.5"
+            fill="#F8FAFC"
+          />
+
+          {/* The Un-stretchable Swing String / Heavy Cable */}
+          <line
+            ref={cableLineRef}
+            x1={ceilingAnchor.x}
+            y1={BAR_Y + 3}
+            x2={swingRef.current.x}
+            y2={swingRef.current.y - BALL_TOP_OFFSET}
+            stroke="url(#swing-cable-grad)"
+            strokeWidth="4"
+            strokeLinecap="round"
             style={{
-              backgroundImage: `radial-gradient(#CBD5E1 1px, transparent 1px)`,
-              backgroundSize: "32px 32px",
+              filter: "drop-shadow(0 2px 5px rgba(0, 0, 0, 0.25))",
             }}
           />
 
-          {/* Canvas Overlay for Impact Sparks */}
-          <canvas
-            ref={canvasRef}
-            className="absolute inset-0 w-full h-full pointer-events-none z-35"
+          {/* Fastener Ring / Shackle connecting to the ball */}
+          <circle
+            ref={cableKnotRef}
+            cx={swingRef.current.x}
+            cy={swingRef.current.y - BALL_TOP_OFFSET}
+            r="5"
+            fill="#0284C7"
+            stroke="#0F172A"
+            strokeWidth="1.5"
           />
+        </svg>
 
-          {/* Arena Floor Baseline Indicator */}
+        {/* Heavy Ball on the Un-stretchable Swing (88px diameter) */}
+        <div
+          ref={ballDomRef}
+          onPointerDown={handleBallPointerDown}
+          onPointerUp={handleBallPointerUp}
+          onPointerCancel={handleBallPointerUp}
+          style={{
+            width: `${BALL_RADIUS * 2}px`,
+            height: `${BALL_RADIUS * 2}px`,
+            touchAction: "none",
+          }}
+          className="absolute top-0 left-0 rounded-full cursor-grab active:cursor-grabbing z-30 flex items-center justify-center will-change-transform select-none group"
+          title="Grab & swing this heavy ball into the stack!"
+        >
+          {/* Outer Polished Demolition Shell */}
+          <div className="relative w-full h-full rounded-full bg-gradient-to-tr from-slate-900 via-slate-800 to-slate-700 border-[3px] border-slate-300 shadow-[0_12px_32px_rgba(0,0,0,0.4),0_0_20px_rgba(56,189,248,0.35)] flex items-center justify-center transition-transform group-hover:scale-105 active:scale-95 overflow-hidden">
+            {/* Radial Bolted Texture */}
+            <div className="absolute inset-1 rounded-full border border-dashed border-slate-500/60 pointer-events-none" />
+
+            {/* Centered Next.js Tech Emblem */}
+            <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-inner z-10 border border-slate-300">
+              <Icon
+                icon="devicon:nextjs"
+                className="w-7 h-7 shrink-0 select-none pointer-events-none drop-shadow-sm text-black"
+              />
+            </div>
+
+            {/* 3D Specular Sheen */}
+            <div className="absolute top-2 left-3 w-6 h-4 rounded-full bg-white/45 rotate-[-30deg] blur-[1px] pointer-events-none" />
+          </div>
+        </div>
+
+        {/* Dynamic Square Tech Stack Badges (Increased size, floaty roaming physics) */}
+        {SLINGSHOT_TECH_STACK.map((item) => (
           <div
-            className="absolute left-0 right-0 h-[2px] bg-slate-200 pointer-events-none z-5"
-            style={{ top: `${floorY}px` }}
-          />
-
-          {/* SVG Layer: Top Horizontal Bar, Mounting Grommet, and Un-stretchable Swing Cable */}
-          <svg
-            className="absolute inset-0 w-full h-full pointer-events-none overflow-visible z-20"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <defs>
-              {/* Chrome / Polished Steel Rod Gradient (Exact match with HangingLetters in light theme) */}
-              <linearGradient id="swing-bar-grad" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stopColor="#94A3B8" />
-                <stop offset="35%" stopColor="#475569" />
-                <stop offset="70%" stopColor="#1E293B" />
-                <stop offset="100%" stopColor="#475569" />
-              </linearGradient>
-
-              {/* Rod highlight reflection */}
-              <linearGradient id="swing-bar-light" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="transparent" />
-                <stop offset="25%" stopColor="rgba(255,255,255,0.4)" />
-                <stop offset="50%" stopColor="rgba(255,255,255,0.85)" />
-                <stop offset="75%" stopColor="rgba(255,255,255,0.4)" />
-                <stop offset="100%" stopColor="transparent" />
-              </linearGradient>
-
-              {/* Un-stretchable Braided Steel Cable Gradient */}
-              <linearGradient id="swing-cable-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#64748B" />
-                <stop offset="50%" stopColor="#334155" />
-                <stop offset="100%" stopColor="#0F172A" />
-              </linearGradient>
-            </defs>
-
-            {/* Wall mount bracket end-caps */}
-            <rect
-              x={4}
-              y={BAR_Y - 7}
-              width={10}
-              height={18}
-              rx={2}
-              fill="#475569"
-            />
-            <rect
-              x={dimensions.width - 14}
-              y={BAR_Y - 7}
-              width={10}
-              height={18}
-              rx={2}
-              fill="#475569"
-            />
-
-            {/* The Horizontal Hanging Bar Rod */}
-            <rect
-              x={10}
-              y={BAR_Y - 4}
-              width={Math.max(10, dimensions.width - 20)}
-              height={8}
-              rx={4}
-              fill="url(#swing-bar-grad)"
-            />
-            <line
-              x1={16}
-              y1={BAR_Y - 2}
-              x2={dimensions.width - 16}
-              y2={BAR_Y - 2}
-              stroke="url(#swing-bar-light)"
-              strokeWidth="1.2"
-            />
-
-            {/* Anchor Grommet & Bearing on the top rod */}
-            <circle
-              cx={ceilingAnchor.x}
-              cy={BAR_Y + 3}
-              r="7"
-              fill="#1E293B"
-              stroke="#64748B"
-              strokeWidth="2.5"
-            />
-            <circle
-              cx={ceilingAnchor.x}
-              cy={BAR_Y + 3}
-              r="3"
-              fill="#F8FAFC"
-            />
-
-            {/* The Un-stretchable Swing String / Heavy Cable */}
-            <line
-              ref={cableLineRef}
-              x1={ceilingAnchor.x}
-              y1={BAR_Y + 3}
-              x2={swingRef.current.x}
-              y2={swingRef.current.y - BALL_TOP_OFFSET}
-              stroke="url(#swing-cable-grad)"
-              strokeWidth="3.5"
-              strokeLinecap="round"
-              style={{
-                filter: "drop-shadow(0 2px 4px rgba(0, 0, 0, 0.25))",
-              }}
-            />
-
-            {/* Fastener Ring / Shackle connecting to the ball */}
-            <circle
-              ref={cableKnotRef}
-              cx={swingRef.current.x}
-              cy={swingRef.current.y - BALL_TOP_OFFSET}
-              r="4.5"
-              fill="#0284C7"
-              stroke="#0F172A"
-              strokeWidth="1.5"
-            />
-          </svg>
-
-          {/* Heavy Ball on the Un-stretchable Swing */}
-          <div
-            ref={ballDomRef}
-            onPointerDown={handleBallPointerDown}
-            onPointerUp={handleBallPointerUp}
-            onPointerCancel={handleBallPointerUp}
+            key={item.id}
+            ref={(el) => {
+              if (el) iconDomRefs.current.set(item.id, el);
+              else iconDomRefs.current.delete(item.id);
+            }}
+            onPointerDown={(e) => handleBadgePointerDown(e, item.id)}
+            onPointerMove={handleBadgePointerMove}
+            onPointerUp={handleBadgePointerUp}
+            onPointerCancel={handleBadgePointerUp}
             style={{
-              width: `${BALL_RADIUS * 2}px`,
-              height: `${BALL_RADIUS * 2}px`,
+              width: `${iconSize}px`,
+              height: `${iconSize}px`,
               touchAction: "none",
             }}
-            className="absolute top-0 left-0 rounded-full cursor-grab active:cursor-grabbing z-30 flex items-center justify-center will-change-transform select-none group"
-            title="Grab & swing this heavy ball into the stack!"
+            className="absolute top-0 left-0 rounded-2xl cursor-grab active:cursor-grabbing z-25 flex items-center justify-center will-change-transform select-none group"
+            title={`Drag and toss ${item.name}`}
           >
-            {/* Outer Polished Demolition Shell */}
-            <div className="relative w-full h-full rounded-full bg-gradient-to-tr from-slate-900 via-slate-800 to-slate-700 border-[2.5px] border-slate-300 shadow-[0_10px_25px_rgba(0,0,0,0.35),0_0_16px_rgba(56,189,248,0.35)] flex items-center justify-center transition-transform group-hover:scale-105 active:scale-95 overflow-hidden">
-              {/* Radial Bolted Texture */}
-              <div className="absolute inset-1 rounded-full border border-dashed border-slate-500/60 pointer-events-none" />
-
-              {/* Centered Next.js Tech Emblem */}
-              <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-inner z-10 border border-slate-300">
-                <Icon
-                  icon="devicon:nextjs"
-                  className="w-6 h-6 shrink-0 select-none pointer-events-none drop-shadow-sm text-black"
-                />
-              </div>
-
-              {/* 3D Specular Sheen */}
-              <div className="absolute top-1 left-2 w-5 h-3 rounded-full bg-white/40 rotate-[-30deg] blur-[1px] pointer-events-none" />
-            </div>
-          </div>
-
-          {/* Dynamic Square Tech Stack Badges (28 items: 4 columns x 7 rows, roaming floaty physics) */}
-          {SLINGSHOT_TECH_STACK.map((item) => (
             <div
-              key={item.id}
-              ref={(el) => {
-                if (el) iconDomRefs.current.set(item.id, el);
-                else iconDomRefs.current.delete(item.id);
-              }}
-              onPointerDown={(e) => handleBadgePointerDown(e, item.id)}
-              onPointerMove={handleBadgePointerMove}
-              onPointerUp={handleBadgePointerUp}
-              onPointerCancel={handleBadgePointerUp}
+              className="w-full h-full rounded-2xl bg-white border border-slate-200/90 shadow-sm flex flex-col items-center justify-center p-2.5 transition-all duration-150 group-hover:shadow-md group-hover:scale-105 active:scale-95"
               style={{
-                width: `${iconSize}px`,
-                height: `${iconSize}px`,
-                touchAction: "none",
+                boxShadow: `0 3px 14px ${item.glowColor}`,
               }}
-              className="absolute top-0 left-0 rounded-2xl cursor-grab active:cursor-grabbing z-25 flex items-center justify-center will-change-transform select-none group"
-              title={`Drag and toss ${item.name}`}
             >
-              <div
-                className="w-full h-full rounded-2xl bg-white border border-slate-200 shadow-sm flex flex-col items-center justify-center p-1.5 transition-all duration-200 group-hover:shadow-md group-hover:border-slate-300 active:scale-95"
-                style={{
-                  boxShadow: `0 2px 10px ${item.glowColor}`,
-                }}
-              >
-                <Icon
-                  icon={item.icon}
-                  className="w-6 h-6 md:w-7 md:h-7 shrink-0 select-none pointer-events-none"
-                />
-                <span className="text-[9.5px] font-bold text-slate-800 tracking-tight whitespace-nowrap truncate max-w-full pointer-events-none mt-0.5">
-                  {item.name}
-                </span>
-              </div>
+              <Icon
+                icon={item.icon}
+                className="w-8 h-8 md:w-9 md:h-9 shrink-0 select-none pointer-events-none drop-shadow-sm"
+              />
+              <span className="text-[10px] md:text-[11px] font-bold text-slate-800 tracking-tight whitespace-nowrap truncate max-w-full pointer-events-none mt-1">
+                {item.name}
+              </span>
             </div>
-          ))}
-
-          {/* Interactive Hint Banner at Bottom */}
-          <div className="absolute bottom-3 left-4 right-4 flex items-center justify-between text-[11px] text-slate-400 pointer-events-none z-10 font-mono">
-            <span className="flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-              <span>Pull the heavy swing ball high to the left and release to test the stack under pressure</span>
-            </span>
-            <span className="hidden sm:inline">
-              Decreased gravity: badges float and roam freely • toss or rebuild anytime
-            </span>
           </div>
-        </div>
+        ))}
       </div>
     </section>
   );
