@@ -5,6 +5,7 @@ import About from "@/src/app/sections/About";
 import Experience from "@/src/app/sections/Experience";
 import Projects from "@/src/app/sections/Projects";
 import Wins from "@/src/app/sections/Wins";
+import TechSlingshot from "@/src/app/sections/Slingshot";
 import Skills from "@/src/app/sections/Skills";
 import Architecture from "@/src/app/sections/Architecture";
 import Achievements from "@/src/app/sections/Achievements";
@@ -159,6 +160,7 @@ export default function Home() {
         <Experience />
         <Projects />
         <Wins />
+        <TechSlingshot />
         <Architecture />
         <Achievements />
         <Skills />

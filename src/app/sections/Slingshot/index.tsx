@@ -1,0 +1,1182 @@
+"use client";
+
+import React, { useEffect, useRef, useState, useCallback, useMemo } from "react";
+import Matter from "matter-js";
+import { Icon } from "@iconify/react";
+import { SLINGSHOT_TECH_STACK } from "@/src/app/data/slingshotIcons";
+import { RotateCcw, Crosshair, Sparkles, MoveRight } from "lucide-react";
+
+// Top mounting rod vertical position
+const BAR_Y = 24;
+const BALL_RADIUS = 36;
+const BALL_TOP_OFFSET = 30; // Distance from ball center to string attachment knot
+const WALL_THICKNESS = 140;
+
+interface Spark {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  color: string;
+  size: number;
+  alpha: number;
+  decay: number;
+}
+
+// Order 28 tech stack items systematically into 4 columns of 7 items
+// Positioned a little more to the left of the block as requested
+function getSystematicGridPositions(width: number, height: number, anchorX: number) {
+  const isSmall = width < 768;
+  const isMedium = width < 1024;
+  const size = isSmall ? 46 : isMedium ? 50 : 54;
+  const gapX = isSmall ? 7 : 8;
+  const cols = 4;
+  const rows = 7; // 4 columns x 7 rows = 28 items
+
+  const totalWidth = cols * size + (cols - 1) * gapX;
+  
+  // Positioned a little more toward the left/center rather than far right
+  const idealLeft = Math.max(anchorX + 110, Math.min(width * 0.48, width - totalWidth - (isSmall ? 20 : 100)));
+  const startX = Math.max(anchorX + 80, idealLeft);
+  const floorY = height - 26;
+
+  const positions = new Map<string, { x: number; y: number }>();
+
+  SLINGSHOT_TECH_STACK.forEach((item, index) => {
+    const col = Math.floor(index / rows) % cols;
+    const row = index % rows; // 0 is bottom, 6 is top
+
+    const x = startX + col * (size + gapX) + size / 2;
+    // Each row rests flat on the row below it starting flush from floorY
+    const y = floorY - size / 2 - row * size;
+
+    positions.set(item.id, { x, y });
+  });
+
+  return { positions, size, floorY, startX, cols, rows };
+}
+
+export default function TechSlingshot() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  // Matter.js references
+  const engineRef = useRef<Matter.Engine | null>(null);
+  const runnerRef = useRef<Matter.Runner | null>(null);
+  const iconBodiesRef = useRef<Map<string, Matter.Body>>(new Map());
+  const ballBodyRef = useRef<Matter.Body | null>(null);
+
+  // DOM node references for direct buttery 60/120fps transforms
+  const ballDomRef = useRef<HTMLDivElement>(null);
+  const cableLineRef = useRef<SVGLineElement>(null);
+  const cableKnotRef = useRef<SVGCircleElement>(null);
+  const iconDomRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+
+  // Dimensions
+  const [dimensions, setDimensions] = useState({ width: 1000, height: 560 });
+  const arenaSizeRef = useRef({ width: 1000, height: 560 });
+
+  // Game/UI stats
+  const [isScattered, setIsScattered] = useState(false);
+  const isScatteredRef = useRef(false);
+  const [scatterCount, setScatterCount] = useState(0);
+  const [swingsCount, setSwingsCount] = useState(0);
+  const [isResetting, setIsResetting] = useState(false);
+  const isResettingRef = useRef(false);
+
+  // Canvas Sparks
+  const sparksRef = useRef<Spark[]>([]);
+
+  // =========================================================================
+  // UN-STRETCHABLE SWING PENDULUM STATE
+  // =========================================================================
+  const swingRef = useRef({
+    theta: -0.88, // Cocked high to the left ready to swing
+    omega: 0,
+    isDragging: false,
+    isArmed: true, // Holds at left peak until released or clicked
+    x: 0,
+    y: 0,
+    vx: 0,
+    vy: 0,
+  });
+
+  const prevBallPointerHistory = useRef<{ theta: number; time: number }[]>([]);
+
+  // Dragging state for individual tech badges (exact hero section drag mechanics)
+  const badgeDragRef = useRef<{
+    id: string;
+    body: Matter.Body;
+    pointerId: number;
+    offsetX: number;
+    offsetY: number;
+    history: { x: number; y: number; time: number }[];
+  } | null>(null);
+
+  // Top Mounting Pivot Anchor
+  const ceilingAnchor = useMemo(() => {
+    const x = Math.max(240, Math.min(390, dimensions.width * 0.35));
+    const y = BAR_Y;
+    return { x, y };
+  }, [dimensions.width]);
+
+  const ceilingAnchorRef = useRef(ceilingAnchor);
+  ceilingAnchorRef.current = ceilingAnchor;
+
+  // Un-stretchable Cable Length (fixed radius)
+  // Lowest point skims ~12px above the floor
+  const cableLength = useMemo(() => {
+    const floorLevel = dimensions.height - 26;
+    return Math.max(280, floorLevel - BAR_Y - BALL_RADIUS - 12);
+  }, [dimensions.height]);
+
+  const cableLengthRef = useRef(cableLength);
+  cableLengthRef.current = cableLength;
+
+  // Safe cocked high-left angle so ball stays comfortably inside the left wall
+  const cockedPeakTheta = useMemo(() => {
+    const ax = ceilingAnchor.x;
+    const L = cableLength;
+    const targetX = BALL_RADIUS + 24;
+    const rawSin = (targetX - ax) / L;
+    const clampedSin = Math.max(-0.94, Math.min(-0.55, rawSin));
+    return Math.asin(clampedSin);
+  }, [ceilingAnchor.x, cableLength]);
+
+  const cockedPeakThetaRef = useRef(cockedPeakTheta);
+  cockedPeakThetaRef.current = cockedPeakTheta;
+
+  // Systematic Grid Slots
+  const { positions: systematicPositions, size: iconSize, floorY } = useMemo(() => {
+    return getSystematicGridPositions(dimensions.width, dimensions.height, ceilingAnchor.x);
+  }, [dimensions.width, dimensions.height, ceilingAnchor.x]);
+
+  const systematicPositionsRef = useRef(systematicPositions);
+  systematicPositionsRef.current = systematicPositions;
+
+  // Trigger burst of sparks on impact
+  const triggerImpactSparks = useCallback((x: number, y: number, color: string, count = 24) => {
+    for (let i = 0; i < count; i++) {
+      const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.6;
+      const speed = Math.random() * 7 + 2.5;
+      sparksRef.current.push({
+        x,
+        y,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed - 1.8,
+        color,
+        size: Math.random() * 4 + 2,
+        alpha: 1,
+        decay: Math.random() * 0.03 + 0.02,
+      });
+    }
+  }, []);
+
+  // =========================================================================
+  // MATTER.JS ENGINE LIFECYCLE (Floater / Low-Gravity physics so icons roam around)
+  // =========================================================================
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const width = container.clientWidth || 1000;
+    const height = container.clientHeight || 560;
+    arenaSizeRef.current = { width, height };
+    setDimensions({ width, height });
+
+    if (canvasRef.current) {
+      canvasRef.current.width = width;
+      canvasRef.current.height = height;
+    }
+
+    // Decreased gravity for floaty, graceful roaming around the arena!
+    const engine = Matter.Engine.create({
+      gravity: {
+        x: 0,
+        y: 0.28, // Low gravity: icons float and roam freely!
+        scale: 0.001,
+      },
+      enableSleeping: true,
+      positionIterations: 14,
+      velocityIterations: 14,
+    });
+    engineRef.current = engine;
+    const world = engine.world;
+
+    // Boundaries with high liveliness and low friction
+    const bounce = 0.82;
+    const wallFriction = 0.05;
+
+    const bottomWall = Matter.Bodies.rectangle(
+      width / 2,
+      height + WALL_THICKNESS / 2 - 26,
+      width * 2,
+      WALL_THICKNESS,
+      {
+        isStatic: true,
+        restitution: bounce,
+        friction: wallFriction,
+        label: "wall-bottom",
+      }
+    );
+
+    const topWall = Matter.Bodies.rectangle(
+      width / 2,
+      -WALL_THICKNESS / 2,
+      width * 2,
+      WALL_THICKNESS,
+      {
+        isStatic: true,
+        restitution: bounce,
+        friction: wallFriction,
+        label: "wall-top",
+      }
+    );
+
+    const leftWall = Matter.Bodies.rectangle(
+      -WALL_THICKNESS / 2,
+      height / 2,
+      WALL_THICKNESS,
+      height * 2,
+      {
+        isStatic: true,
+        restitution: bounce,
+        friction: wallFriction,
+        label: "wall-left",
+      }
+    );
+
+    const rightWall = Matter.Bodies.rectangle(
+      width + WALL_THICKNESS / 2,
+      height / 2,
+      WALL_THICKNESS,
+      height * 2,
+      {
+        isStatic: true,
+        restitution: bounce,
+        friction: wallFriction,
+        label: "wall-right",
+      }
+    );
+
+    Matter.Composite.add(world, [bottomWall, topWall, leftWall, rightWall]);
+
+    // Initial Pendulum State
+    const anchorX = Math.max(240, Math.min(390, width * 0.35));
+    const anchorY = BAR_Y;
+    const initialL = Math.max(280, height - 26 - BAR_Y - BALL_RADIUS - 12);
+    
+    const targetLeftX = BALL_RADIUS + 24;
+    const initialTheta = Math.asin(Math.max(-0.94, Math.min(-0.55, (targetLeftX - anchorX) / initialL)));
+    
+    const ballX = anchorX + initialL * Math.sin(initialTheta);
+    const ballY = anchorY + initialL * Math.cos(initialTheta);
+
+    swingRef.current = {
+      theta: initialTheta,
+      omega: 0,
+      isDragging: false,
+      isArmed: true,
+      x: ballX,
+      y: ballY,
+      vx: 0,
+      vy: 0,
+    };
+
+    // Heavy Ball Matter.js physics body (Driver body for demolition impact)
+    const ballBody = Matter.Bodies.circle(ballX, ballY, BALL_RADIUS, {
+      isStatic: true,
+      restitution: 0.8,
+      friction: 0.05,
+      density: 0.08,
+      label: "wrecking-ball",
+    });
+    ballBodyRef.current = ballBody;
+    Matter.Composite.add(world, ballBody);
+
+    // Initial DOM positions for Ball and Cable
+    if (ballDomRef.current) {
+      ballDomRef.current.style.transform = `translate3d(${ballX}px, ${ballY}px, 0px) translate(-50%, -50%) rotate(${initialTheta}rad)`;
+    }
+    if (cableLineRef.current) {
+      cableLineRef.current.setAttribute("x1", String(anchorX));
+      cableLineRef.current.setAttribute("y1", String(anchorY));
+      cableLineRef.current.setAttribute("x2", String(ballX));
+      cableLineRef.current.setAttribute("y2", String(ballY - BALL_TOP_OFFSET));
+    }
+    if (cableKnotRef.current) {
+      cableKnotRef.current.setAttribute("cx", String(ballX));
+      cableKnotRef.current.setAttribute("cy", String(ballY - BALL_TOP_OFFSET));
+    }
+
+    // Create 28 Tech Stack Badges (Dynamic bodies with low air resistance to roam around)
+    const { positions: slots, size: itemSize } = getSystematicGridPositions(width, height, anchorX);
+    const iconBodies = new Map<string, Matter.Body>();
+
+    SLINGSHOT_TECH_STACK.forEach((item) => {
+      const slot = slots.get(item.id) || { x: width * 0.55, y: height * 0.5 };
+
+      // Square chamfered body with low air friction and high bounce
+      const body = Matter.Bodies.rectangle(slot.x, slot.y, itemSize, itemSize, {
+        chamfer: { radius: 6 },
+        restitution: 0.80, // Springy & bouncy!
+        friction: 0.08, // Low ground friction to slide and drift smoothly
+        frictionAir: 0.004, // Very low air drag so icons roam and glide around!
+        density: 0.0024,
+        isStatic: false,
+        label: `tech-${item.id}`,
+      });
+
+      // Put to sleep initially so it rests stably in formation without slipping
+      Matter.Sleeping.set(body, true);
+
+      iconBodies.set(item.id, body);
+
+      const el = iconDomRefs.current.get(item.id);
+      if (el) {
+        el.style.transform = `translate3d(${slot.x}px, ${slot.y}px, 0px) translate(-50%, -50%) rotate(0rad)`;
+      }
+    });
+
+    iconBodiesRef.current = iconBodies;
+    Matter.Composite.add(world, Array.from(iconBodies.values()));
+
+    // -------------------------------------------------------------------------
+    // Main Physics Tick & Render Loop
+    // -------------------------------------------------------------------------
+    let lastTime = performance.now();
+
+    const afterUpdateHandler = () => {
+      const now = performance.now();
+      const dtMs = Math.min(32, Math.max(8, now - lastTime));
+      lastTime = now;
+      const dt = dtMs / 16.666;
+
+      const anchor = ceilingAnchorRef.current;
+      const L = cableLengthRef.current;
+      const swing = swingRef.current;
+
+      // 1. Un-stretchable Swing Pendulum Integration
+      if (!swing.isDragging && !swing.isArmed && !isResettingRef.current) {
+        const gravityFactor = 0.0036;
+        const damping = 0.001;
+
+        const alpha = -gravityFactor * Math.sin(swing.theta) - damping * swing.omega;
+        swing.omega += alpha * dt;
+        swing.omega *= Math.pow(0.9994, dt);
+        swing.theta += swing.omega * dt;
+
+        const curX = anchor.x + L * Math.sin(swing.theta);
+        const curY = anchor.y + L * Math.cos(swing.theta);
+
+        swing.vx = L * Math.cos(swing.theta) * swing.omega;
+        swing.vy = -L * Math.sin(swing.theta) * swing.omega;
+        swing.x = curX;
+        swing.y = curY;
+
+        // Sync Matter.js ball body position & velocity
+        if (ballBody) {
+          Matter.Body.setPosition(ballBody, { x: curX, y: curY });
+          Matter.Body.setVelocity(ballBody, { x: swing.vx, y: swing.vy });
+        }
+      }
+
+      // Update ball and SVG cable in DOM
+      if (ballDomRef.current) {
+        ballDomRef.current.style.transform = `translate3d(${swing.x}px, ${swing.y}px, 0px) translate(-50%, -50%) rotate(${swing.theta}rad)`;
+      }
+      if (cableLineRef.current) {
+        cableLineRef.current.setAttribute("x1", String(anchor.x));
+        cableLineRef.current.setAttribute("y1", String(anchor.y));
+        cableLineRef.current.setAttribute("x2", String(swing.x));
+        cableLineRef.current.setAttribute("y2", String(swing.y - BALL_TOP_OFFSET));
+      }
+      if (cableKnotRef.current) {
+        cableKnotRef.current.setAttribute("cx", String(swing.x));
+        cableKnotRef.current.setAttribute("cy", String(swing.y - BALL_TOP_OFFSET));
+      }
+
+      // 2. Collision: Smooth, continuous demolition impact into the Tech Stack
+      if (!isResettingRef.current) {
+        const ballSpeed = Math.hypot(swing.vx, swing.vy);
+        const hitDistance = BALL_RADIUS + itemSize * 0.62;
+
+        if (ballSpeed > 0.6) {
+          for (const body of iconBodies.values()) {
+            const dx = body.position.x - swing.x;
+            const dy = body.position.y - swing.y;
+            const dist = Math.hypot(dx, dy);
+
+            if (dist < hitDistance) {
+              // Wake up ALL stack bodies so they roam freely!
+              iconBodies.forEach((b) => {
+                Matter.Sleeping.set(b, false);
+              });
+
+              isScatteredRef.current = true;
+              setIsScattered(true);
+
+              // Smooth momentum transfer with quadratic radius falloff
+              const blastRadius = 320;
+              iconBodies.forEach((other) => {
+                const odx = other.position.x - swing.x;
+                const ody = other.position.y - swing.y;
+                const odist = Math.hypot(odx, ody);
+                if (odist < blastRadius) {
+                  // Smooth falloff factor
+                  const factor = Math.pow((blastRadius - odist) / blastRadius, 1.35);
+                  const onx = odx / (odist || 1);
+                  const ony = ody / (odist || 1);
+
+                  // Fluid velocity impulse: forward and floating upward
+                  const pushX = onx * factor * 14 + swing.vx * 0.65;
+                  const pushY = ony * factor * 12 + swing.vy * 0.45 - 4.5;
+
+                  Matter.Body.setVelocity(other, {
+                    x: other.velocity.x * 0.4 + pushX + (Math.random() - 0.5) * 3,
+                    y: other.velocity.y * 0.4 + pushY + (Math.random() - 0.5) * 3,
+                  });
+                  Matter.Body.setAngularVelocity(other, (Math.random() - 0.5) * 0.3);
+                }
+              });
+
+              // Smooth ball resistance (doesn't stop abruptly)
+              swing.omega *= 0.96;
+
+              // Spark burst
+              triggerImpactSparks(body.position.x, body.position.y, "#38BDF8", 28);
+              setScatterCount((prev) => prev + 1);
+              break;
+            }
+          }
+        }
+      }
+
+      // 3. Render Tech Badges transforms directly to DOM (Matter.js -> DOM)
+      if (!isResettingRef.current) {
+        iconBodies.forEach((body, id) => {
+          if (badgeDragRef.current?.id === id) return;
+          const el = iconDomRefs.current.get(id);
+          if (!el) return;
+
+          const { x, y } = body.position;
+          const angle = body.angle;
+          el.style.transform = `translate3d(${x}px, ${y}px, 0px) translate(-50%, -50%) rotate(${angle}rad)`;
+
+          // Arena boundary safety respawn
+          if (y > height + 200 || x < -150 || x > width + 150) {
+            Matter.Body.setPosition(body, {
+              x: Math.max(80, Math.min(width - 80, x)),
+              y: 60,
+            });
+            Matter.Body.setVelocity(body, { x: 0, y: 1 });
+          }
+        });
+      }
+
+      // 4. Render Sparks Overlay on Canvas
+      const canvas = canvasRef.current;
+      if (canvas) {
+        const ctx = canvas.getContext("2d");
+        if (ctx) {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+          const sparks = sparksRef.current;
+          if (sparks.length > 0) {
+            ctx.save();
+            for (let i = sparks.length - 1; i >= 0; i--) {
+              const p = sparks[i];
+              p.x += p.vx * dt;
+              p.y += p.vy * dt;
+              p.vy += 0.14 * dt;
+              p.alpha -= p.decay * dt;
+
+              if (p.alpha <= 0) {
+                sparks.splice(i, 1);
+                continue;
+              }
+
+              ctx.beginPath();
+              ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+              ctx.fillStyle = p.color;
+              ctx.globalAlpha = p.alpha;
+              ctx.shadowColor = p.color;
+              ctx.shadowBlur = 6;
+              ctx.fill();
+            }
+            ctx.restore();
+          }
+        }
+      }
+    };
+
+    Matter.Events.on(engine, "afterUpdate", afterUpdateHandler);
+
+    const runner = Matter.Runner.create();
+    runnerRef.current = runner;
+    Matter.Runner.run(runner, engine);
+
+    return () => {
+      Matter.Events.off(engine, "afterUpdate", afterUpdateHandler);
+      Matter.Runner.stop(runner);
+      Matter.Engine.clear(engine);
+    };
+  }, [triggerImpactSparks]);
+
+  // =========================================================================
+  // UN-STRETCHABLE BALL POINTER DRAGGING (Strict fixed-length pendulum arc!)
+  // =========================================================================
+
+  const updateBallDrag = useCallback((clientX: number, clientY: number) => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const rect = container.getBoundingClientRect();
+    const pointerX = clientX - rect.left;
+    const pointerY = clientY - rect.top;
+
+    const anchor = ceilingAnchorRef.current;
+    const L = cableLengthRef.current;
+
+    // Vector from anchor to pointer
+    const dx = pointerX - anchor.x;
+    const dy = pointerY - anchor.y;
+
+    // Fixed un-stretchable string: angle is determined by pointer angle!
+    let angle = Math.atan2(dx, dy);
+
+    // Clamp angle so it stays inside bounds and below the top bar (~ -74 deg to +74 deg)
+    const maxTheta = 1.28;
+    angle = Math.max(-maxTheta, Math.min(maxTheta, angle));
+
+    const swing = swingRef.current;
+    swing.theta = angle;
+    swing.omega = 0;
+    swing.x = anchor.x + L * Math.sin(angle);
+    swing.y = anchor.y + L * Math.cos(angle);
+    swing.vx = 0;
+    swing.vy = 0;
+
+    if (ballBodyRef.current) {
+      Matter.Body.setPosition(ballBodyRef.current, { x: swing.x, y: swing.y });
+      Matter.Body.setVelocity(ballBodyRef.current, { x: 0, y: 0 });
+    }
+
+    if (ballDomRef.current) {
+      ballDomRef.current.style.transform = `translate3d(${swing.x}px, ${swing.y}px, 0px) translate(-50%, -50%) rotate(${angle}rad)`;
+    }
+    if (cableLineRef.current) {
+      cableLineRef.current.setAttribute("x2", String(swing.x));
+      cableLineRef.current.setAttribute("y2", String(swing.y - BALL_TOP_OFFSET));
+    }
+    if (cableKnotRef.current) {
+      cableKnotRef.current.setAttribute("cx", String(swing.x));
+      cableKnotRef.current.setAttribute("cy", String(swing.y - BALL_TOP_OFFSET));
+    }
+
+    const now = performance.now();
+    prevBallPointerHistory.current.push({ theta: angle, time: now });
+    prevBallPointerHistory.current = prevBallPointerHistory.current.filter((p) => now - p.time <= 120);
+  }, []);
+
+  const finishBallDrag = useCallback(() => {
+    const swing = swingRef.current;
+    if (!swing.isDragging) return;
+
+    swing.isDragging = false;
+    swing.isArmed = false;
+
+    // Calculate flick velocity from angular drag history
+    const history = prevBallPointerHistory.current;
+    if (history.length >= 2) {
+      const first = history[0];
+      const last = history[history.length - 1];
+      const dt = Math.max(1, last.time - first.time);
+      const dTheta = last.theta - first.theta;
+
+      let flickOmega = (dTheta / dt) * 16 * 1.15;
+      const maxOmega = 0.16;
+      flickOmega = Math.max(-maxOmega, Math.min(maxOmega, flickOmega));
+      swing.omega = flickOmega;
+    } else {
+      if (swing.theta < -0.15) {
+        swing.omega = 0.024; // Forward swing boost
+      }
+    }
+
+    setSwingsCount((c) => c + 1);
+    triggerImpactSparks(swing.x, swing.y, "#38BDF8", 12);
+  }, [triggerImpactSparks]);
+
+  // Window-level listeners for smooth dragging anywhere on the screen
+  useEffect(() => {
+    const onWindowPointerMove = (e: PointerEvent) => {
+      if (swingRef.current.isDragging) {
+        updateBallDrag(e.clientX, e.clientY);
+      }
+    };
+
+    const onWindowPointerUp = () => {
+      if (swingRef.current.isDragging) {
+        finishBallDrag();
+      }
+    };
+
+    window.addEventListener("pointermove", onWindowPointerMove, { passive: true });
+    window.addEventListener("pointerup", onWindowPointerUp);
+    window.addEventListener("pointercancel", onWindowPointerUp);
+
+    return () => {
+      window.removeEventListener("pointermove", onWindowPointerMove);
+      window.removeEventListener("pointerup", onWindowPointerUp);
+      window.removeEventListener("pointercancel", onWindowPointerUp);
+    };
+  }, [updateBallDrag, finishBallDrag]);
+
+  // Ball Pointer Down
+  const handleBallPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch {}
+
+    const swing = swingRef.current;
+    swing.isDragging = true;
+    swing.isArmed = false;
+    swing.omega = 0;
+    prevBallPointerHistory.current = [{ theta: swing.theta, time: performance.now() }];
+  };
+
+  // Ball Pointer Up
+  const handleBallPointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    try {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    } catch {}
+    finishBallDrag();
+  };
+
+  // Trigger Swing from High-Left Peak (Button Action)
+  const triggerSwing = () => {
+    const anchor = ceilingAnchorRef.current;
+    const L = cableLengthRef.current;
+    const swing = swingRef.current;
+    const peakTheta = cockedPeakThetaRef.current;
+
+    swing.theta = peakTheta;
+    swing.omega = 0.026; // Snappy forward impulse toward the stack!
+    swing.isDragging = false;
+    swing.isArmed = false;
+    swing.x = anchor.x + L * Math.sin(peakTheta);
+    swing.y = anchor.y + L * Math.cos(peakTheta);
+
+    if (ballBodyRef.current) {
+      Matter.Body.setPosition(ballBodyRef.current, { x: swing.x, y: swing.y });
+    }
+
+    setSwingsCount((c) => c + 1);
+    triggerImpactSparks(swing.x, swing.y, "#38BDF8", 16);
+  };
+
+  // =========================================================================
+  // INDIVIDUAL TECH BADGES DRAGGING & FLINGING (Roam freely!)
+  // =========================================================================
+
+  const handleBadgePointerDown = (e: React.PointerEvent<HTMLDivElement>, id: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const body = iconBodiesRef.current.get(id);
+    if (!body) return;
+
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch {}
+
+    const container = containerRef.current;
+    if (!container) return;
+
+    const rect = container.getBoundingClientRect();
+    const pointerX = e.clientX - rect.left;
+    const pointerY = e.clientY - rect.top;
+
+    // Wake this body so it moves freely
+    Matter.Sleeping.set(body, false);
+
+    Matter.Body.setVelocity(body, { x: 0, y: 0 });
+    Matter.Body.setAngularVelocity(body, 0);
+    Matter.Body.setStatic(body, true);
+
+    badgeDragRef.current = {
+      id,
+      body,
+      pointerId: e.pointerId,
+      offsetX: pointerX - body.position.x,
+      offsetY: pointerY - body.position.y,
+      history: [{ x: pointerX, y: pointerY, time: performance.now() }],
+    };
+  };
+
+  const handleBadgePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    const drag = badgeDragRef.current;
+    if (!drag || !containerRef.current) return;
+
+    e.preventDefault();
+    const rect = containerRef.current.getBoundingClientRect();
+    const pointerX = e.clientX - rect.left;
+    const pointerY = e.clientY - rect.top;
+
+    const targetX = pointerX - drag.offsetX;
+    const targetY = pointerY - drag.offsetY;
+
+    Matter.Body.setPosition(drag.body, { x: targetX, y: targetY });
+
+    const el = iconDomRefs.current.get(drag.id);
+    if (el) {
+      el.style.transform = `translate3d(${targetX}px, ${targetY}px, 0px) translate(-50%, -50%) rotate(${drag.body.angle}rad)`;
+    }
+
+    const now = performance.now();
+    drag.history.push({ x: pointerX, y: pointerY, time: now });
+    drag.history = drag.history.filter((p) => now - p.time <= 120);
+  };
+
+  const handleBadgePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    const drag = badgeDragRef.current;
+    if (!drag) return;
+
+    try {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    } catch {}
+
+    // Restore full dynamic freedom with low gravity & floaty roaming!
+    Matter.Body.setStatic(drag.body, false);
+    Matter.Sleeping.set(drag.body, false);
+
+    // Exact throw calculation from PhysicsIcons.tsx with floaty power
+    if (drag.history.length >= 2) {
+      const first = drag.history[0];
+      const last = drag.history[drag.history.length - 1];
+      const dt = Math.max(1, last.time - first.time);
+
+      let vx = ((last.x - first.x) / dt) * 16 * 1.35;
+      let vy = ((last.y - first.y) / dt) * 16 * 1.35;
+
+      const maxVelocity = 28;
+      vx = Math.max(-maxVelocity, Math.min(maxVelocity, vx));
+      vy = Math.max(-maxVelocity, Math.min(maxVelocity, vy));
+
+      if (Math.abs(vx) < 1.2 && Math.abs(vy) < 1.2) {
+        vx = (Math.random() - 0.5) * 5;
+        vy = -(Math.random() * 5 + 5);
+      }
+
+      Matter.Body.setVelocity(drag.body, { x: vx, y: vy });
+      Matter.Body.setAngularVelocity(drag.body, (vx / 20) * 0.12);
+    } else {
+      Matter.Body.setVelocity(drag.body, {
+        x: (Math.random() - 0.5) * 5,
+        y: -(Math.random() * 5 + 5),
+      });
+      Matter.Body.setAngularVelocity(drag.body, (Math.random() - 0.5) * 0.1);
+    }
+
+    badgeDragRef.current = null;
+  };
+
+  // =========================================================================
+  // REBUILD STACK & RESET FORMATION
+  // =========================================================================
+
+  const handleResetFormation = useCallback(() => {
+    if (isResettingRef.current) return;
+    setIsResetting(true);
+    isResettingRef.current = true;
+
+    const startTime = performance.now();
+    const duration = 650;
+
+    const anchor = ceilingAnchorRef.current;
+    const L = cableLengthRef.current;
+    const initialCockedTheta = cockedPeakThetaRef.current;
+
+    // Snapshot start positions
+    const startBadgeStates = new Map<string, { x: number; y: number; angle: number }>();
+    iconBodiesRef.current.forEach((body, id) => {
+      startBadgeStates.set(id, {
+        x: body.position.x,
+        y: body.position.y,
+        angle: body.angle,
+      });
+      Matter.Body.setStatic(body, true);
+    });
+
+    const startSwingTheta = swingRef.current.theta;
+
+    const animateReset = (now: number) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(1, elapsed / duration);
+      const ease = 1 - Math.pow(1 - progress, 3); // Cubic ease out
+
+      // Animate badges back to systematic 4 columns
+      iconBodiesRef.current.forEach((body, id) => {
+        const start = startBadgeStates.get(id);
+        const target = systematicPositionsRef.current.get(id);
+        if (!start || !target) return;
+
+        const curX = start.x + (target.x - start.x) * ease;
+        const curY = start.y + (target.y - start.y) * ease;
+        const curAngle = start.angle * (1 - ease);
+
+        Matter.Body.setPosition(body, { x: curX, y: curY });
+        Matter.Body.setAngle(body, curAngle);
+        Matter.Body.setVelocity(body, { x: 0, y: 0 });
+        Matter.Body.setAngularVelocity(body, 0);
+
+        const el = iconDomRefs.current.get(id);
+        if (el) {
+          el.style.transform = `translate3d(${curX}px, ${curY}px, 0px) translate(-50%, -50%) rotate(${curAngle}rad)`;
+        }
+      });
+
+      // Animate swing back to cocked high-left peak
+      const curTheta = startSwingTheta + (initialCockedTheta - startSwingTheta) * ease;
+      const ballX = anchor.x + L * Math.sin(curTheta);
+      const ballY = anchor.y + L * Math.cos(curTheta);
+
+      const swing = swingRef.current;
+      swing.theta = curTheta;
+      swing.omega = 0;
+      swing.x = ballX;
+      swing.y = ballY;
+      swing.vx = 0;
+      swing.vy = 0;
+
+      if (ballBodyRef.current) {
+        Matter.Body.setPosition(ballBodyRef.current, { x: ballX, y: ballY });
+      }
+
+      if (ballDomRef.current) {
+        ballDomRef.current.style.transform = `translate3d(${ballX}px, ${ballY}px, 0px) translate(-50%, -50%) rotate(${curTheta}rad)`;
+      }
+      if (cableLineRef.current) {
+        cableLineRef.current.setAttribute("x2", String(ballX));
+        cableLineRef.current.setAttribute("y2", String(ballY - BALL_TOP_OFFSET));
+      }
+      if (cableKnotRef.current) {
+        cableKnotRef.current.setAttribute("cx", String(ballX));
+        cableKnotRef.current.setAttribute("cy", String(ballY - BALL_TOP_OFFSET));
+      }
+
+      if (progress < 1) {
+        requestAnimationFrame(animateReset);
+      } else {
+        // Finalize state: Keep dynamic, put to sleep in neat grid until hit or dragged!
+        iconBodiesRef.current.forEach((body, id) => {
+          const target = systematicPositionsRef.current.get(id);
+          if (target) {
+            Matter.Body.setPosition(body, target);
+            Matter.Body.setAngle(body, 0);
+          }
+          Matter.Body.setStatic(body, false); // Dynamic!
+          Matter.Body.setVelocity(body, { x: 0, y: 0 });
+          Matter.Sleeping.set(body, true); // Stable in formation until touched or struck!
+        });
+
+        swing.isArmed = true; // Cocked and ready
+        swing.isDragging = false;
+
+        isScatteredRef.current = false;
+        setIsScattered(false);
+        setScatterCount(0);
+        setIsResetting(false);
+        isResettingRef.current = false;
+
+        triggerImpactSparks(
+          arenaSizeRef.current.width * 0.58,
+          arenaSizeRef.current.height * 0.6,
+          "#10B981",
+          28
+        );
+      }
+    };
+
+    requestAnimationFrame(animateReset);
+  }, [triggerImpactSparks]);
+
+  return (
+    <section
+      id="playground"
+      className="section-layout border-t border-current/10 bg-white dark:bg-transparent transition-colors duration-700"
+    >
+      <div className="container-narrow">
+        {/* Section Header (Matching the typography and style of RESPONSIBILITY EARNED) */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
+          <div>
+            <span className="text-sm uppercase tracking-widest text-slate-400 font-medium">
+              The Arsenal
+            </span>
+            <h2 className="heading-2 mt-2 text-current">
+              NOT JUST LOGOS — <span style={{ color: "rgb(71, 36, 0)" }}>PRESSURE TESTED</span>
+            </h2>
+            <p className="body-large max-w-2xl mt-3 text-current/60 text-base md:text-lg">
+              Every tool in this stack was forged through real production constraints.
+              Pull the unstretchable swing high to the left and release to test the stack under pressure.
+            </p>
+          </div>
+
+          {/* Action HUD / Controls */}
+          <div className="flex flex-wrap items-center gap-3">
+            {/* Status Indicator Pill */}
+            <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-50 border border-slate-200/90 text-xs font-medium text-slate-700 shadow-sm">
+              <span className={`w-2 h-2 rounded-full ${isScattered ? "bg-amber-500 animate-pulse" : "bg-emerald-500"}`} />
+              <span>{isScattered ? `Demolished (${scatterCount} hits)` : "Systematic Formation"}</span>
+              <span className="text-slate-300">•</span>
+              <span>Swings: {swingsCount}</span>
+            </div>
+
+            {/* Swing Ball Button */}
+            <button
+              type="button"
+              onClick={triggerSwing}
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200/80 text-xs font-semibold transition-all shadow-sm active:scale-95 cursor-pointer"
+              title="Release the heavy swing ball from high left to smash into the stack"
+            >
+              <MoveRight className="w-3.5 h-3.5" />
+              <span>Swing Ball</span>
+            </button>
+
+            {/* Rebuild Stack Button */}
+            <button
+              type="button"
+              onClick={handleResetFormation}
+              disabled={isResetting}
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold transition-all shadow-sm active:scale-95 disabled:opacity-50 cursor-pointer"
+            >
+              <RotateCcw className={`w-3.5 h-3.5 ${isResetting ? "animate-spin" : ""}`} />
+              <span>Rebuild Stack</span>
+            </button>
+          </div>
+        </div>
+
+        {/* The Physics Arena Box (Crisp Light Theme matching the portfolio aesthetic) */}
+        <div
+          ref={containerRef}
+          className="relative w-full h-[520px] md:h-[580px] rounded-3xl border border-slate-200/90 bg-gradient-to-b from-slate-50/70 via-white to-slate-50/40 shadow-[0_8px_30px_rgba(0,0,0,0.04)] overflow-hidden select-none touch-none cursor-default"
+        >
+          {/* Subtle Blueprint Grid Pattern */}
+          <div
+            className="absolute inset-0 pointer-events-none opacity-60"
+            style={{
+              backgroundImage: `radial-gradient(#CBD5E1 1px, transparent 1px)`,
+              backgroundSize: "32px 32px",
+            }}
+          />
+
+          {/* Canvas Overlay for Impact Sparks */}
+          <canvas
+            ref={canvasRef}
+            className="absolute inset-0 w-full h-full pointer-events-none z-35"
+          />
+
+          {/* Arena Floor Baseline Indicator */}
+          <div
+            className="absolute left-0 right-0 h-[2px] bg-slate-200 pointer-events-none z-5"
+            style={{ top: `${floorY}px` }}
+          />
+
+          {/* SVG Layer: Top Horizontal Bar, Mounting Grommet, and Un-stretchable Swing Cable */}
+          <svg
+            className="absolute inset-0 w-full h-full pointer-events-none overflow-visible z-20"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <defs>
+              {/* Chrome / Polished Steel Rod Gradient (Exact match with HangingLetters in light theme) */}
+              <linearGradient id="swing-bar-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="#94A3B8" />
+                <stop offset="35%" stopColor="#475569" />
+                <stop offset="70%" stopColor="#1E293B" />
+                <stop offset="100%" stopColor="#475569" />
+              </linearGradient>
+
+              {/* Rod highlight reflection */}
+              <linearGradient id="swing-bar-light" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="transparent" />
+                <stop offset="25%" stopColor="rgba(255,255,255,0.4)" />
+                <stop offset="50%" stopColor="rgba(255,255,255,0.85)" />
+                <stop offset="75%" stopColor="rgba(255,255,255,0.4)" />
+                <stop offset="100%" stopColor="transparent" />
+              </linearGradient>
+
+              {/* Un-stretchable Braided Steel Cable Gradient */}
+              <linearGradient id="swing-cable-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#64748B" />
+                <stop offset="50%" stopColor="#334155" />
+                <stop offset="100%" stopColor="#0F172A" />
+              </linearGradient>
+            </defs>
+
+            {/* Wall mount bracket end-caps */}
+            <rect
+              x={4}
+              y={BAR_Y - 7}
+              width={10}
+              height={18}
+              rx={2}
+              fill="#475569"
+            />
+            <rect
+              x={dimensions.width - 14}
+              y={BAR_Y - 7}
+              width={10}
+              height={18}
+              rx={2}
+              fill="#475569"
+            />
+
+            {/* The Horizontal Hanging Bar Rod */}
+            <rect
+              x={10}
+              y={BAR_Y - 4}
+              width={Math.max(10, dimensions.width - 20)}
+              height={8}
+              rx={4}
+              fill="url(#swing-bar-grad)"
+            />
+            <line
+              x1={16}
+              y1={BAR_Y - 2}
+              x2={dimensions.width - 16}
+              y2={BAR_Y - 2}
+              stroke="url(#swing-bar-light)"
+              strokeWidth="1.2"
+            />
+
+            {/* Anchor Grommet & Bearing on the top rod */}
+            <circle
+              cx={ceilingAnchor.x}
+              cy={BAR_Y + 3}
+              r="7"
+              fill="#1E293B"
+              stroke="#64748B"
+              strokeWidth="2.5"
+            />
+            <circle
+              cx={ceilingAnchor.x}
+              cy={BAR_Y + 3}
+              r="3"
+              fill="#F8FAFC"
+            />
+
+            {/* The Un-stretchable Swing String / Heavy Cable */}
+            <line
+              ref={cableLineRef}
+              x1={ceilingAnchor.x}
+              y1={BAR_Y + 3}
+              x2={swingRef.current.x}
+              y2={swingRef.current.y - BALL_TOP_OFFSET}
+              stroke="url(#swing-cable-grad)"
+              strokeWidth="3.5"
+              strokeLinecap="round"
+              style={{
+                filter: "drop-shadow(0 2px 4px rgba(0, 0, 0, 0.25))",
+              }}
+            />
+
+            {/* Fastener Ring / Shackle connecting to the ball */}
+            <circle
+              ref={cableKnotRef}
+              cx={swingRef.current.x}
+              cy={swingRef.current.y - BALL_TOP_OFFSET}
+              r="4.5"
+              fill="#0284C7"
+              stroke="#0F172A"
+              strokeWidth="1.5"
+            />
+          </svg>
+
+          {/* Heavy Ball on the Un-stretchable Swing */}
+          <div
+            ref={ballDomRef}
+            onPointerDown={handleBallPointerDown}
+            onPointerUp={handleBallPointerUp}
+            onPointerCancel={handleBallPointerUp}
+            style={{
+              width: `${BALL_RADIUS * 2}px`,
+              height: `${BALL_RADIUS * 2}px`,
+              touchAction: "none",
+            }}
+            className="absolute top-0 left-0 rounded-full cursor-grab active:cursor-grabbing z-30 flex items-center justify-center will-change-transform select-none group"
+            title="Grab & swing this heavy ball into the stack!"
+          >
+            {/* Outer Polished Demolition Shell */}
+            <div className="relative w-full h-full rounded-full bg-gradient-to-tr from-slate-900 via-slate-800 to-slate-700 border-[2.5px] border-slate-300 shadow-[0_10px_25px_rgba(0,0,0,0.35),0_0_16px_rgba(56,189,248,0.35)] flex items-center justify-center transition-transform group-hover:scale-105 active:scale-95 overflow-hidden">
+              {/* Radial Bolted Texture */}
+              <div className="absolute inset-1 rounded-full border border-dashed border-slate-500/60 pointer-events-none" />
+
+              {/* Centered Next.js Tech Emblem */}
+              <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-inner z-10 border border-slate-300">
+                <Icon
+                  icon="devicon:nextjs"
+                  className="w-6 h-6 shrink-0 select-none pointer-events-none drop-shadow-sm text-black"
+                />
+              </div>
+
+              {/* 3D Specular Sheen */}
+              <div className="absolute top-1 left-2 w-5 h-3 rounded-full bg-white/40 rotate-[-30deg] blur-[1px] pointer-events-none" />
+            </div>
+          </div>
+
+          {/* Dynamic Square Tech Stack Badges (28 items: 4 columns x 7 rows, roaming floaty physics) */}
+          {SLINGSHOT_TECH_STACK.map((item) => (
+            <div
+              key={item.id}
+              ref={(el) => {
+                if (el) iconDomRefs.current.set(item.id, el);
+                else iconDomRefs.current.delete(item.id);
+              }}
+              onPointerDown={(e) => handleBadgePointerDown(e, item.id)}
+              onPointerMove={handleBadgePointerMove}
+              onPointerUp={handleBadgePointerUp}
+              onPointerCancel={handleBadgePointerUp}
+              style={{
+                width: `${iconSize}px`,
+                height: `${iconSize}px`,
+                touchAction: "none",
+              }}
+              className="absolute top-0 left-0 rounded-2xl cursor-grab active:cursor-grabbing z-25 flex items-center justify-center will-change-transform select-none group"
+              title={`Drag and toss ${item.name}`}
+            >
+              <div
+                className="w-full h-full rounded-2xl bg-white border border-slate-200 shadow-sm flex flex-col items-center justify-center p-1.5 transition-all duration-200 group-hover:shadow-md group-hover:border-slate-300 active:scale-95"
+                style={{
+                  boxShadow: `0 2px 10px ${item.glowColor}`,
+                }}
+              >
+                <Icon
+                  icon={item.icon}
+                  className="w-6 h-6 md:w-7 md:h-7 shrink-0 select-none pointer-events-none"
+                />
+                <span className="text-[9.5px] font-bold text-slate-800 tracking-tight whitespace-nowrap truncate max-w-full pointer-events-none mt-0.5">
+                  {item.name}
+                </span>
+              </div>
+            </div>
+          ))}
+
+          {/* Interactive Hint Banner at Bottom */}
+          <div className="absolute bottom-3 left-4 right-4 flex items-center justify-between text-[11px] text-slate-400 pointer-events-none z-10 font-mono">
+            <span className="flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+              <span>Pull the heavy swing ball high to the left and release to test the stack under pressure</span>
+            </span>
+            <span className="hidden sm:inline">
+              Decreased gravity: badges float and roam freely • toss or rebuild anytime
+            </span>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}

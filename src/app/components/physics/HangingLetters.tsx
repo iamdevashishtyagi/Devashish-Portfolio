@@ -207,7 +207,6 @@ export default function HangingLetters() {
         l.angle = 0;
         l.vAngle = 0;
       }
-      setRenderTrigger((prev) => (prev + 1) % 100000);
       animFrameRef.current = null;
     }
   }, []);
@@ -264,7 +263,9 @@ export default function HangingLetters() {
       letter.y = anchorY + dy * scale;
     }
 
-    wakeSimulation();
+    if (!animFrameRef.current) {
+      wakeSimulation();
+    }
   }, [wakeSimulation]);
 
   // Finish dragging and apply flick impulse
