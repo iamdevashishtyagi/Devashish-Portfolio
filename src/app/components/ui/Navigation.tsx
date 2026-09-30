@@ -23,11 +23,41 @@ export default function Navigation() {
   const introBackdropRef = useRef<HTMLDivElement>(null);
   const introTimelineRef = useRef<gsap.core.Timeline | null>(null);
 
-  // Once docked, wordmark is permanently frozen in navbar
+  // Position wordmark directly in the navbar slot without animation
   const handleDockWordmark = useCallback(() => {
     setIsDocked(true);
-    if (wordmarkWrapperRef.current) {
-      wordmarkWrapperRef.current.style.display = "none";
+    const wordmark = wordmarkRef.current;
+    const slot = wordmarkSlotRef.current;
+    if (!wordmark || !slot) return;
+
+    const rect = slot.getBoundingClientRect();
+    gsap.set(wordmark, {
+      fontSize: "1.5rem",
+      fontWeight: 700,
+      letterSpacing: "-0.04em",
+      lineHeight: 1,
+      x: rect.left + rect.width / 2 - window.innerWidth / 2,
+      y: rect.top + rect.height / 2 - window.innerHeight / 2,
+      opacity: 1,
+    });
+
+    if (remainingCharsRef.current) {
+      gsap.set(remainingCharsRef.current, { opacity: 1, x: 0 });
+    }
+
+    const charEls = Array.from(
+      wordmark.querySelectorAll<HTMLElement>(".wordmark-character")
+    );
+    charEls.forEach((el) => {
+      gsap.set(el, { width: "auto" });
+    });
+
+    if (introBackdropRef.current) {
+      gsap.set(introBackdropRef.current, { autoAlpha: 0 });
+    }
+
+    if (loadingLineRef.current) {
+      gsap.set(loadingLineRef.current, { display: "none" });
     }
   }, []);
 
@@ -63,8 +93,9 @@ export default function Navigation() {
         xPercent: -50,
         yPercent: -50,
         fontSize: initialStyles.fontSize,
-        fontWeight: 900,
+        fontWeight: 700,
         letterSpacing: initialStyles.letterSpacing,
+        lineHeight: 1,
       });
 
       const charEls = Array.from(
@@ -97,10 +128,11 @@ export default function Navigation() {
         measurer.style.whiteSpace = "pre";
         measurer.style.pointerEvents = "none";
         measurer.style.fontSize = initialStyles.fontSize;
-        measurer.style.fontWeight = "900";
+        measurer.style.fontWeight = "700";
         measurer.style.fontFamily = initialStyles.fontFamily;
         measurer.style.letterSpacing = initialStyles.letterSpacing;
         measurer.style.textTransform = initialStyles.textTransform;
+        measurer.style.lineHeight = "1";
         document.body.appendChild(measurer);
         measurer.textContent = char;
         const width = measurer.getBoundingClientRect().width;
@@ -109,11 +141,7 @@ export default function Navigation() {
       });
 
       // Intro timeline
-      const intro = gsap.timeline({
-        onComplete: () => {
-          handleDockWordmark();
-        },
-      });
+      const intro = gsap.timeline();
       introTimelineRef.current = intro;
 
       // 1. Loading bar fill
@@ -170,7 +198,7 @@ export default function Navigation() {
         "-=0.55"
       );
 
-      // 4. Smooth glide directly into navbar logo slot (One-Way Transition)
+      // 4. Smooth glide directly into navbar logo slot (One-Way Continuous Transition)
       intro.to(
         wordmark,
         {
@@ -183,10 +211,14 @@ export default function Navigation() {
             return rect.top + rect.height / 2 - window.innerHeight / 2;
           },
           fontSize: "1.5rem",
-          fontWeight: 900,
-          letterSpacing: "-0.025em",
-          duration: 0.75,
+          fontWeight: 700,
+          letterSpacing: "-0.04em",
+          lineHeight: 1,
+          duration: 0.9,
           ease: "power2.inOut",
+          onComplete: () => {
+            setIsDocked(true);
+          },
         },
         "+=0.2"
       );
@@ -196,7 +228,7 @@ export default function Navigation() {
         introBackdrop,
         {
           autoAlpha: 0,
-          duration: 0.75,
+          duration: 0.9,
           ease: "power2.inOut",
         },
         "<"
@@ -207,7 +239,7 @@ export default function Navigation() {
     const handleEarlyScroll = () => {
       if (window.scrollY > 20 && introTimelineRef.current) {
         introTimelineRef.current.progress(1);
-        handleDockWordmark();
+        setIsDocked(true);
       }
     };
     window.addEventListener("scroll", handleEarlyScroll, { passive: true });
@@ -217,6 +249,21 @@ export default function Navigation() {
       ctx.revert();
     };
   }, [handleDockWordmark]);
+
+  // Keep wordmark aligned with navbar slot on window resize once docked
+  useEffect(() => {
+    const handleResize = () => {
+      if (!isDocked || !wordmarkRef.current || !wordmarkSlotRef.current) return;
+      const rect = wordmarkSlotRef.current.getBoundingClientRect();
+      gsap.set(wordmarkRef.current, {
+        x: rect.left + rect.width / 2 - window.innerWidth / 2,
+        y: rect.top + rect.height / 2 - window.innerHeight / 2,
+      });
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [isDocked]);
 
   // Scroll tracking for navbar background blur & active section
   useEffect(() => {
@@ -258,87 +305,92 @@ export default function Navigation() {
 
   return (
     <>
-      {/* Intro Overlay: Active only during first transition, then hidden permanently */}
-      {!isDocked && (
+      {/* Intro & Docked Wordmark Layer - ONE single continuous element across entire lifecycle */}
+      <div
+        ref={wordmarkWrapperRef}
+        className={`pointer-events-none fixed inset-0 z-[60] overflow-hidden transition-transform duration-300 ${
+          isDocked && isHidden ? "-translate-y-full" : "translate-y-0"
+        }`}
+      >
+        {/* Frosted blurry effect behind the intro transition */}
         <div
-          ref={wordmarkWrapperRef}
-          className="pointer-events-none fixed inset-0 z-[60] overflow-hidden"
+          ref={introBackdropRef}
+          className="absolute inset-0 bg-white/75 backdrop-blur-2xl"
+          aria-hidden="true"
+        />
+
+        {/* The single, continuous DEVASHISH wordmark */}
+        <a
+          ref={wordmarkRef}
+          href="#"
+          aria-label="Devashish - Back to top"
+          style={{
+            left: "50%",
+            top: "50%",
+            fontSize: "clamp(3.25rem, 16vw, 16rem)",
+            fontFamily: "var(--font-medieval-sharp), serif",
+            letterSpacing: "-0.04em",
+            lineHeight: 1,
+          }}
+          className="pointer-events-auto absolute z-10 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap font-medieval-sharp font-bold uppercase leading-none text-black will-change-transform transition-opacity hover:opacity-80"
         >
-          {/* Frosted blurry effect behind the intro transition */}
-          <div
-            ref={introBackdropRef}
-            className="absolute inset-0 bg-white/75 backdrop-blur-2xl"
-            aria-hidden="true"
-          />
-          <a
-            ref={wordmarkRef}
-            href="#"
-            aria-label="Devashish - Portfolio"
-            style={{
-              left: "50%",
-              top: "50%",
-              fontSize: "clamp(3.25rem, 16vw, 16rem)",
-              fontWeight: 900,
-              fontFamily: "var(--font-medieval-sharp)",
-              letterSpacing: "-0.05em",
-            }}
-            className="pointer-events-auto absolute z-10 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap font-sans font-black uppercase leading-none text-black will-change-transform"
+          <span className="wordmark-character inline-block">
+            {WORDMARK_CHARACTERS[0]}
+          </span>
+          <span
+            ref={remainingCharsRef}
+            className="inline-block"
+            style={{ opacity: 0 }}
           >
-            <span className="wordmark-character inline-block">
-              {WORDMARK_CHARACTERS[0]}
-            </span>
-            <span
-              ref={remainingCharsRef}
-              className="inline-block"
-              style={{ opacity: 0 }}
-            >
-              {WORDMARK_CHARACTERS.slice(1).map((character, index) => (
-                <span
-                  key={`${character}-${index}`}
-                  className="wordmark-character inline-block"
-                  style={{ width: 0, verticalAlign: "top" }}
-                >
-                  {character}
-                </span>
-              ))}
-            </span>
-          </a>
+            {WORDMARK_CHARACTERS.slice(1).map((character, index) => (
+              <span
+                key={`${character}-${index}`}
+                className="wordmark-character inline-block"
+                style={{ width: 0 }}
+              >
+                {character}
+              </span>
+            ))}
+          </span>
+        </a>
 
-          <div
-            ref={loadingLineRef}
-            className="fixed z-10 left-1/2 h-[2px] w-24 -translate-x-1/2 overflow-hidden rounded-full bg-neutral-200 opacity-0 sm:w-32"
-          >
-            <div ref={loadingBarRef} className="h-full w-full rounded-full bg-black" />
-          </div>
+        <div
+          ref={loadingLineRef}
+          className="fixed z-10 left-1/2 h-[2px] w-24 -translate-x-1/2 overflow-hidden rounded-full bg-neutral-200 opacity-0 sm:w-32"
+        >
+          <div ref={loadingBarRef} className="h-full w-full rounded-full bg-black" />
         </div>
-      )}
+      </div>
 
-      {/* Modern, Smart, Clear Navbar */}
+      {/* Main Navbar */}
       <nav
         className={`fixed top-0 right-0 left-0 z-50 transition-all duration-300 ${
           isHidden ? "-translate-y-full" : "translate-y-0"
         } ${
           isScrolled
-            ? "border-b border-neutral-200/80 bg-white/90 backdrop-blur-md shadow-xs"
+            ? "border-b border-[#D8EAFD] bg-white/95 backdrop-blur-md shadow-xs"
             : "bg-transparent"
         }`}
       >
         <div className="mx-auto max-w-7xl px-6 md:px-12 lg:px-24">
           <div className="flex h-16 items-center justify-between">
-            {/* Frozen Navbar Wordmark Slot */}
+            {/* Frozen Navbar Wordmark Slot - Reserves space in navbar layout */}
             <div
               ref={wordmarkSlotRef}
-              className="h-8 min-w-36 flex items-center"
+              className="h-8 flex items-center"
+              aria-hidden="true"
             >
-              {isDocked && (
-                <a
-                  href="#"
-                  aria-label="Devashish - Back to top"
-                  className="font-sans font-black text-2xl tracking-tight text-black transition-opacity hover:opacity-80 flex items-center uppercase"
-                >
-                  DEVASHISH
-                </a>
-              )}
+              <span
+                className="invisible font-medieval-sharp font-bold text-2xl uppercase select-none pointer-events-none"
+                style={{
+                  fontFamily: "var(--font-medieval-sharp), serif",
+                  letterSpacing: "-0.04em",
+                  fontSize: "1.5rem",
+                  lineHeight: 1,
+                }}
+              >
+                DEVASHISH
+              </span>
             </div>
 
             {/* Nav Links */}
@@ -347,10 +399,10 @@ export default function Navigation() {
                 <a
                   key={link.label}
                   href={link.href}
-                  className={`transition-colors hover:text-black ${
+                  className={`transition-colors hover:text-[#0A173E] ${
                     activeSection === link.href
-                      ? "text-black font-semibold"
-                      : "text-neutral-500"
+                      ? "text-[#0A173E] font-bold"
+                      : "text-slate-600"
                   }`}
                 >
                   {link.label}
