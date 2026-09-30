@@ -23,6 +23,41 @@ interface Spark {
   decay: number;
 }
 
+// Generate dynamic organic string curve with natural catenary sag and aerodynamic bowing
+function getCablePath(
+  ax: number,
+  ay: number,
+  bx: number,
+  by: number,
+  vx: number,
+  vy: number,
+  L: number
+) {
+  const dx = bx - ax;
+  const dy = by - ay;
+  const dist = Math.hypot(dx, dy);
+
+  // Slack amount when ball is closer to anchor than string length L
+  const slack = Math.max(0, L - dist);
+  // Natural catenary droop (sags downwards in gravity direction)
+  const sag = Math.min(180, Math.pow(slack, 0.92) * 0.62);
+
+  // Inertial and aerodynamic flex (rope bows dynamically opposite to ball velocity)
+  const flexX = Math.max(-50, Math.min(50, -vx * 0.45));
+  const flexY = Math.max(-35, Math.min(35, -vy * 0.3));
+
+  // Cubic Bézier curve with two control points for rich, organic string physics:
+  // cp1: near anchor, hangs down with gravity + slack
+  const cp1x = ax + dx * 0.28 + flexX * 0.7;
+  const cp1y = ay + dy * 0.28 + sag * 0.85 + flexY * 0.6;
+
+  // cp2: near ball shackle, connects smoothly into top of the ball
+  const cp2x = bx - dx * 0.28 + flexX * 0.4;
+  const cp2y = by - dy * 0.28 + sag * 0.85 + flexY * 0.4;
+
+  return `M ${ax.toFixed(1)} ${ay.toFixed(1)} C ${cp1x.toFixed(1)} ${cp1y.toFixed(1)}, ${cp2x.toFixed(1)} ${cp2y.toFixed(1)}, ${bx.toFixed(1)} ${by.toFixed(1)}`;
+}
+
 // Order 28 tech stack items systematically into 4 columns of 7 items
 // Positioned a little more to the left of the block with increased box size
 function getSystematicGridPositions(width: number, height: number, anchorX: number) {
@@ -69,7 +104,7 @@ export default function TechSlingshot() {
 
   // DOM node references for direct buttery 60/120fps transforms
   const ballDomRef = useRef<HTMLDivElement>(null);
-  const cableLineRef = useRef<SVGLineElement>(null);
+  const cablePathRef = useRef<SVGPathElement>(null);
   const cableKnotRef = useRef<SVGCircleElement>(null);
   const iconDomRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
@@ -102,7 +137,7 @@ export default function TechSlingshot() {
     vy: 0,
   });
 
-  const prevBallPointerHistory = useRef<{ theta: number; time: number }[]>([]);
+  const prevBallPointerHistory = useRef<{ x: number; y: number; time: number }[]>([]);
 
   // Dragging state for individual tech badges
   const badgeDragRef = useRef<{
@@ -298,11 +333,11 @@ export default function TechSlingshot() {
     if (ballDomRef.current) {
       ballDomRef.current.style.transform = `translate3d(${ballX}px, ${ballY}px, 0px) translate(-50%, -50%) rotate(${initialTheta}rad)`;
     }
-    if (cableLineRef.current) {
-      cableLineRef.current.setAttribute("x1", String(anchorX));
-      cableLineRef.current.setAttribute("y1", String(anchorY));
-      cableLineRef.current.setAttribute("x2", String(ballX));
-      cableLineRef.current.setAttribute("y2", String(ballY - BALL_TOP_OFFSET));
+    if (cablePathRef.current) {
+      cablePathRef.current.setAttribute(
+        "d",
+        getCablePath(anchorX, anchorY, ballX, ballY - BALL_TOP_OFFSET, 0, 0, initialL)
+      );
     }
     if (cableKnotRef.current) {
       cableKnotRef.current.setAttribute("cx", String(ballX));
@@ -356,40 +391,78 @@ export default function TechSlingshot() {
       const L = cableLengthRef.current;
       const swing = swingRef.current;
 
-      // 1. Un-stretchable Swing Pendulum Integration
+      // 1. Flexible String Swing Integration (Slack freefall + Taut pendulum)
       if (!swing.isDragging && !swing.isArmed && !isResettingRef.current) {
-        const gravityFactor = 0.0035;
-        const damping = 0.0009;
+        const curDistToAnchor = Math.hypot(swing.x - anchor.x, swing.y - anchor.y);
+        const isSlack = curDistToAnchor < L - 1.5;
 
-        const alpha = -gravityFactor * Math.sin(swing.theta) - damping * swing.omega;
-        swing.omega += alpha * dt;
-        swing.omega *= Math.pow(0.9995, dt);
-        swing.theta += swing.omega * dt;
+        if (isSlack) {
+          // String is slack: Ball falls and moves in free 2D trajectory under gravity
+          const g = 0.42;
+          swing.vy += g * dt;
+          swing.vx *= Math.pow(0.9994, dt);
+          swing.vy *= Math.pow(0.9994, dt);
 
-        const curX = anchor.x + L * Math.sin(swing.theta);
-        const curY = anchor.y + L * Math.cos(swing.theta);
+          let nextX = swing.x + swing.vx * dt;
+          let nextY = swing.y + swing.vy * dt;
 
-        swing.vx = L * Math.cos(swing.theta) * swing.omega;
-        swing.vy = -L * Math.sin(swing.theta) * swing.omega;
-        swing.x = curX;
-        swing.y = curY;
+          const newDist = Math.hypot(nextX - anchor.x, nextY - anchor.y);
+          if (newDist >= L) {
+            // String snaps taut! Convert velocity smoothly into pendulum swing
+            const theta = Math.atan2(nextX - anchor.x, nextY - anchor.y);
+            swing.theta = theta;
+            const nx = Math.sin(theta);
+            const ny = Math.cos(theta);
+
+            // Tangential velocity preserved
+            const vTan = swing.vx * ny - swing.vy * nx;
+            swing.omega = vTan / L;
+            swing.vx = L * ny * swing.omega;
+            swing.vy = -L * nx * swing.omega;
+            nextX = anchor.x + nx * L;
+            nextY = anchor.y + ny * L;
+          } else {
+            swing.theta = Math.atan2(nextX - anchor.x, nextY - anchor.y);
+            swing.omega = (swing.vx * (nextY - anchor.y) - swing.vy * (nextX - anchor.x)) / (newDist * newDist || 1);
+          }
+
+          swing.x = nextX;
+          swing.y = nextY;
+        } else {
+          // String is taut: Pure harmonic pendulum physics along the circular arc
+          const gravityFactor = 0.0035;
+          const damping = 0.0008;
+
+          const alpha = -gravityFactor * Math.sin(swing.theta) - damping * swing.omega;
+          swing.omega += alpha * dt;
+          swing.omega *= Math.pow(0.9996, dt);
+          swing.theta += swing.omega * dt;
+
+          const curX = anchor.x + L * Math.sin(swing.theta);
+          const curY = anchor.y + L * Math.cos(swing.theta);
+
+          swing.vx = L * Math.cos(swing.theta) * swing.omega;
+          swing.vy = -L * Math.sin(swing.theta) * swing.omega;
+          swing.x = curX;
+          swing.y = curY;
+        }
 
         // Sync Matter.js ball body position & velocity
         if (ballBody) {
-          Matter.Body.setPosition(ballBody, { x: curX, y: curY });
+          Matter.Body.setPosition(ballBody, { x: swing.x, y: swing.y });
           Matter.Body.setVelocity(ballBody, { x: swing.vx, y: swing.vy });
         }
       }
 
-      // Update ball and SVG cable in DOM
+      // Update ball and flexible SVG string in DOM
       if (ballDomRef.current) {
         ballDomRef.current.style.transform = `translate3d(${swing.x}px, ${swing.y}px, 0px) translate(-50%, -50%) rotate(${swing.theta}rad)`;
       }
-      if (cableLineRef.current) {
-        cableLineRef.current.setAttribute("x1", String(anchor.x));
-        cableLineRef.current.setAttribute("y1", String(anchor.y));
-        cableLineRef.current.setAttribute("x2", String(swing.x));
-        cableLineRef.current.setAttribute("y2", String(swing.y - BALL_TOP_OFFSET));
+      if (cablePathRef.current) {
+        cablePathRef.current.setAttribute(
+          "d",
+          getCablePath(anchor.x, anchor.y, swing.x, swing.y - BALL_TOP_OFFSET, swing.vx, swing.vy, L)
+        );
       }
       if (cableKnotRef.current) {
         cableKnotRef.current.setAttribute("cx", String(swing.x));
@@ -577,20 +650,36 @@ export default function TechSlingshot() {
 
     // Vector from anchor to pointer
     const dx = pointerX - anchor.x;
-    const dy = pointerY - anchor.y;
+    const dy = Math.max(16, pointerY - anchor.y);
+    const pDist = Math.hypot(dx, dy);
 
-    // Fixed un-stretchable string: angle is determined by pointer angle!
-    let angle = Math.atan2(dx, dy);
+    let targetX = pointerX;
+    let targetY = pointerY;
 
-    // Clamp angle so it stays inside bounds and below the top bar (~ -74 deg to +74 deg)
-    const maxTheta = 1.28;
-    angle = Math.max(-maxTheta, Math.min(maxTheta, angle));
+    // String physics:
+    // If pulled farther than string length L, clamp distance firmly to L (un-stretchable string)
+    // If pointer is inside L, the ball moves freely with pointer and the string sags loosely!
+    if (pDist > L) {
+      const nx = dx / (pDist || 1);
+      const ny = dy / (pDist || 1);
+      const clampedL = L + Math.min(4, (pDist - L) * 0.05);
+      targetX = anchor.x + nx * clampedL;
+      targetY = anchor.y + ny * clampedL;
+    } else {
+      targetY = Math.max(anchor.y + 16, pointerY);
+    }
+
+    // Keep ball within arena boundaries
+    targetX = Math.max(BALL_RADIUS + 12, Math.min(arenaSizeRef.current.width - BALL_RADIUS - 12, targetX));
+    targetY = Math.min(arenaSizeRef.current.height - 20 - BALL_RADIUS, targetY);
+
+    const angle = Math.atan2(targetX - anchor.x, targetY - anchor.y);
 
     const swing = swingRef.current;
     swing.theta = angle;
     swing.omega = 0;
-    swing.x = anchor.x + L * Math.sin(angle);
-    swing.y = anchor.y + L * Math.cos(angle);
+    swing.x = targetX;
+    swing.y = targetY;
     swing.vx = 0;
     swing.vy = 0;
 
@@ -602,9 +691,11 @@ export default function TechSlingshot() {
     if (ballDomRef.current) {
       ballDomRef.current.style.transform = `translate3d(${swing.x}px, ${swing.y}px, 0px) translate(-50%, -50%) rotate(${angle}rad)`;
     }
-    if (cableLineRef.current) {
-      cableLineRef.current.setAttribute("x2", String(swing.x));
-      cableLineRef.current.setAttribute("y2", String(swing.y - BALL_TOP_OFFSET));
+    if (cablePathRef.current) {
+      cablePathRef.current.setAttribute(
+        "d",
+        getCablePath(anchor.x, anchor.y, swing.x, swing.y - BALL_TOP_OFFSET, 0, 0, L)
+      );
     }
     if (cableKnotRef.current) {
       cableKnotRef.current.setAttribute("cx", String(swing.x));
@@ -612,8 +703,8 @@ export default function TechSlingshot() {
     }
 
     const now = performance.now();
-    prevBallPointerHistory.current.push({ theta: angle, time: now });
-    prevBallPointerHistory.current = prevBallPointerHistory.current.filter((p) => now - p.time <= 120);
+    prevBallPointerHistory.current.push({ x: targetX, y: targetY, time: now });
+    prevBallPointerHistory.current = prevBallPointerHistory.current.filter((p) => now - p.time <= 140);
   }, []);
 
   const finishBallDrag = useCallback(() => {
@@ -623,21 +714,29 @@ export default function TechSlingshot() {
     swing.isDragging = false;
     swing.isArmed = false;
 
-    // Calculate flick velocity from angular drag history
+    // Calculate flick velocity from 2D pointer drag history
     const history = prevBallPointerHistory.current;
     if (history.length >= 2) {
       const first = history[0];
       const last = history[history.length - 1];
       const dt = Math.max(1, last.time - first.time);
-      const dTheta = last.theta - first.theta;
+      const vx = ((last.x - first.x) / dt) * 16;
+      const vy = ((last.y - first.y) / dt) * 16;
 
-      let flickOmega = (dTheta / dt) * 16 * 1.15;
-      const maxOmega = 0.16;
-      flickOmega = Math.max(-maxOmega, Math.min(maxOmega, flickOmega));
-      swing.omega = flickOmega;
+      const maxSpeed = 38;
+      const speed = Math.hypot(vx, vy);
+      if (speed > maxSpeed) {
+        swing.vx = (vx / speed) * maxSpeed;
+        swing.vy = (vy / speed) * maxSpeed;
+      } else {
+        swing.vx = vx;
+        swing.vy = vy;
+      }
     } else {
-      if (swing.theta < -0.15) {
-        swing.omega = 0.024; // Forward swing boost
+      // Natural release
+      if (swing.x < ceilingAnchorRef.current.x - 40) {
+        swing.vx = 4.0; // Confident forward swing toward the stack
+        swing.vy = 1.0;
       }
     }
 
@@ -683,7 +782,9 @@ export default function TechSlingshot() {
     swing.isDragging = true;
     swing.isArmed = false;
     swing.omega = 0;
-    prevBallPointerHistory.current = [{ theta: swing.theta, time: performance.now() }];
+    swing.vx = 0;
+    swing.vy = 0;
+    prevBallPointerHistory.current = [{ x: swing.x, y: swing.y, time: performance.now() }];
   };
 
   // Ball Pointer Up
@@ -702,14 +803,23 @@ export default function TechSlingshot() {
     const peakTheta = cockedPeakThetaRef.current;
 
     swing.theta = peakTheta;
-    swing.omega = 0.026; // Snappy forward impulse toward the stack!
+    swing.omega = 0.028; // Snappy forward impulse toward the stack!
     swing.isDragging = false;
     swing.isArmed = false;
     swing.x = anchor.x + L * Math.sin(peakTheta);
     swing.y = anchor.y + L * Math.cos(peakTheta);
+    swing.vx = 4.6;
+    swing.vy = 1.0;
 
     if (ballBodyRef.current) {
       Matter.Body.setPosition(ballBodyRef.current, { x: swing.x, y: swing.y });
+    }
+
+    if (cablePathRef.current) {
+      cablePathRef.current.setAttribute(
+        "d",
+        getCablePath(anchor.x, anchor.y, swing.x, swing.y - BALL_TOP_OFFSET, swing.vx, swing.vy, L)
+      );
     }
 
     setSwingsCount((c) => c + 1);
@@ -897,9 +1007,11 @@ export default function TechSlingshot() {
       if (ballDomRef.current) {
         ballDomRef.current.style.transform = `translate3d(${ballX}px, ${ballY}px, 0px) translate(-50%, -50%) rotate(${curTheta}rad)`;
       }
-      if (cableLineRef.current) {
-        cableLineRef.current.setAttribute("x2", String(ballX));
-        cableLineRef.current.setAttribute("y2", String(ballY - BALL_TOP_OFFSET));
+      if (cablePathRef.current) {
+        cablePathRef.current.setAttribute(
+          "d",
+          getCablePath(anchor.x, anchor.y, ballX, ballY - BALL_TOP_OFFSET, 0, 0, L)
+        );
       }
       if (cableKnotRef.current) {
         cableKnotRef.current.setAttribute("cx", String(ballX));
@@ -1099,15 +1211,21 @@ export default function TechSlingshot() {
             fill="#F8FAFC"
           />
 
-          {/* The Un-stretchable Swing String / Heavy Cable */}
-          <line
-            ref={cableLineRef}
-            x1={ceilingAnchor.x}
-            y1={BAR_Y + 3}
-            x2={swingRef.current.x}
-            y2={swingRef.current.y - BALL_TOP_OFFSET}
+          {/* Flexible Realistic Physics Cable / Hanging String */}
+          <path
+            ref={cablePathRef}
+            d={getCablePath(
+              ceilingAnchor.x,
+              BAR_Y + 3,
+              swingRef.current.x,
+              swingRef.current.y - BALL_TOP_OFFSET,
+              swingRef.current.vx,
+              swingRef.current.vy,
+              cableLength
+            )}
+            fill="none"
             stroke="url(#swing-cable-grad)"
-            strokeWidth="4"
+            strokeWidth="3.5"
             strokeLinecap="round"
             style={{
               filter: "drop-shadow(0 2px 5px rgba(0, 0, 0, 0.25))",
