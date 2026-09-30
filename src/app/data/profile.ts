@@ -20,9 +20,9 @@ export const navLinks = [
   { label: "Experience", href: "#experience" },
   { label: "Work", href: "#projects" },
   { label: "Wins", href: "#wins" },
-  { label: "Skills", href: "#skills" },
   { label: "Systems", href: "#architecture" },
   { label: "Achievements", href: "#achievements" },
+  { label: "Skills", href: "#skills" },
   { label: "FAQ", href: "#faq" },
   { label: "Contact", href: "#contact" },
 ];

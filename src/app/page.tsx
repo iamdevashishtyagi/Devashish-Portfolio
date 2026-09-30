@@ -159,9 +159,9 @@ export default function Home() {
         <Experience />
         <Projects />
         <Wins />
-        <Skills />
         <Architecture />
         <Achievements />
+        <Skills />
         <Faq />
         <Contact />
         <Footer />
