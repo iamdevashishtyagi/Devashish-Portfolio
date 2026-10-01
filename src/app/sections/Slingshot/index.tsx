@@ -99,8 +99,14 @@ export function getSlingshotConfig(width: number, height: number) {
     : Math.max(260, Math.min(460, width * 0.32));
   const anchorY = barY;
 
-  // Initial cocked ball position: touching ceiling, just right of left boundary
-  const initialBallX = ballRadius + (isMobile ? 14 : 36);
+  // Initial cocked ball position: touching ceiling, tucked closely to the left boundary
+  const initialBallX = isCompactMobile
+    ? ballRadius + 2
+    : isMobile
+    ? ballRadius + 4
+    : isTablet
+    ? ballRadius + 16
+    : ballRadius + 36;
   const initialBallY = barY + ballRadius + 2;
 
   // Cable length: spans from anchor down towards the floor level
@@ -740,7 +746,8 @@ export default function TechSlingshot() {
     }
 
     // Keep ball within arena boundaries
-    targetX = Math.max(curConf.ballRadius + 10, Math.min(arenaSizeRef.current.width - curConf.ballRadius - 10, targetX));
+    const minBallX = curConf.ballRadius + (curConf.isCompactMobile ? 2 : curConf.isMobile ? 4 : 10);
+    targetX = Math.max(minBallX, Math.min(arenaSizeRef.current.width - curConf.ballRadius - 10, targetX));
     targetY = Math.min(arenaSizeRef.current.height - (curConf.isMobile ? 14 : 20) - curConf.ballRadius, targetY);
 
     const angle = Math.atan2(targetX - anchor.x, targetY - anchor.y);
