@@ -164,7 +164,7 @@ export default function Home() {
         <Architecture />
         <Achievements />
         <Skills />
-        <Faq />
+        {/* <Faq /> */}
         <Contact />
         <Footer />
       </main>
