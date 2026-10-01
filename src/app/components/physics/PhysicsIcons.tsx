@@ -32,6 +32,17 @@ export interface PhysicsIconsProps {
   showHint?: boolean;
   hintText?: string;
   bottomOffset?: number;
+  scale?: number;
+}
+
+// Calculate proportional icon scaling for mobile, tablet, and desktop
+export function getResponsiveScale(width: number): number {
+  if (width <= 0) return 1.0;
+  if (width < 440) return 0.48; // Mobile compact (360px - 439px) -> ~50-52px icons
+  if (width < 640) return 0.54; // Mobile regular (440px - 639px) -> ~56-58px icons
+  if (width < 768) return 0.64; // Large mobile / small tablet (640px - 767px) -> ~68-70px icons
+  if (width < 1024) return 0.74; // Tablet (768px - 1023px) -> ~78-80px icons
+  return 1.0; // Desktop (>=1024px) -> ~104-112px icons
 }
 
 export default function PhysicsIcons({
@@ -47,12 +58,21 @@ export default function PhysicsIcons({
   showHint = false,
   hintText = "Interactive · Drag & Toss Icons",
   bottomOffset = 0,
+  scale: propScale,
 }: PhysicsIconsProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const [mounted, setMounted] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
   const [hasInteracted, setHasInteracted] = useState(false);
+  const [responsiveScale, setResponsiveScale] = useState<number>(() => {
+    if (typeof window !== "undefined") {
+      return getResponsiveScale(window.innerWidth);
+    }
+    return 1.0;
+  });
+
+  const scale = propScale ?? responsiveScale;
 
   // Matter.js references
   const engineRef = useRef<Matter.Engine | null>(null);
@@ -155,9 +175,11 @@ export default function PhysicsIcons({
     wallsRef.current = { left: leftWall, right: rightWall, bottom: bottomWall };
     Matter.Composite.add(world, [bottomWall, leftWall, rightWall]);
 
-    // Create physics bodies
+    // Create physics bodies with responsive dimensions for mobile, tablet, and desktop
     const bodies = new Map<string, Matter.Body>();
-    const cols = Math.max(3, Math.floor(width / 130));
+    const colWidth = Math.max(50, Math.round(110 * scale));
+    const cols = Math.max(3, Math.floor((width - 40) / colWidth));
+    const spacingX = (width - 40) / Math.max(1, cols);
 
     items.forEach((item, index) => {
       const shape = item.shape || (item.label ? "pill" : "circle");
@@ -169,19 +191,20 @@ export default function PhysicsIcons({
       // Distribute spawn positions horizontally across upper area
       const col = index % cols;
       const row = Math.floor(index / cols);
-      const spacingX = (width - 60) / Math.max(1, cols);
+      const marginX = Math.max(25, Math.round(35 * scale));
       const spawnX = Math.max(
-        50,
+        marginX,
         Math.min(
-          width - 50,
-          35 + col * spacingX + (Math.random() - 0.5) * 24
+          width - marginX,
+          marginX + col * spacingX + (Math.random() - 0.5) * (spacingX * 0.4)
         )
       );
-      const spawnY = -40 - row * 70 + (Math.random() - 0.5) * 20;
+      const rowSpacing = Math.max(38, Math.round(65 * scale));
+      const spawnY = -30 - row * rowSpacing + (Math.random() - 0.5) * 15;
 
       if (isPill) {
-        const itemW = el?.offsetWidth || 116;
-        const itemH = el?.offsetHeight || 38;
+        const itemW = Math.max(60, Math.round((el?.offsetWidth || 116) * scale));
+        const itemH = Math.max(24, Math.round((el?.offsetHeight || 38) * scale));
         body = Matter.Bodies.rectangle(spawnX, spawnY, itemW, itemH, {
           chamfer: { radius: Math.min(itemW, itemH) / 2 },
           restitution: bounce,
@@ -192,7 +215,8 @@ export default function PhysicsIcons({
           label: `icon-${item.id}`,
         });
       } else if (shape === "circle") {
-        const radius = item.radius || (item.size ? Math.round(item.size / 2) : 54);
+        const baseRadius = item.radius || (item.size ? Math.round(item.size / 2) : 54);
+        const radius = Math.max(16, Math.round(baseRadius * scale));
         body = Matter.Bodies.circle(spawnX, spawnY, radius, {
           restitution: bounce,
           friction,
@@ -202,9 +226,11 @@ export default function PhysicsIcons({
           label: `icon-${item.id}`,
         });
       } else if (shape === "square") {
-        const size = item.width || item.height || item.size || 104;
+        const baseSize = item.width || item.height || item.size || 104;
+        const size = Math.max(28, Math.round(baseSize * scale));
+        const chamferRadius = Math.max(6, Math.round(20 * scale));
         body = Matter.Bodies.rectangle(spawnX, spawnY, size, size, {
-          chamfer: { radius: 20 },
+          chamfer: { radius: chamferRadius },
           restitution: bounce,
           friction,
           frictionAir,
@@ -213,10 +239,13 @@ export default function PhysicsIcons({
           label: `icon-${item.id}`,
         });
       } else if (shape === "rectangle") {
-        const itemW = item.width || 116;
-        const itemH = item.height || 72;
+        const baseW = item.width || 116;
+        const baseH = item.height || 72;
+        const itemW = Math.max(36, Math.round(baseW * scale));
+        const itemH = Math.max(22, Math.round(baseH * scale));
+        const chamferRadius = Math.max(6, Math.round(18 * scale));
         body = Matter.Bodies.rectangle(spawnX, spawnY, itemW, itemH, {
-          chamfer: { radius: 18 },
+          chamfer: { radius: chamferRadius },
           restitution: bounce,
           friction,
           frictionAir,
@@ -225,7 +254,7 @@ export default function PhysicsIcons({
           label: `icon-${item.id}`,
         });
       } else {
-        const radius = 54;
+        const radius = Math.max(16, Math.round(54 * scale));
         body = Matter.Bodies.circle(spawnX, spawnY, radius, {
           restitution: bounce,
           friction,
@@ -306,6 +335,12 @@ export default function PhysicsIcons({
           });
         }
 
+        // Update scale tier if screen width crosses mobile / tablet / desktop breakpoints
+        const newScale = getResponsiveScale(newWidth);
+        if (Math.abs(newScale - scale) > 0.04) {
+          setResponsiveScale(newScale);
+        }
+
         bodies.forEach((body) => {
           if (body.position.x > newWidth - 30) {
             Matter.Body.setPosition(body, {
@@ -330,7 +365,7 @@ export default function PhysicsIcons({
       bodiesRef.current.clear();
       wallsRef.current = null;
     };
-  }, [mounted, reducedMotion, disabled, gravity, bounce, friction, frictionAir, items, bottomOffset]);
+  }, [mounted, reducedMotion, disabled, gravity, bounce, friction, frictionAir, items, bottomOffset, scale]);
 
   // Pointer event handlers for grabbing, dragging & throwing with zero jump
   const handlePointerDown = useCallback(
@@ -469,8 +504,8 @@ export default function PhysicsIcons({
           >
             <Icon
               icon={item.icon}
-              width={item.size || 52}
-              height={item.height || item.size || 52}
+              width={Math.round((item.size || 52) * scale)}
+              height={Math.round((item.height || item.size || 52) * scale)}
               aria-hidden="true"
             />
           </div>
@@ -489,9 +524,13 @@ export default function PhysicsIcons({
       {items.map((item) => {
         const shape = item.shape || (item.label ? "pill" : "circle");
         const isPill = shape === "pill" && !!item.label;
-        const radius = item.radius || (item.size ? Math.round(item.size / 2) : 38);
-        const w = shape === "circle" ? radius * 2 : item.width || item.size || 76;
-        const h = shape === "circle" ? radius * 2 : item.height || item.size || 76;
+        const baseRadius = item.radius || (item.size ? Math.round(item.size / 2) : 54);
+        const radius = Math.max(16, Math.round(baseRadius * scale));
+        const w = shape === "circle" ? radius * 2 : Math.max(28, Math.round((item.width || item.size || 104) * scale));
+        const h = shape === "circle" ? radius * 2 : Math.max(28, Math.round((item.height || item.size || 104) * scale));
+
+        const iconW = Math.max(24, Math.round((item.width || item.size || 108) * scale));
+        const iconH = Math.max(24, Math.round((item.height || item.size || 108) * scale));
 
         return (
           <div
@@ -513,7 +552,7 @@ export default function PhysicsIcons({
             aria-label={`${item.label || item.id} icon. Drag or press Space to toss.`}
             className={`absolute top-0 left-0 pointer-events-auto cursor-grab active:cursor-grabbing will-change-transform touch-none select-none opacity-0 ${
               isPill
-                ? "inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/95 backdrop-blur-md border border-slate-200"
+                ? "inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/95 backdrop-blur-md border border-slate-200"
                 : "flex items-center justify-center bg-transparent border-0 outline-none p-0"
             } ${itemClassName} ${item.className || ""}`}
             style={
@@ -535,8 +574,8 @@ export default function PhysicsIcons({
                 >
                   <Icon
                     icon={item.icon}
-                    width={item.size || 20}
-                    height={item.size || 20}
+                    width={Math.round((item.size || 20) * scale)}
+                    height={Math.round((item.size || 20) * scale)}
                     className="shrink-0"
                     aria-hidden="true"
                   />
@@ -549,9 +588,9 @@ export default function PhysicsIcons({
               <div className="flex items-center justify-center w-full h-full pointer-events-none">
                 <Icon
                   icon={item.icon}
-                  width={item.width || item.size || 108}
-                  height={item.height || item.size || 108}
-                  className="shrink-0 select-none pointer-events-none"
+                  width={iconW}
+                  height={iconH}
+                  className="shrink-0 select-none pointer-events-none drop-shadow-sm"
                   aria-hidden="true"
                 />
               </div>
