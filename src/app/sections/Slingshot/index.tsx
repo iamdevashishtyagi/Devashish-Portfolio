@@ -4,13 +4,18 @@ import React, { useEffect, useRef, useState, useCallback, useMemo } from "react"
 import Matter from "matter-js";
 import { Icon } from "@iconify/react";
 import { SLINGSHOT_TECH_STACK } from "@/src/app/data/slingshotIcons";
-import { RotateCcw, Crosshair, Sparkles, MoveRight } from "lucide-react";
+import { RotateCcw, MoveRight } from "lucide-react";
 
-// Top mounting rod vertical position
-const BAR_Y = 24;
-const BALL_RADIUS = 44; // Demolition ball (88px diameter)
-const BALL_TOP_OFFSET = 38; // Distance from ball center to string attachment knot
 const WALL_THICKNESS = 140;
+
+export type SlingshotTier = "compact" | "mobile" | "tablet" | "desktop";
+
+export function getSlingshotTier(width: number): SlingshotTier {
+  if (width < 420) return "compact";
+  if (width < 640) return "mobile";
+  if (width < 1024) return "tablet";
+  return "desktop";
+}
 
 interface Spark {
   x: number;
@@ -58,38 +63,104 @@ function getCablePath(
   return `M ${ax.toFixed(1)} ${ay.toFixed(1)} C ${cp1x.toFixed(1)} ${cp1y.toFixed(1)}, ${cp2x.toFixed(1)} ${cp2y.toFixed(1)}, ${bx.toFixed(1)} ${by.toFixed(1)}`;
 }
 
-// Order 28 tech stack items systematically into 4 columns of 7 items
-// Positioned a little more to the left of the block with increased box size
-function getSystematicGridPositions(width: number, height: number, anchorX: number) {
-  const isSmall = width < 768;
-  const isMedium = width < 1024;
-  // Increased box size for prominent visual impact and tactile interaction
-  const size = isSmall ? 64 : isMedium ? 70 : 76;
-  const gapX = isSmall ? 8 : 10;
+// Responsive configuration engine for mobile, tablet, and desktop viewports
+export function getSlingshotConfig(width: number, height: number) {
+  const isCompactMobile = width < 420;
+  const isMobile = width < 640;
+  const isTablet = width < 1024;
+
+  const barY = isMobile ? 18 : 24;
+
+  // Demolition ball radius
+  // Mobile: 26-30px (52-60px diameter)
+  // Tablet: 36px (72px diameter)
+  // Desktop: 44px (88px diameter)
+  const ballRadius = isCompactMobile ? 26 : isMobile ? 30 : isTablet ? 36 : 44;
+  const ballTopOffset = Math.round(ballRadius * 0.86);
+
+  // Stack badges dimensions
+  // Mobile: 42-46px (4 cols x 46px = 184px, perfectly fits inside 360-390px screens)
+  // Tablet: 60px (4 cols x 60px = 240px)
+  // Desktop: 74px (4 cols x 74px = 296px)
+  const itemSize = isCompactMobile ? 42 : isMobile ? 46 : isTablet ? 60 : 74;
+  const gapX = isCompactMobile ? 4 : isMobile ? 6 : isTablet ? 8 : 10;
   const cols = 4;
   const rows = 7; // 4 columns x 7 rows = 28 items
+  const totalStackWidth = cols * itemSize + (cols - 1) * gapX;
 
-  const totalWidth = cols * size + (cols - 1) * gapX;
+  // Ceiling Anchor
+  // Mobile: anchored at ~24% of width (e.g. 88-95px on 375-390px screens)
+  // Tablet: anchored at ~28% of width (e.g. 215px on 768px screens)
+  // Desktop: anchored at ~32% of width (e.g. 360-460px)
+  const anchorX = isMobile
+    ? Math.max(68, Math.min(115, Math.round(width * 0.24)))
+    : isTablet
+    ? Math.max(160, Math.min(260, Math.round(width * 0.28)))
+    : Math.max(260, Math.min(460, width * 0.32));
+  const anchorY = barY;
 
-  // Positioned a little more toward the left-center of the arena
-  const targetLeft = Math.max(anchorX + 130, Math.min(width * 0.44, width - totalWidth - (isSmall ? 20 : 100)));
-  const startX = Math.max(anchorX + 90, targetLeft);
-  const floorY = height - 20;
+  // Initial cocked ball position: touching ceiling, just right of left boundary
+  const initialBallX = ballRadius + (isMobile ? 14 : 36);
+  const initialBallY = barY + ballRadius + 2;
 
+  // Cable length: spans from anchor down towards the floor level
+  const floorLevel = height - (isMobile ? 16 : 20);
+  const cableLength = Math.max(180, floorLevel - anchorY - ballRadius - 10);
+
+  // Stack horizontal start position (startX)
+  // On mobile & tablet: positioned cleanly on the right half with safe margin so it never overflows
+  // On desktop: positioned slightly left of center as specifically requested
+  let startX: number;
+  if (isMobile) {
+    const rightMargin = isCompactMobile ? 8 : 14;
+    const idealLeft = width - totalStackWidth - rightMargin;
+    const minLeft = anchorX + ballRadius * 2 + 16;
+    startX = Math.max(minLeft, idealLeft);
+  } else if (isTablet) {
+    const rightMargin = 24;
+    const idealLeft = width - totalStackWidth - rightMargin;
+    const minLeft = anchorX + ballRadius * 2 + 36;
+    startX = Math.max(minLeft, idealLeft);
+  } else {
+    // Desktop: Slightly to the left of the block as requested
+    const targetLeft = Math.max(anchorX + 130, Math.min(width * 0.44, width - totalStackWidth - 80));
+    startX = Math.max(anchorX + 90, targetLeft);
+  }
+
+  // Precompute systematic grid positions
   const positions = new Map<string, { x: number; y: number }>();
-
   SLINGSHOT_TECH_STACK.forEach((item, index) => {
     const col = Math.floor(index / rows) % cols;
     const row = index % rows; // 0 is bottom, 6 is top
 
-    const x = startX + col * (size + gapX) + size / 2;
-    // Each row rests flat on the row below it starting flush from floorY
-    const y = floorY - size / 2 - row * size;
+    const x = startX + col * (itemSize + gapX) + itemSize / 2;
+    // Each row rests flat on the row below it starting flush from floorLevel
+    const y = floorLevel - itemSize / 2 - row * itemSize;
 
     positions.set(item.id, { x, y });
   });
 
-  return { positions, size, floorY, startX, cols, rows };
+  return {
+    isCompactMobile,
+    isMobile,
+    isTablet,
+    barY,
+    ballRadius,
+    ballTopOffset,
+    itemSize,
+    gapX,
+    cols,
+    rows,
+    totalStackWidth,
+    anchorX,
+    anchorY,
+    initialBallX,
+    initialBallY,
+    cableLength,
+    floorLevel,
+    startX,
+    positions,
+  };
 }
 
 export default function TechSlingshot() {
@@ -102,15 +173,21 @@ export default function TechSlingshot() {
   const iconBodiesRef = useRef<Map<string, Matter.Body>>(new Map());
   const ballBodyRef = useRef<Matter.Body | null>(null);
 
-  // DOM node references for direct buttery 60/120fps transforms
+  // DOM node references for direct 60/120fps transforms
   const ballDomRef = useRef<HTMLDivElement>(null);
   const cablePathRef = useRef<SVGPathElement>(null);
   const cableKnotRef = useRef<SVGCircleElement>(null);
   const iconDomRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
-  // Dimensions (Full Viewport)
+  // Dimensions & Responsive Tier
   const [dimensions, setDimensions] = useState({ width: 1200, height: 750 });
   const arenaSizeRef = useRef({ width: 1200, height: 750 });
+  const [tier, setTier] = useState<SlingshotTier>(() => {
+    if (typeof window !== "undefined") {
+      return getSlingshotTier(window.innerWidth);
+    }
+    return "desktop";
+  });
 
   // Game/UI stats
   const [isScattered, setIsScattered] = useState(false);
@@ -123,6 +200,14 @@ export default function TechSlingshot() {
   // Canvas Sparks
   const sparksRef = useRef<Spark[]>([]);
 
+  // Responsive config
+  const config = useMemo(() => {
+    return getSlingshotConfig(dimensions.width, dimensions.height);
+  }, [dimensions.width, dimensions.height]);
+
+  const configRef = useRef(config);
+  configRef.current = config;
+
   // =========================================================================
   // UN-STRETCHABLE SWING PENDULUM STATE
   // =========================================================================
@@ -131,8 +216,8 @@ export default function TechSlingshot() {
     omega: 0,
     isDragging: false,
     isArmed: true, // Holds at ceiling position until released, dragged, or Swing Ball clicked
-    x: BALL_RADIUS + 60,
-    y: BALL_RADIUS + 20,
+    x: 44 + 36,
+    y: 24 + 44 + 2,
     vx: 0,
     vy: 0,
   });
@@ -149,44 +234,6 @@ export default function TechSlingshot() {
     history: { x: number; y: number; time: number }[];
   } | null>(null);
 
-  // Top Mounting Pivot Anchor
-  const ceilingAnchor = useMemo(() => {
-    const x = Math.max(240, Math.min(460, dimensions.width * 0.32));
-    const y = BAR_Y;
-    return { x, y };
-  }, [dimensions.width]);
-
-  const ceilingAnchorRef = useRef(ceilingAnchor);
-  ceilingAnchorRef.current = ceilingAnchor;
-
-  // Un-stretchable Cable Length (fixed radius)
-  const cableLength = useMemo(() => {
-    const floorLevel = dimensions.height - 20;
-    return Math.max(280, floorLevel - BAR_Y - BALL_RADIUS - 12);
-  }, [dimensions.height]);
-
-  const cableLengthRef = useRef(cableLength);
-  cableLengthRef.current = cableLength;
-
-  // Cocked ball position: touching the ceiling, just slight right from the left boundary
-  const initialBallPosition = useMemo(() => {
-    return {
-      x: BALL_RADIUS + 60,
-      y: BALL_RADIUS + 20,
-    };
-  }, []);
-
-  const initialBallPositionRef = useRef(initialBallPosition);
-  initialBallPositionRef.current = initialBallPosition;
-
-  // Systematic Grid Slots
-  const { positions: systematicPositions, size: iconSize, floorY } = useMemo(() => {
-    return getSystematicGridPositions(dimensions.width, dimensions.height, ceilingAnchor.x);
-  }, [dimensions.width, dimensions.height, ceilingAnchor.x]);
-
-  const systematicPositionsRef = useRef(systematicPositions);
-  systematicPositionsRef.current = systematicPositions;
-
   // Trigger burst of sparks on impact
   const triggerImpactSparks = useCallback((x: number, y: number, color: string, count = 28) => {
     for (let i = 0; i < count; i++) {
@@ -198,7 +245,7 @@ export default function TechSlingshot() {
         vx: Math.cos(angle) * speed,
         vy: Math.sin(angle) * speed - 1.8,
         color,
-        size: Math.random() * 4 + 2,
+        size: Math.random() * 3.5 + 1.8,
         alpha: 1,
         decay: Math.random() * 0.026 + 0.016,
       });
@@ -206,7 +253,8 @@ export default function TechSlingshot() {
   }, []);
 
   // =========================================================================
-  // MATTER.JS ENGINE LIFECYCLE (Micro-Gravity: items are ultra-light & roam around)
+  // MATTER.JS ENGINE LIFECYCLE (Micro-Gravity: items roam & float freely)
+  // Re-initializes seamlessly when crossing mobile/tablet/desktop tiers
   // =========================================================================
   useEffect(() => {
     const container = containerRef.current;
@@ -217,6 +265,8 @@ export default function TechSlingshot() {
     arenaSizeRef.current = { width, height };
     setDimensions({ width, height });
 
+    const activeConf = getSlingshotConfig(width, height);
+
     if (canvasRef.current) {
       canvasRef.current.width = width;
       canvasRef.current.height = height;
@@ -226,7 +276,7 @@ export default function TechSlingshot() {
     const engine = Matter.Engine.create({
       gravity: {
         x: 0,
-        y: 0.08, // Very light gravity: badges float, drift, and roam around freely!
+        y: 0.08,
         scale: 0.001,
       },
       enableSleeping: true,
@@ -242,7 +292,7 @@ export default function TechSlingshot() {
 
     const bottomWall = Matter.Bodies.rectangle(
       width / 2,
-      height + WALL_THICKNESS / 2 - 20,
+      height + WALL_THICKNESS / 2 - (activeConf.isMobile ? 16 : 20),
       width * 2,
       WALL_THICKNESS,
       {
@@ -295,14 +345,9 @@ export default function TechSlingshot() {
     Matter.Composite.add(world, [bottomWall, topWall, leftWall, rightWall]);
 
     // Initial Pendulum State
-    const anchorX = Math.max(240, Math.min(460, width * 0.32));
-    const anchorY = BAR_Y;
-    const initialL = Math.max(280, height - 20 - BAR_Y - BALL_RADIUS - 12);
-    
-    // Initial Ball State: Touching the ceiling, just slight right from the left boundary
-    const ballX = BALL_RADIUS + 60;
-    const ballY = BALL_RADIUS + 20;
-    const initialTheta = Math.atan2(ballX - anchorX, ballY - anchorY);
+    const ballX = activeConf.initialBallX;
+    const ballY = activeConf.initialBallY;
+    const initialTheta = Math.atan2(ballX - activeConf.anchorX, ballY - activeConf.anchorY);
 
     swingRef.current = {
       theta: initialTheta,
@@ -316,7 +361,7 @@ export default function TechSlingshot() {
     };
 
     // Heavy Ball Matter.js physics body (Driver body for demolition impact)
-    const ballBody = Matter.Bodies.circle(ballX, ballY, BALL_RADIUS, {
+    const ballBody = Matter.Bodies.circle(ballX, ballY, activeConf.ballRadius, {
       isStatic: true,
       restitution: 0.82,
       friction: 0.03,
@@ -333,28 +378,35 @@ export default function TechSlingshot() {
     if (cablePathRef.current) {
       cablePathRef.current.setAttribute(
         "d",
-        getCablePath(anchorX, anchorY, ballX, ballY - BALL_TOP_OFFSET, 0, 0, initialL)
+        getCablePath(
+          activeConf.anchorX,
+          activeConf.anchorY,
+          ballX,
+          ballY - activeConf.ballTopOffset,
+          0,
+          0,
+          activeConf.cableLength
+        )
       );
     }
     if (cableKnotRef.current) {
       cableKnotRef.current.setAttribute("cx", String(ballX));
-      cableKnotRef.current.setAttribute("cy", String(ballY - BALL_TOP_OFFSET));
+      cableKnotRef.current.setAttribute("cy", String(ballY - activeConf.ballTopOffset));
     }
 
     // Create 28 Tech Stack Badges (Ultra-light bodies with near-zero air drag to float & roam!)
-    const { positions: slots, size: itemSize } = getSystematicGridPositions(width, height, anchorX);
     const iconBodies = new Map<string, Matter.Body>();
 
     SLINGSHOT_TECH_STACK.forEach((item) => {
-      const slot = slots.get(item.id) || { x: width * 0.50, y: height * 0.5 };
+      const slot = activeConf.positions.get(item.id) || { x: width * 0.5, y: height * 0.5 };
 
       // Square chamfered body: very light density, minimal air drag, high bounce
-      const body = Matter.Bodies.rectangle(slot.x, slot.y, itemSize, itemSize, {
-        chamfer: { radius: 8 },
-        restitution: 0.88, // Very springy & bouncy!
-        friction: 0.03, // Glides smoothly across surfaces
-        frictionAir: 0.0018, // Near zero air drag so badges float and roam endlessly!
-        density: 0.001, // Ultra-light mass
+      const body = Matter.Bodies.rectangle(slot.x, slot.y, activeConf.itemSize, activeConf.itemSize, {
+        chamfer: { radius: activeConf.isMobile ? 6 : 8 },
+        restitution: 0.88,
+        friction: 0.03,
+        frictionAir: 0.0018,
+        density: 0.001,
         isStatic: false,
         label: `tech-${item.id}`,
       });
@@ -384,8 +436,9 @@ export default function TechSlingshot() {
       lastTime = now;
       const dt = dtMs / 16.666;
 
-      const anchor = ceilingAnchorRef.current;
-      const L = cableLengthRef.current;
+      const curConf = configRef.current;
+      const anchor = { x: curConf.anchorX, y: curConf.anchorY };
+      const L = curConf.cableLength;
       const swing = swingRef.current;
 
       // 1. Flexible String Swing Integration (Slack freefall + Taut pendulum)
@@ -395,7 +448,7 @@ export default function TechSlingshot() {
 
         if (isSlack) {
           // String is slack: Ball falls and moves in free 2D trajectory under gravity
-          const g = 0.42;
+          const g = curConf.isMobile ? 0.38 : 0.42;
           swing.vy += g * dt;
           swing.vx *= Math.pow(0.9994, dt);
           swing.vy *= Math.pow(0.9994, dt);
@@ -458,18 +511,26 @@ export default function TechSlingshot() {
       if (cablePathRef.current) {
         cablePathRef.current.setAttribute(
           "d",
-          getCablePath(anchor.x, anchor.y, swing.x, swing.y - BALL_TOP_OFFSET, swing.vx, swing.vy, L)
+          getCablePath(
+            curConf.anchorX,
+            curConf.anchorY,
+            swing.x,
+            swing.y - curConf.ballTopOffset,
+            swing.vx,
+            swing.vy,
+            curConf.cableLength
+          )
         );
       }
       if (cableKnotRef.current) {
         cableKnotRef.current.setAttribute("cx", String(swing.x));
-        cableKnotRef.current.setAttribute("cy", String(swing.y - BALL_TOP_OFFSET));
+        cableKnotRef.current.setAttribute("cy", String(swing.y - curConf.ballTopOffset));
       }
 
       // 2. Collision: Smooth demolition impact into the Tech Stack
       if (!isResettingRef.current) {
         const ballSpeed = Math.hypot(swing.vx, swing.vy);
-        const hitDistance = BALL_RADIUS + itemSize * 0.62;
+        const hitDistance = curConf.ballRadius + curConf.itemSize * 0.62;
 
         if (ballSpeed > 0.6) {
           for (const body of iconBodies.values()) {
@@ -486,8 +547,11 @@ export default function TechSlingshot() {
               isScatteredRef.current = true;
               setIsScattered(true);
 
-              // Smooth momentum wave with cubic falloff across a 380px blast radius
-              const blastRadius = 380;
+              // Proportional blast radius for mobile vs desktop
+              const blastRadius = curConf.isMobile ? 210 : curConf.isTablet ? 290 : 380;
+              const pushPowerX = curConf.isMobile ? 11 : 16;
+              const pushPowerY = curConf.isMobile ? 9 : 14;
+
               iconBodies.forEach((other) => {
                 const odx = other.position.x - swing.x;
                 const ody = other.position.y - swing.y;
@@ -498,8 +562,8 @@ export default function TechSlingshot() {
                   const ony = ody / (odist || 1);
 
                   // Fluid velocity impulse: forward and floating upward
-                  const pushX = onx * factor * 16 + swing.vx * 0.65;
-                  const pushY = ony * factor * 14 + swing.vy * 0.45 - 5;
+                  const pushX = onx * factor * pushPowerX + swing.vx * 0.65;
+                  const pushY = ony * factor * pushPowerY + swing.vy * 0.45 - (curConf.isMobile ? 3.5 : 5);
 
                   Matter.Body.setVelocity(other, {
                     x: other.velocity.x * 0.45 + pushX + (Math.random() - 0.5) * 3,
@@ -513,7 +577,12 @@ export default function TechSlingshot() {
               swing.omega *= 0.97;
 
               // Spark burst
-              triggerImpactSparks(body.position.x, body.position.y, "#38BDF8", 32);
+              triggerImpactSparks(
+                body.position.x,
+                body.position.y,
+                "#38BDF8",
+                curConf.isMobile ? 20 : 32
+              );
               setScatterCount((prev) => prev + 1);
               break;
             }
@@ -535,8 +604,8 @@ export default function TechSlingshot() {
           // Arena boundary safety respawn
           if (y > height + 200 || x < -150 || x > width + 150) {
             Matter.Body.setPosition(body, {
-              x: Math.max(80, Math.min(width - 80, x)),
-              y: 60,
+              x: Math.max(60, Math.min(width - 60, x)),
+              y: 50,
             });
             Matter.Body.setVelocity(body, { x: 0, y: 1 });
           }
@@ -595,15 +664,21 @@ export default function TechSlingshot() {
         arenaSizeRef.current = { width: newWidth, height: newHeight };
         setDimensions({ width: newWidth, height: newHeight });
 
+        const newTier = getSlingshotTier(newWidth);
+        if (newTier !== tier) {
+          setTier(newTier);
+        }
+
         if (canvasRef.current) {
           canvasRef.current.width = newWidth;
           canvasRef.current.height = newHeight;
         }
 
         // Reposition boundary walls for full width/height
+        const currentConf = getSlingshotConfig(newWidth, newHeight);
         Matter.Body.setPosition(bottomWall, {
           x: newWidth / 2,
-          y: newHeight + WALL_THICKNESS / 2 - 20,
+          y: newHeight + WALL_THICKNESS / 2 - (currentConf.isMobile ? 16 : 20),
         });
         Matter.Body.setPosition(topWall, {
           x: newWidth / 2,
@@ -628,7 +703,7 @@ export default function TechSlingshot() {
       Matter.Runner.stop(runner);
       Matter.Engine.clear(engine);
     };
-  }, [triggerImpactSparks]);
+  }, [triggerImpactSparks, tier]);
 
   // =========================================================================
   // UN-STRETCHABLE BALL POINTER DRAGGING (Strict fixed-length pendulum arc!)
@@ -638,12 +713,13 @@ export default function TechSlingshot() {
     const container = containerRef.current;
     if (!container) return;
 
+    const curConf = configRef.current;
     const rect = container.getBoundingClientRect();
     const pointerX = clientX - rect.left;
     const pointerY = clientY - rect.top;
 
-    const anchor = ceilingAnchorRef.current;
-    const L = cableLengthRef.current;
+    const anchor = { x: curConf.anchorX, y: curConf.anchorY };
+    const L = curConf.cableLength;
 
     // Vector from anchor to pointer
     const dx = pointerX - anchor.x;
@@ -653,9 +729,6 @@ export default function TechSlingshot() {
     let targetX = pointerX;
     let targetY = pointerY;
 
-    // String physics:
-    // If pulled farther than string length L, clamp distance firmly to L (un-stretchable string)
-    // If pointer is inside L, the ball moves freely with pointer and the string sags loosely!
     if (pDist > L) {
       const nx = dx / (pDist || 1);
       const ny = dy / (pDist || 1);
@@ -663,12 +736,12 @@ export default function TechSlingshot() {
       targetX = anchor.x + nx * clampedL;
       targetY = anchor.y + ny * clampedL;
     } else {
-      targetY = Math.max(anchor.y + 16, pointerY);
+      targetY = Math.max(anchor.y + 14, pointerY);
     }
 
     // Keep ball within arena boundaries
-    targetX = Math.max(BALL_RADIUS + 12, Math.min(arenaSizeRef.current.width - BALL_RADIUS - 12, targetX));
-    targetY = Math.min(arenaSizeRef.current.height - 20 - BALL_RADIUS, targetY);
+    targetX = Math.max(curConf.ballRadius + 10, Math.min(arenaSizeRef.current.width - curConf.ballRadius - 10, targetX));
+    targetY = Math.min(arenaSizeRef.current.height - (curConf.isMobile ? 14 : 20) - curConf.ballRadius, targetY);
 
     const angle = Math.atan2(targetX - anchor.x, targetY - anchor.y);
 
@@ -691,12 +764,12 @@ export default function TechSlingshot() {
     if (cablePathRef.current) {
       cablePathRef.current.setAttribute(
         "d",
-        getCablePath(anchor.x, anchor.y, swing.x, swing.y - BALL_TOP_OFFSET, 0, 0, L)
+        getCablePath(anchor.x, anchor.y, swing.x, swing.y - curConf.ballTopOffset, 0, 0, L)
       );
     }
     if (cableKnotRef.current) {
       cableKnotRef.current.setAttribute("cx", String(swing.x));
-      cableKnotRef.current.setAttribute("cy", String(swing.y - BALL_TOP_OFFSET));
+      cableKnotRef.current.setAttribute("cy", String(swing.y - curConf.ballTopOffset));
     }
 
     const now = performance.now();
@@ -789,12 +862,13 @@ export default function TechSlingshot() {
     finishBallDrag();
   };
 
-  // Trigger Swing from High-Left Ceiling Peak (Button Action: Pure Natural Free Fall!)
+  // Trigger Swing from High-Left Ceiling Peak (Pure Natural Free Fall!)
   const triggerSwing = () => {
-    const anchor = ceilingAnchorRef.current;
-    const L = cableLengthRef.current;
+    const curConf = configRef.current;
+    const anchor = { x: curConf.anchorX, y: curConf.anchorY };
+    const L = curConf.cableLength;
     const swing = swingRef.current;
-    const targetPos = initialBallPositionRef.current;
+    const targetPos = { x: curConf.initialBallX, y: curConf.initialBallY };
 
     // Reset cleanly to ceiling position if armed or settled
     if (swing.isArmed || Math.hypot(swing.vx, swing.vy) < 0.5) {
@@ -820,7 +894,7 @@ export default function TechSlingshot() {
     if (cablePathRef.current) {
       cablePathRef.current.setAttribute(
         "d",
-        getCablePath(anchor.x, anchor.y, swing.x, swing.y - BALL_TOP_OFFSET, 0, 0, L)
+        getCablePath(anchor.x, anchor.y, swing.x, swing.y - curConf.ballTopOffset, 0, 0, L)
       );
     }
 
@@ -898,11 +972,10 @@ export default function TechSlingshot() {
       e.currentTarget.releasePointerCapture(e.pointerId);
     } catch {}
 
-    // Restore full dynamic freedom with low gravity & floaty roaming!
+    // Restore dynamic freedom
     Matter.Body.setStatic(drag.body, false);
     Matter.Sleeping.set(drag.body, false);
 
-    // Exact throw calculation from PhysicsIcons.tsx with floaty power
     if (drag.history.length >= 2) {
       const first = drag.history[0];
       const last = drag.history[drag.history.length - 1];
@@ -945,10 +1018,11 @@ export default function TechSlingshot() {
     const startTime = performance.now();
     const duration = 650;
 
-    const anchor = ceilingAnchorRef.current;
-    const L = cableLengthRef.current;
+    const curConf = configRef.current;
+    const anchor = { x: curConf.anchorX, y: curConf.anchorY };
+    const L = curConf.cableLength;
     const startBallPos = { x: swingRef.current.x, y: swingRef.current.y };
-    const targetBallPos = initialBallPositionRef.current;
+    const targetBallPos = { x: curConf.initialBallX, y: curConf.initialBallY };
     const targetTheta = Math.atan2(targetBallPos.x - anchor.x, targetBallPos.y - anchor.y);
 
     // Snapshot start positions
@@ -969,10 +1043,10 @@ export default function TechSlingshot() {
       const progress = Math.min(1, elapsed / duration);
       const ease = 1 - Math.pow(1 - progress, 3); // Cubic ease out
 
-      // Animate badges back to systematic 4 columns
+      // Animate badges back to systematic formation
       iconBodiesRef.current.forEach((body, id) => {
         const start = startBadgeStates.get(id);
-        const target = systematicPositionsRef.current.get(id);
+        const target = curConf.positions.get(id);
         if (!start || !target) return;
 
         const curX = start.x + (target.x - start.x) * ease;
@@ -1013,12 +1087,12 @@ export default function TechSlingshot() {
       if (cablePathRef.current) {
         cablePathRef.current.setAttribute(
           "d",
-          getCablePath(anchor.x, anchor.y, ballX, ballY - BALL_TOP_OFFSET, 0, 0, L)
+          getCablePath(anchor.x, anchor.y, ballX, ballY - curConf.ballTopOffset, 0, 0, L)
         );
       }
       if (cableKnotRef.current) {
         cableKnotRef.current.setAttribute("cx", String(ballX));
-        cableKnotRef.current.setAttribute("cy", String(ballY - BALL_TOP_OFFSET));
+        cableKnotRef.current.setAttribute("cy", String(ballY - curConf.ballTopOffset));
       }
 
       if (progress < 1) {
@@ -1026,17 +1100,17 @@ export default function TechSlingshot() {
       } else {
         // Finalize state: Keep dynamic, put to sleep in neat grid until hit or dragged!
         iconBodiesRef.current.forEach((body, id) => {
-          const target = systematicPositionsRef.current.get(id);
+          const target = curConf.positions.get(id);
           if (target) {
             Matter.Body.setPosition(body, target);
             Matter.Body.setAngle(body, 0);
           }
-          Matter.Body.setStatic(body, false); // Dynamic!
+          Matter.Body.setStatic(body, false);
           Matter.Body.setVelocity(body, { x: 0, y: 0 });
-          Matter.Sleeping.set(body, true); // Stable in formation until touched or struck!
+          Matter.Sleeping.set(body, true);
         });
 
-        swing.isArmed = true; // Cocked touching ceiling and ready
+        swing.isArmed = true;
         swing.isDragging = false;
         swing.x = targetBallPos.x;
         swing.y = targetBallPos.y;
@@ -1052,10 +1126,10 @@ export default function TechSlingshot() {
         isResettingRef.current = false;
 
         triggerImpactSparks(
-          arenaSizeRef.current.width * 0.44,
-          arenaSizeRef.current.height * 0.6,
+          curConf.startX + curConf.totalStackWidth / 2,
+          curConf.floorLevel - (curConf.rows * curConf.itemSize) / 2,
           "#10B981",
-          28
+          curConf.isMobile ? 18 : 28
         );
       }
     };
@@ -1066,57 +1140,66 @@ export default function TechSlingshot() {
   return (
     <section
       id="playground"
-      className="w-full border-t border-slate-200/80 bg-white dark:bg-transparent transition-colors duration-700 pt-12 md:pt-16 pb-0 overflow-x-hidden"
+      className="w-full border-t border-slate-200/80 bg-white dark:bg-transparent transition-colors duration-700 pt-10 sm:pt-14 md:pt-16 pb-0 overflow-x-hidden"
     >
       {/* Section Heading (Cleanly ABOVE the system arena, outside the box) */}
-      <div className="container-narrow px-6 md:px-12 mb-6 md:mb-8">
-        <span className="text-sm uppercase tracking-widest text-slate-400 font-medium font-mono">
+      <div className="container-narrow px-4 sm:px-6 md:px-12 mb-4 sm:mb-6 md:mb-8">
+        <span className="text-xs sm:text-sm uppercase tracking-widest text-slate-400 font-medium font-mono">
           The Arsenal
         </span>
-        <h2 className="heading-2 mt-2 text-current text-2xl md:text-3xl font-extrabold tracking-tight">
+        <h2 className="heading-2 mt-1.5 sm:mt-2 text-current text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight">
           NOT JUST LOGOS — <span style={{ color: "rgb(71, 36, 0)" }}>PRESSURE TESTED</span>
         </h2>
-        <p className="body-large max-w-2xl mt-2 text-current/60 text-base md:text-lg">
+        <p className="body-large max-w-2xl mt-1.5 sm:mt-2 text-current/60 text-sm sm:text-base md:text-lg">
           Every tool in this stack was forged through real production constraints.
-          Pull the unstretchable swing high to the left and release to test the stack under pressure.
+          Pull or swing the heavy ball on the left to test the stack under pressure.
         </p>
       </div>
 
-      {/* Full-width & Full-height Viewport Physics Arena System Box */}
+      {/* Responsive Physics Arena System Box */}
       <div
         ref={containerRef}
-        className="relative w-full h-screen min-h-[700px] overflow-hidden bg-gradient-to-b from-slate-50/70 via-white to-slate-50/40 select-none touch-none border-y border-slate-200/90 shadow-[inset_0_2px_14px_rgba(0,0,0,0.02)]"
+        className="relative w-full h-[76vh] min-h-[520px] max-h-[720px] sm:h-screen sm:min-h-[680px] sm:max-h-none overflow-hidden bg-gradient-to-b from-slate-50/70 via-white to-slate-50/40 select-none touch-none border-y border-slate-200/90 shadow-[inset_0_2px_14px_rgba(0,0,0,0.02)]"
       >
-        {/* Subtle Full-Viewport Blueprint Grid Pattern */}
+        {/* Subtle Blueprint Grid Pattern */}
         <div
           className="absolute inset-0 pointer-events-none opacity-60"
           style={{
             backgroundImage: `radial-gradient(#CBD5E1 1px, transparent 1px)`,
-            backgroundSize: "36px 36px",
+            backgroundSize: config.isMobile ? "28px 28px" : "36px 36px",
           }}
         />
 
-        {/* The 3 Action Buttons INSIDE the box at Top Right */}
-        <div className="absolute top-4 right-4 md:top-10 md:right-8 z-40 flex flex-wrap items-center gap-2 p-1.5 rounded-2xl bg-white/95 backdrop-blur-md border border-slate-200/90 shadow-md">
+        {/* The 3 Action Buttons INSIDE the box at Top Right (Responsive for Mobile & Desktop) */}
+        <div className="absolute top-2.5 right-2.5 sm:top-5 sm:right-6 md:top-8 md:right-8 z-40 flex flex-wrap items-center justify-end gap-1.5 sm:gap-2 p-1 sm:p-1.5 rounded-2xl bg-white/95 backdrop-blur-md border border-slate-200/90 shadow-md max-w-[calc(100%-20px)]">
           {/* Status Indicator Pill */}
-          <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-50/90 border border-slate-200/70 text-xs font-medium text-slate-700">
-            <span className={`w-2 h-2 rounded-full ${isScattered ? "bg-amber-500 animate-pulse" : "bg-emerald-500"}`} />
-            <span className="font-mono text-[11px] sm:text-xs">
-              {isScattered ? `Demolished (${scatterCount} hits)` : "Systematic Formation"}
+          <div className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl bg-slate-50/90 border border-slate-200/70 text-xs font-medium text-slate-700">
+            <span
+              className={`w-2 h-2 rounded-full shrink-0 ${
+                isScattered ? "bg-amber-500 animate-pulse" : "bg-emerald-500"
+              }`}
+            />
+            <span className="font-mono text-[10px] sm:text-xs">
+              <span className="hidden sm:inline">
+                {isScattered ? `Demolished (${scatterCount} hits)` : "Systematic Formation"}
+              </span>
+              <span className="sm:hidden">
+                {isScattered ? `Hits: ${scatterCount}` : "Ready"}
+              </span>
             </span>
             <span className="text-slate-300">•</span>
-            <span className="font-mono text-[11px] sm:text-xs">Swings: {swingsCount}</span>
+            <span className="font-mono text-[10px] sm:text-xs">Swings: {swingsCount}</span>
           </div>
 
           {/* Swing Ball Button */}
           <button
             type="button"
             onClick={triggerSwing}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200/90 text-xs font-semibold transition-all shadow-xs active:scale-95 cursor-pointer"
+            className="inline-flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200/90 text-[11px] sm:text-xs font-semibold transition-all shadow-xs active:scale-95 cursor-pointer"
             title="Release the heavy swing ball from high left to smash into the stack"
           >
-            <MoveRight className="w-3.5 h-3.5" />
-            <span>Swing Ball</span>
+            <MoveRight className="w-3.5 h-3.5 shrink-0" />
+            <span>Swing</span>
           </button>
 
           {/* Rebuild Stack Button */}
@@ -1124,10 +1207,10 @@ export default function TechSlingshot() {
             type="button"
             onClick={handleResetFormation}
             disabled={isResetting}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold transition-all shadow-xs active:scale-95 disabled:opacity-50 cursor-pointer"
+            className="inline-flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-[11px] sm:text-xs font-semibold transition-all shadow-xs active:scale-95 disabled:opacity-50 cursor-pointer"
           >
-            <RotateCcw className={`w-3.5 h-3.5 ${isResetting ? "animate-spin" : ""}`} />
-            <span>Rebuild Stack</span>
+            <RotateCcw className={`w-3.5 h-3.5 shrink-0 ${isResetting ? "animate-spin" : ""}`} />
+            <span>Rebuild</span>
           </button>
         </div>
 
@@ -1160,7 +1243,7 @@ export default function TechSlingshot() {
               <stop offset="100%" stopColor="transparent" />
             </linearGradient>
 
-            {/* Un-stretchable Braided Steel Cable Gradient */}
+            {/* Braided Steel Cable Gradient */}
             <linearGradient id="swing-cable-grad" x1="0%" y1="0%" x2="100%" y2="100%">
               <stop offset="0%" stopColor="#64748B" />
               <stop offset="50%" stopColor="#334155" />
@@ -1171,52 +1254,52 @@ export default function TechSlingshot() {
           {/* Wall mount bracket end-caps spanning full width */}
           <rect
             x={4}
-            y={BAR_Y - 7}
-            width={12}
-            height={20}
+            y={config.anchorY - 7}
+            width={config.isMobile ? 10 : 12}
+            height={config.isMobile ? 16 : 20}
             rx={2}
             fill="#475569"
           />
           <rect
-            x={dimensions.width - 16}
-            y={BAR_Y - 7}
-            width={12}
-            height={20}
+            x={dimensions.width - (config.isMobile ? 14 : 16)}
+            y={config.anchorY - 7}
+            width={config.isMobile ? 10 : 12}
+            height={config.isMobile ? 16 : 20}
             rx={2}
             fill="#475569"
           />
 
           {/* The Horizontal Hanging Bar Rod */}
           <rect
-            x={12}
-            y={BAR_Y - 4}
-            width={Math.max(10, dimensions.width - 24)}
-            height={8}
-            rx={4}
+            x={config.isMobile ? 10 : 12}
+            y={config.anchorY - 4}
+            width={Math.max(10, dimensions.width - (config.isMobile ? 20 : 24))}
+            height={config.isMobile ? 7 : 8}
+            rx={config.isMobile ? 3.5 : 4}
             fill="url(#swing-bar-grad)"
           />
           <line
-            x1={18}
-            y1={BAR_Y - 2}
-            x2={dimensions.width - 18}
-            y2={BAR_Y - 2}
+            x1={config.isMobile ? 14 : 18}
+            y1={config.anchorY - 2}
+            x2={dimensions.width - (config.isMobile ? 14 : 18)}
+            y2={config.anchorY - 2}
             stroke="url(#swing-bar-light)"
             strokeWidth="1.2"
           />
 
           {/* Anchor Grommet & Bearing on the top rod */}
           <circle
-            cx={ceilingAnchor.x}
-            cy={BAR_Y + 3}
-            r="8"
+            cx={config.anchorX}
+            cy={config.anchorY + 3}
+            r={config.isMobile ? "6" : "8"}
             fill="#1E293B"
             stroke="#64748B"
-            strokeWidth="2.5"
+            strokeWidth={config.isMobile ? "2" : "2.5"}
           />
           <circle
-            cx={ceilingAnchor.x}
-            cy={BAR_Y + 3}
-            r="3.5"
+            cx={config.anchorX}
+            cy={config.anchorY + 3}
+            r={config.isMobile ? "2.5" : "3.5"}
             fill="#F8FAFC"
           />
 
@@ -1224,17 +1307,17 @@ export default function TechSlingshot() {
           <path
             ref={cablePathRef}
             d={getCablePath(
-              ceilingAnchor.x,
-              BAR_Y + 3,
+              config.anchorX,
+              config.anchorY + 3,
               swingRef.current.x,
-              swingRef.current.y - BALL_TOP_OFFSET,
+              swingRef.current.y - config.ballTopOffset,
               swingRef.current.vx,
               swingRef.current.vy,
-              cableLength
+              config.cableLength
             )}
             fill="none"
             stroke="url(#swing-cable-grad)"
-            strokeWidth="3.5"
+            strokeWidth={config.isMobile ? "2.5" : "3.5"}
             strokeLinecap="round"
             style={{
               filter: "drop-shadow(0 2px 5px rgba(0, 0, 0, 0.25))",
@@ -1245,47 +1328,57 @@ export default function TechSlingshot() {
           <circle
             ref={cableKnotRef}
             cx={swingRef.current.x}
-            cy={swingRef.current.y - BALL_TOP_OFFSET}
-            r="5"
+            cy={swingRef.current.y - config.ballTopOffset}
+            r={config.isMobile ? "3.5" : "5"}
             fill="#0284C7"
             stroke="#0F172A"
             strokeWidth="1.5"
           />
         </svg>
 
-        {/* Heavy Ball on the Un-stretchable Swing (88px diameter) */}
+        {/* Heavy Ball on the Un-stretchable Swing (Proportionally scaled for mobile & desktop) */}
         <div
           ref={ballDomRef}
           onPointerDown={handleBallPointerDown}
           onPointerUp={handleBallPointerUp}
           onPointerCancel={handleBallPointerUp}
           style={{
-            width: `${BALL_RADIUS * 2}px`,
-            height: `${BALL_RADIUS * 2}px`,
+            width: `${config.ballRadius * 2}px`,
+            height: `${config.ballRadius * 2}px`,
             touchAction: "none",
           }}
           className="absolute top-0 left-0 rounded-full cursor-grab active:cursor-grabbing z-30 flex items-center justify-center will-change-transform select-none group"
           title="Grab & swing this heavy ball into the stack!"
         >
           {/* Outer Polished Demolition Shell */}
-          <div className="relative w-full h-full rounded-full bg-gradient-to-tr from-slate-900 via-slate-800 to-slate-700 border-[3px] border-slate-300 shadow-[0_12px_32px_rgba(0,0,0,0.4),0_0_20px_rgba(56,189,248,0.35)] flex items-center justify-center transition-transform group-hover:scale-105 active:scale-95 overflow-hidden">
+          <div className="relative w-full h-full rounded-full bg-gradient-to-tr from-slate-900 via-slate-800 to-slate-700 border-[2.5px] md:border-[3px] border-slate-300 shadow-[0_8px_24px_rgba(0,0,0,0.35),0_0_16px_rgba(56,189,248,0.3)] flex items-center justify-center transition-transform group-hover:scale-105 active:scale-95 overflow-hidden">
             {/* Radial Bolted Texture */}
             <div className="absolute inset-1 rounded-full border border-dashed border-slate-500/60 pointer-events-none" />
 
             {/* Centered Next.js Tech Emblem */}
-            <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-inner z-10 border border-slate-300">
+            <div
+              className="rounded-full bg-white flex items-center justify-center shadow-inner z-10 border border-slate-300"
+              style={{
+                width: `${Math.round(config.ballRadius * 1.08)}px`,
+                height: `${Math.round(config.ballRadius * 1.08)}px`,
+              }}
+            >
               <Icon
                 icon="devicon:nextjs"
-                className="w-7 h-7 shrink-0 select-none pointer-events-none drop-shadow-sm text-black"
+                className="shrink-0 select-none pointer-events-none drop-shadow-sm text-black"
+                style={{
+                  width: `${Math.round(config.ballRadius * 0.62)}px`,
+                  height: `${Math.round(config.ballRadius * 0.62)}px`,
+                }}
               />
             </div>
 
             {/* 3D Specular Sheen */}
-            <div className="absolute top-2 left-3 w-6 h-4 rounded-full bg-white/45 rotate-[-30deg] blur-[1px] pointer-events-none" />
+            <div className="absolute top-1.5 left-2 w-5 h-3 md:w-6 md:h-4 rounded-full bg-white/45 rotate-[-30deg] blur-[1px] pointer-events-none" />
           </div>
         </div>
 
-        {/* Dynamic Square Tech Stack Badges (Increased size, floaty roaming physics) */}
+        {/* Dynamic Square Tech Stack Badges (Proportionately configured for mobile & desktop) */}
         {SLINGSHOT_TECH_STACK.map((item) => (
           <div
             key={item.id}
@@ -1298,24 +1391,52 @@ export default function TechSlingshot() {
             onPointerUp={handleBadgePointerUp}
             onPointerCancel={handleBadgePointerUp}
             style={{
-              width: `${iconSize}px`,
-              height: `${iconSize}px`,
+              width: `${config.itemSize}px`,
+              height: `${config.itemSize}px`,
               touchAction: "none",
             }}
-            className="absolute top-0 left-0 rounded-2xl cursor-grab active:cursor-grabbing z-25 flex items-center justify-center will-change-transform select-none group"
+            className={`absolute top-0 left-0 cursor-grab active:cursor-grabbing z-25 flex items-center justify-center will-change-transform select-none group ${
+              config.isMobile ? "rounded-xl" : "rounded-2xl"
+            }`}
             title={`Drag and toss ${item.name}`}
           >
             <div
-              className="w-full h-full rounded-2xl bg-white border border-slate-200/90 shadow-sm flex flex-col items-center justify-center p-2.5 transition-all duration-150 group-hover:shadow-md group-hover:scale-105 active:scale-95"
+              className={`w-full h-full bg-white border border-slate-200/90 shadow-sm flex flex-col items-center justify-center transition-all duration-150 group-hover:shadow-md group-hover:scale-105 active:scale-95 ${
+                config.isMobile
+                  ? "rounded-xl p-1"
+                  : config.isTablet
+                  ? "rounded-xl p-1.5"
+                  : "rounded-2xl p-2.5"
+              }`}
               style={{
                 boxShadow: `0 3px 14px ${item.glowColor}`,
               }}
             >
               <Icon
                 icon={item.icon}
-                className="w-8 h-8 md:w-9 md:h-9 shrink-0 select-none pointer-events-none drop-shadow-sm"
+                className={`${
+                  config.isCompactMobile
+                    ? "w-4 h-4"
+                    : config.isMobile
+                    ? "w-5 h-5"
+                    : config.isTablet
+                    ? "w-6 h-6"
+                    : "w-8 h-8 md:w-9 md:h-9"
+                } shrink-0 select-none pointer-events-none drop-shadow-sm`}
               />
-              <span className="text-[10px] md:text-[11px] font-bold text-slate-800 tracking-tight whitespace-nowrap truncate max-w-full pointer-events-none mt-1">
+              <span
+                className={`${
+                  config.isCompactMobile
+                    ? "text-[7.5px]"
+                    : config.isMobile
+                    ? "text-[8.5px]"
+                    : config.isTablet
+                    ? "text-[9.5px]"
+                    : "text-[10px] md:text-[11px]"
+                } font-bold text-slate-800 tracking-tight whitespace-nowrap truncate max-w-full pointer-events-none ${
+                  config.isMobile ? "mt-0.5 leading-none" : "mt-1"
+                }`}
+              >
                 {item.name}
               </span>
             </div>
