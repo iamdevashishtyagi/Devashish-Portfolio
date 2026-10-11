@@ -160,7 +160,7 @@ export default function Home() {
         <Experience />
         <Projects />
         <Wins />
-        <TechSlingshot />
+        {/* <TechSlingshot /> */}
         <Architecture />
         <Achievements />
         <Skills />
