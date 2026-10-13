@@ -12,7 +12,7 @@ export const profile = {
   email: "iamdevashishtyagi@gmail.com",
   github: "https://github.com/iamdevashishtyagi", 
   linkedin: "https://www.linkedin.com/in/iamdevashishtyagi",
-  resumeUrl: "/Devashish_Tyagi_Resume.pdf",
+  resumeUrl: "/Devashish_resume.pdf",
 };
 
 export const navLinks = [
