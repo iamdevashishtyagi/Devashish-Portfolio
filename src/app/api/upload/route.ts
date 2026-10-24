@@ -29,7 +29,7 @@ export async function POST(req: Request) {
     }
 
     // Attempt Cloudinary upload if configured
-    if (isCloudinaryConfigured) {
+    if (isCloudinaryConfigured()) {
       const result = await uploadAvatarToCloudinary(image);
       if (result && result.url) {
         return NextResponse.json({

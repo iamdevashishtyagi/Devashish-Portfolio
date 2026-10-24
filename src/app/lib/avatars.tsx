@@ -168,7 +168,8 @@ interface AvatarDisplayProps {
   avatar?: string;
   name: string;
   className?: string;
-  size?: "sm" | "md" | "lg";
+  size?: "sm" | "md" | "card" | "lg";
+  whiteBorder?: boolean;
 }
 
 export function AvatarDisplay({
@@ -176,17 +177,23 @@ export function AvatarDisplay({
   name,
   className = "",
   size = "md",
+  whiteBorder = true,
 }: AvatarDisplayProps) {
   const sizeClasses = {
-    sm: "w-7 h-7 text-xs",
+    sm: "w-8 h-8 text-xs",
     md: "w-9 h-9 text-sm",
+    card: "w-10 h-10 sm:w-11 sm:h-11 text-xs sm:text-sm",
     lg: "w-12 h-12 text-base",
   }[size];
+
+  const borderClass = whiteBorder
+    ? "border-2 border-white shadow-md ring-1 ring-black/10"
+    : "border border-black/10 shadow-xs";
 
   // If user uploaded a custom photo (data:image or http/https)
   if (avatar && (avatar.startsWith("data:image/") || avatar.startsWith("http://") || avatar.startsWith("https://"))) {
     return (
-      <div className={`relative rounded-full overflow-hidden shrink-0 border border-black/10 shadow-sm ${sizeClasses} ${className}`}>
+      <div className={`relative rounded-full overflow-hidden shrink-0 ${borderClass} ${sizeClasses} ${className}`}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={avatar} alt={name || "Avatar"} className="w-full h-full object-cover" />
       </div>
@@ -196,7 +203,7 @@ export function AvatarDisplay({
   // If user selected one of the 8 preset SVG avatars
   if (avatar && PRESET_AVATARS.some((p) => p.id === avatar)) {
     return (
-      <div className={`relative rounded-full overflow-hidden shrink-0 border border-black/10 shadow-sm ${sizeClasses} ${className}`}>
+      <div className={`relative rounded-full overflow-hidden shrink-0 ${borderClass} ${sizeClasses} ${className}`}>
         <AvatarSvg id={avatar} />
       </div>
     );
@@ -213,7 +220,7 @@ export function AvatarDisplay({
 
   return (
     <div
-      className={`rounded-full flex items-center justify-center font-bold text-slate-700 bg-white/70 border border-black/10 shadow-sm shrink-0 ${sizeClasses} ${className}`}
+      className={`rounded-full flex items-center justify-center font-bold text-slate-800 bg-white/90 shrink-0 ${borderClass} ${sizeClasses} ${className}`}
     >
       {initials || "V"}
     </div>

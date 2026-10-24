@@ -1,19 +1,31 @@
 import { v2 as cloudinary } from "cloudinary";
 
-// Configure Cloudinary from environment variables
-const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
-const apiKey = process.env.CLOUDINARY_API_KEY;
-const apiSecret = process.env.CLOUDINARY_API_SECRET;
+/**
+ * Configure and return Cloudinary client dynamically from environment variables.
+ */
+export function getCloudinary() {
+  const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
+  const apiKey = process.env.CLOUDINARY_API_KEY;
+  const apiSecret = process.env.CLOUDINARY_API_SECRET;
 
-export const isCloudinaryConfigured = Boolean(cloudName && apiKey && apiSecret);
+  if (cloudName && apiKey && apiSecret) {
+    cloudinary.config({
+      cloud_name: cloudName,
+      api_key: apiKey,
+      api_secret: apiSecret,
+      secure: true,
+    });
+    return cloudinary;
+  }
+  return null;
+}
 
-if (isCloudinaryConfigured) {
-  cloudinary.config({
-    cloud_name: cloudName,
-    api_key: apiKey,
-    api_secret: apiSecret,
-    secure: true,
-  });
+export function isCloudinaryConfigured(): boolean {
+  return Boolean(
+    process.env.CLOUDINARY_CLOUD_NAME &&
+    process.env.CLOUDINARY_API_KEY &&
+    process.env.CLOUDINARY_API_SECRET
+  );
 }
 
 /**
@@ -23,13 +35,14 @@ if (isCloudinaryConfigured) {
 export async function uploadAvatarToCloudinary(
   imageDataUrl: string
 ): Promise<{ url: string; publicId: string } | null> {
-  if (!isCloudinaryConfigured) {
+  const cld = getCloudinary();
+  if (!cld) {
     console.warn("Cloudinary is not configured. Falling back to local data URL.");
     return null;
   }
 
   try {
-    const uploadResponse = await cloudinary.uploader.upload(imageDataUrl, {
+    const uploadResponse = await cld.uploader.upload(imageDataUrl, {
       folder: "portfolio_guestbook",
       transformation: [
         { width: 200, height: 200, crop: "fill", gravity: "face" },

@@ -132,42 +132,44 @@ export default function NotesSection() {
   return (
     <section
       id="notes"
-      className="section-layout relative overflow-hidden py-16 sm:py-24 transition-colors duration-700"
+      className="relative w-full overflow-hidden pt-16 pb-20 sm:pt-24 sm:pb-28 transition-colors duration-700"
       style={{
         backgroundColor: "var(--notes-bg, #FFFFFF)",
       }}
     >
-      <div className="container-narrow mb-10 sm:mb-14">
+      <div className="container-narrow px-4 sm:px-6 md:px-8 mb-10 sm:mb-14">
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div className="max-w-2xl">
-            {/* Live Visit Count Badge */}
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/90 border border-slate-200/90 shadow-xs text-xs font-medium text-slate-700 mb-4">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            <div className="flex flex-wrap items-center gap-3 mb-2">
+              <span className="text-sm uppercase tracking-widest text-current/50 flex items-center gap-2">
+                <MessageSquareHeart className="w-4 h-4 text-rose-500 shrink-0" />
+                COMMUNITY GUESTBOOK
               </span>
-              <span>
-                {visitCount ? (
-                  <>
-                    <strong className="text-slate-900 font-semibold">{visitCount.toLocaleString()}</strong> visitors & counting
-                  </>
-                ) : (
-                  "Counting visits..."
-                )}
-              </span>
+
+              {/* Live Visit Count Badge */}
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-black/5 dark:bg-white/5 border border-current/10 text-xs font-mono text-current/70">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
+                <span>
+                  {visitCount ? (
+                    <>
+                      <strong className="text-current font-semibold">{visitCount.toLocaleString()}</strong> visitors
+                    </>
+                  ) : (
+                    "Live"
+                  )}
+                </span>
+              </div>
             </div>
 
-            <div className="flex items-center gap-2.5 text-xs uppercase tracking-widest text-slate-400 font-mono mb-2">
-              <MessageSquareHeart className="w-4 h-4 text-rose-500" />
-              <span>Visitor Guestbook</span>
-            </div>
-
-            <h2 className="heading-2 text-slate-950">
-              Before you Leave, Leave a note
+            <h2 className="heading-2 mt-1 text-current">
+              BEFORE YOU LEAVE, LEAVE A NOTE
             </h2>
 
-            <p className="body-large text-slate-600 mt-2.5 max-w-xl">
+            <p className="body-large max-w-2xl mt-3 text-current/55">
               Drop a thought, feedback, or say hello. Pick a pastel card and leave your mark on the wall before you go.
             </p>
           </div>
@@ -200,7 +202,7 @@ export default function NotesSection() {
 
         {/* ROW 1: Infinite Scrolling to the LEFT */}
         <div className="flex overflow-hidden">
-          <div className="animate-marquee-left flex items-center gap-6 sm:gap-7 py-3 px-3">
+          <div className="animate-marquee-left flex items-center gap-6 sm:gap-7 py-4 px-3">
             {row1.map((item, idx) =>
               item === "prompt" ? (
                 <PromptCard key={`row1-prompt-${idx}`} onClick={() => setIsModalOpen(true)} />
@@ -213,7 +215,7 @@ export default function NotesSection() {
 
         {/* ROW 2: Infinite Scrolling to the RIGHT */}
         <div className="flex overflow-hidden">
-          <div className="animate-marquee-right flex items-center gap-6 sm:gap-7 py-3 px-3">
+          <div className="animate-marquee-right flex items-center gap-6 sm:gap-7 py-4 px-3">
             {row2.map((item, idx) =>
               item === "prompt" ? (
                 <PromptCard key={`row2-prompt-${idx}`} onClick={() => setIsModalOpen(true)} />

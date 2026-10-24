@@ -79,13 +79,17 @@ export async function POST(req: Request) {
     const colorValid = ALLOWED_NOTE_COLORS.includes(color as NoteColor);
     const finalColor: NoteColor = colorValid ? (color as NoteColor) : ALLOWED_NOTE_COLORS[0];
 
-    // Validate avatar string (either safe data URL under 250KB or preset id)
+    // Validate avatar string (Cloudinary URL, safe data URL, or preset id)
     let sanitizedAvatar: string | undefined = undefined;
-    if (typeof avatar === "string") {
-      if (avatar.startsWith("data:image/") && avatar.length < 250000) {
-        sanitizedAvatar = avatar;
-      } else if (/^[a-zA-Z0-9_-]{1,30}$/.test(avatar)) {
-        sanitizedAvatar = avatar;
+    if (typeof avatar === "string" && avatar.trim().length > 0) {
+      const trimmedAvatar = avatar.trim();
+      if (trimmedAvatar.startsWith("https://") || trimmedAvatar.startsWith("http://")) {
+        // Accept Cloudinary or secure image URLs
+        sanitizedAvatar = trimmedAvatar.slice(0, 1000);
+      } else if (trimmedAvatar.startsWith("data:image/") && trimmedAvatar.length < 500000) {
+        sanitizedAvatar = trimmedAvatar;
+      } else if (/^[a-zA-Z0-9_-]{1,30}$/.test(trimmedAvatar)) {
+        sanitizedAvatar = trimmedAvatar;
       }
     }
 

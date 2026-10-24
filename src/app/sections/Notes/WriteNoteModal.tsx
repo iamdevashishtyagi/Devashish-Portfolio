@@ -232,38 +232,42 @@ export default function WriteNoteModal({
 
             {/* The Actual Sticky Note Preview Card */}
             <div
-              className="relative p-5 sm:p-6 rounded-2xl border border-black/10 shadow-lg transition-all duration-300 min-h-[200px] flex flex-col justify-between"
+              className="relative p-5 sm:p-6 rounded-2xl border border-black/10 shadow-lg transition-all duration-300 min-h-[250px] flex flex-col justify-between"
               style={{ backgroundColor: selectedColor }}
             >
               {/* Paper Washi Tape Pin Accent */}
               <div
-                className="absolute -top-2.5 left-1/2 -translate-x-1/2 w-12 h-4 rounded-xs bg-white/50 backdrop-blur-xs border border-black/5 shadow-2xs rotate-[-1deg]"
+                className="absolute -top-2.5 sm:-top-3 left-1/2 -translate-x-1/2 w-28 sm:w-32 h-5 sm:h-5.5 rounded-[2px] bg-white/70 backdrop-blur-xs border-y border-black/10 shadow-[0_1px_3px_rgba(0,0,0,0.06)] rotate-[-1deg] pointer-events-none z-10"
                 aria-hidden="true"
               />
 
               {/* Note Content */}
-              <div className="pt-1.5">
-                <p className="text-slate-800 text-sm leading-relaxed whitespace-pre-wrap break-words min-h-[70px] font-normal font-sans">
+              <div className="pt-2 sm:pt-3 flex-1 flex flex-col justify-start">
+                <p className="text-slate-900 text-[14.5px] leading-relaxed whitespace-pre-wrap break-words min-h-[90px] font-normal font-sans tracking-[-0.01em]">
                   {message.trim() || "Your note will appear right here on the wall..."}
                 </p>
               </div>
 
               {/* Footer / Author Bar */}
-              <div className="mt-4 pt-3.5 border-t border-black/8 flex items-center justify-between text-xs">
-                <div className="flex items-center gap-2.5 min-w-0 pr-2">
-                  <AvatarDisplay avatar={avatar} name={name} size="sm" />
-                  <div className="flex flex-col min-w-0">
-                    <span className="font-semibold text-slate-900 truncate text-xs">
+              <div className="mt-4 pt-3.5 border-t border-black/10 flex items-center justify-between text-xs text-slate-700">
+                <div className="flex items-center gap-3 min-w-0 pr-2">
+                  <AvatarDisplay avatar={avatar} name={name} size="card" />
+                  <div className="flex flex-col min-w-0 justify-center">
+                    <span className="font-bold text-slate-950 truncate text-[13px] tracking-tight">
                       {name.trim() || "Your Name"}
                     </span>
-                    {subtitlePreview && (
-                      <span className="text-[11px] text-slate-600 truncate mt-0.5 opacity-80">
+                    {subtitlePreview ? (
+                      <span className="text-[11px] text-slate-700/80 truncate font-medium">
                         {subtitlePreview}
+                      </span>
+                    ) : (
+                      <span className="text-[11px] text-slate-500/70 truncate">
+                        Visitor
                       </span>
                     )}
                   </div>
                 </div>
-                <span className="text-[11px] text-slate-500 font-medium shrink-0 ml-auto">
+                <span className="text-[11px] font-medium text-slate-600 bg-black/[0.04] px-2.5 py-1 rounded-full border border-black/5 shrink-0 ml-auto whitespace-nowrap">
                   Just now
                 </span>
               </div>
