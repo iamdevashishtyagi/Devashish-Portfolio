@@ -20,11 +20,11 @@ export const navLinks = [
   { label: "Experience", href: "#experience" },
   { label: "Work", href: "#projects" },
   { label: "Wins", href: "#wins" },
-  { label: "Playground", href: "#playground" },
+  // { label: "Playground", href: "#playground" },
   { label: "Systems", href: "#architecture" },
   { label: "Achievements", href: "#achievements" },
-  { label: "Skills", href: "#skills" },
   { label: "Notes", href: "#notes" },
+  { label: "Skills", href: "#skills" },
   { label: "Contact", href: "#contact" },
 ];
 

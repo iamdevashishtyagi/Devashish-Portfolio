@@ -22,15 +22,11 @@ export default function NotesSection() {
 
     async function handleVisits() {
       try {
-        const STORAGE_KEY = "devashish_portfolio_visit_timestamp";
-        const lastVisit = localStorage.getItem(STORAGE_KEY);
-        const now = Date.now();
-        const TWELVE_HOURS = 1000 * 60 * 60 * 12;
+        const SESSION_KEY = "devashish_portfolio_session_tracked";
+        const hasTrackedSession = sessionStorage.getItem(SESSION_KEY);
 
-        const isNewVisit = !lastVisit || now - parseInt(lastVisit, 10) > TWELVE_HOURS;
-
-        if (isNewVisit) {
-          // Increment unique visit with silent client telemetry
+        if (!hasTrackedSession) {
+          // New browser tab / session: Increment unique visit with silent client telemetry
           const telemetry = collectClientTelemetry();
           const res = await fetch("/api/visits", {
             method: "POST",
@@ -40,11 +36,11 @@ export default function NotesSection() {
           const data = await res.json();
           if (data && typeof data.count === "number") {
             setVisitCount(data.count);
-            localStorage.setItem(STORAGE_KEY, now.toString());
+            sessionStorage.setItem(SESSION_KEY, "true");
             window.dispatchEvent(new CustomEvent("portfolio_visit_updated", { detail: data.count }));
           }
         } else {
-          // Fetch existing count without incrementing
+          // Same session / refresh: Fetch existing count without incrementing
           const res = await fetch("/api/visits");
           const data = await res.json();
           if (data && typeof data.count === "number") {

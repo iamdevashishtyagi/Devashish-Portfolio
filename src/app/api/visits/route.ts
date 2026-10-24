@@ -36,8 +36,9 @@ export async function POST(req: Request) {
       ipHash,
     };
 
-    // Rate limit: Max 1 recorded increment per IP per 10 minutes to prevent spam / F5 abuse
-    const rateLimit = checkRateLimit(`visit_${ipHash}`, 1, 600);
+    // Rate limit: Max 1 recorded increment per IP per 15 seconds to prevent burst spam
+    // while allowing genuine new tab/browser reopenings to count immediately
+    const rateLimit = checkRateLimit(`visit_${ipHash}`, 1, 15);
     if (!rateLimit.allowed) {
       const current = await getVisitCount();
       return NextResponse.json({ count: current, counted: false });
