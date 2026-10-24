@@ -55,8 +55,8 @@ export const ACCENT_HEX: Record<Project["accent"], string> = {
   royalBlue: "#4F46E5",
   emerald: "#10B981",
   amber: "#F59E0B",
-  violet: "#18014e",
-  red: "#5b0202",
+  violet: "#8B5CF6",
+  red: "#EF4444",
 };
 
 /** Respects the OS-level reduced-motion preference and updates live. */

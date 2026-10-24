@@ -64,7 +64,7 @@ export default function ProjectArtifacts({
           <button
             key={image.src}
             onClick={() => setOpenIndex(i)}
-            className="group relative aspect-[4/3] overflow-hidden rounded-lg border border-current/10 bg-current/5 text-left"
+            className="group relative aspect-[4/3] overflow-hidden rounded-2xl border border-zinc-200/90 bg-white/80 backdrop-blur-sm text-left shadow-xs hover:shadow-md transition-all duration-300 hover:border-zinc-300 cursor-pointer"
           >
             <Image
               src={image.src}
@@ -74,13 +74,7 @@ export default function ProjectArtifacts({
               className="object-cover object-top opacity-90 transition-all duration-500 group-hover:scale-[1.03] group-hover:opacity-100"
             />
 
-            <span
-              className="absolute left-1.5 top-1.5 rounded px-1.5 py-0.5 text-[9px] font-mono uppercase tracking-wider backdrop-blur-sm"
-              style={{
-                backgroundColor: `${accent}26`,
-                color: accent,
-              }}
-            >
+            <span className="absolute left-2 top-2 rounded-md px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider bg-white/90 text-blue-600 border border-zinc-200/80 shadow-xs font-semibold backdrop-blur-md">
               EX-{String(i + 1).padStart(2, "0")}
             </span>
 

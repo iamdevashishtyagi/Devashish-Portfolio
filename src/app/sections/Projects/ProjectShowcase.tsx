@@ -1,12 +1,12 @@
 // src/app/sections/Projects/ProjectShowcase.tsx
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { gsap } from "gsap";
+import { useEffect, useState, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Project } from "@/src/app/data/profile";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, CheckCircle2 } from "lucide-react";
 import { FaGithub } from "react-icons/fa";
-import { ATMOSPHERES, ACCENT_HEX, useReducedMotion } from "./atmosphere";
+import { ATMOSPHERES } from "./atmosphere";
 import ProjectSchematic from "./ProjectSchematic";
 import ProjectArtifacts from "./ProjectArtifacts";
 
@@ -24,206 +24,215 @@ const STEPS = [
   { key: "outcome", label: "Outcome", verb: "Seeing the consequence" },
 ] as const;
 
+// Unified signature blue for refined, clean light accents across all cards
+const UNIFIED_ACCENT = "#2563EB";
+
 export default function ProjectShowcase({
   projects,
   activeIndex,
   setActiveIndex,
 }: ProjectShowcaseProps) {
   const [activeStep, setActiveStep] = useState(0);
-  const canvasRef = useRef<HTMLDivElement>(null);
-  const atmosphereRef = useRef<HTMLDivElement>(null);
-  const numberRef = useRef<HTMLDivElement>(null);
-  const headerRef = useRef<HTMLDivElement>(null);
-  const stepBodyRef = useRef<HTMLDivElement>(null);
-  const schematicRef = useRef<HTMLDivElement>(null);
-  const reduced = useReducedMotion();
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [isHovered, setIsHovered] = useState(false);
 
   const project = projects[activeIndex];
   const atmosphere = ATMOSPHERES[project.filter];
-  const accent = ACCENT_HEX[project.accent];
   const nextProject = projects[(activeIndex + 1) % projects.length];
 
-  // Reset to the overview whenever the visitor moves to a different project.
+  // Reset to overview tab whenever active project changes
   useEffect(() => {
     setActiveStep(0);
   }, [activeIndex]);
 
-  // Project change: the whole canvas transitions to a new world —
-  // atmosphere crosses over, the number morphs, header staggers in.
-  useEffect(() => {
-    if (reduced) return;
-    const ctx = gsap.context(() => {
-      gsap.fromTo(
-        atmosphereRef.current,
-        { opacity: 0 },
-        { opacity: 1, duration: 0.9, ease: "power2.out" }
-      );
-      gsap.fromTo(
-        numberRef.current,
-        { yPercent: 40, opacity: 0 },
-        { yPercent: 0, opacity: 1, duration: 0.55, ease: "power3.out" }
-      );
-      if (headerRef.current) {
-        gsap.fromTo(
-          headerRef.current.children,
-          { opacity: 0, y: 16 },
-          { opacity: 1, y: 0, duration: 0.55, stagger: 0.07, ease: "power2.out", delay: 0.05 }
-        );
-      }
-    }, canvasRef);
-    return () => ctx.revert();
-  }, [activeIndex, reduced]);
-
-  // Step change: only the case-file body crossfades, everything
-  // else (identity, atmosphere, artifacts frame) stays put.
-  useEffect(() => {
-    if (!stepBodyRef.current) return;
-    if (reduced) return;
-    const ctx = gsap.context(() => {
-      gsap.fromTo(
-        stepBodyRef.current!.children,
-        { opacity: 0, y: 12 },
-        { opacity: 1, y: 0, duration: 0.45, stagger: 0.05, ease: "power2.out" }
-      );
-    }, stepBodyRef);
-    return () => ctx.revert();
-  }, [activeStep, activeIndex, reduced]);
-
-  // Idle breathing on the schematic — a quiet ambient signal that the
-  // canvas is alive, paused on hover/focus and under reduced motion.
-  useEffect(() => {
-    if (reduced || !schematicRef.current) return;
-    const tween = gsap.to(schematicRef.current, {
-      scale: 1.03,
-      duration: 3.2,
-      ease: "sine.inOut",
-      repeat: -1,
-      yoyo: true,
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    setMousePos({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
     });
-    return () => {
-      tween.kill();
-    };
-  }, [activeIndex, reduced]);
+  };
 
   return (
     <div
-      ref={canvasRef}
-      className="relative overflow-hidden rounded-3xl border border-current/10 bg-white/65 shadow-[0_18px_60px_rgb(10_10_10_/_0.06)] backdrop-blur-[2px]"
-      style={{ ["--accent" as string]: accent }}
+      ref={cardRef}
+      onMouseMove={handleMouseMove}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      className="relative overflow-hidden rounded-3xl bg-white/80 backdrop-blur-xl border border-zinc-200/90 shadow-[0_12px_40px_rgba(0,0,0,0.04),0_1px_3px_rgba(0,0,0,0.02)] ring-1 ring-inset ring-white/90 transition-all duration-300"
     >
-      {/* BACKGROUND ATMOSPHERE — the layer that gives each project type its own weather */}
-      <div ref={atmosphereRef} className="absolute inset-0 pointer-events-none">
-        <div className="absolute inset-0 opacity-[0.08]" style={{ background: `linear-gradient(135deg, ${accent}, transparent 68%)` }} />
-        <AtmospherePattern pattern={atmosphere.pattern} accent={accent} reduced={reduced} />
-      </div>
+      {/* Light Glass Sheen — Pure subtle gradient reflection */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-44 bg-gradient-to-b from-white/70 via-white/30 to-transparent" />
 
-      <div className="relative p-6 md:p-10 grid grid-cols-1 lg:grid-cols-[auto_1fr] gap-8 lg:gap-12">
-        {/* IDENTITY COLUMN — the anchored, morphing case number */}
-        <div className="flex lg:flex-col items-center lg:items-start gap-4 lg:gap-6 lg:w-28 shrink-0">
-          <div ref={numberRef} className="font-mono text-5xl md:text-6xl font-semibold leading-none" style={{ color: accent, opacity: 0.9 }}>
-            {String(activeIndex + 1).padStart(2, "0")}
-          </div>
-          <div
-            ref={schematicRef}
-            className="hidden lg:block w-24 rounded-xl border border-current/10 bg-current/[0.03] p-2"
-          >
-            <ProjectSchematic mockup={project.mockup} accent={accent} className="w-full h-auto" />
-          </div>
-          <span className="hidden lg:block text-[10px] uppercase tracking-widest text-current/30 leading-relaxed">
-            {atmosphere.classification}
-          </span>
-        </div>
+      {/* Interactive Light Specular Spotlight that follows cursor */}
+      <div
+        className="pointer-events-none absolute inset-0 transition-opacity duration-300"
+        style={{
+          opacity: isHovered ? 1 : 0,
+          background: `radial-gradient(550px circle at ${mousePos.x}px ${mousePos.y}px, rgba(255,255,255,0.85), transparent 60%)`,
+        }}
+      />
 
-        {/* MAIN COLUMN */}
-        <div className="min-w-0">
-          <div ref={headerRef} className="space-y-3">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="px-2.5 py-1 text-[10px] uppercase tracking-wider rounded-full border border-current/15 text-current/60">
-                {project.category}
-              </span>
-              {/* <span className="px-2.5 py-1 text-[10px] rounded-full text-current/35">{project.year}</span> */}
-            </div>
-            <h3 className="text-3xl md:text-4xl font-medium text-current leading-tight">{project.title}</h3>
-            <p className="text-current/60 text-base md:text-lg max-w-xl">{project.oneLiner}</p>
-          </div>
-
-          {/* STEP NAVIGATION — the case file the visitor steps through */}
-          <div role="tablist" aria-label="Case file sections" className="flex flex-wrap gap-1 mt-6 mb-5 border-b border-current/10 pb-1">
-            {STEPS.map((step, i) => (
-              <button
-                key={step.key}
-                role="tab"
-                aria-selected={activeStep === i}
-                onClick={() => setActiveStep(i)}
-                className={`relative px-3 py-1.5 text-xs uppercase tracking-wider rounded-t-md transition-colors ${
-                  activeStep === i ? "text-current" : "text-current/35 hover:text-current/60"
-                }`}
+      {/* Smooth Project Transition with Framer Motion */}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={project.id}
+          initial={{ opacity: 0, y: 12, filter: "blur(4px)" }}
+          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+          exit={{ opacity: 0, y: -12, filter: "blur(4px)" }}
+          transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+          className="relative p-6 sm:p-8 md:p-10 grid grid-cols-1 lg:grid-cols-[auto_1fr] gap-8 lg:gap-12"
+        >
+          {/* IDENTITY COLUMN — Clean Exhibit Number and Blueprint */}
+          <div className="flex lg:flex-col items-center lg:items-start gap-4 lg:gap-6 lg:w-28 shrink-0">
+            <div className="relative overflow-hidden">
+              <motion.span
+                key={activeIndex}
+                initial={{ y: 24, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ duration: 0.35, ease: "easeOut" }}
+                className="block font-mono text-5xl md:text-6xl font-bold leading-none tracking-tight text-zinc-900"
               >
-                {step.label}
-                {activeStep === i && (
-                  <span
-                    className="absolute left-2 right-2 -bottom-[5px] h-[2px] rounded-full"
-                    style={{ backgroundColor: accent }}
-                  />
-                )}
-              </button>
-            ))}
-          </div>
-
-          {/* STEP BODY */}
-          <div ref={stepBodyRef} className="min-h-[220px] space-y-5">
-            <StepContent step={STEPS[activeStep].key} project={project} accent={accent} />
-          </div>
-
-          {/* FOOTER — stack, links, and a quiet preview of what's next */}
-          <div className="mt-8 pt-5 border-t border-current/10 flex flex-wrap items-end justify-between gap-4">
-            <div className="flex flex-wrap gap-2 max-w-md">
-              {project.stack.map((tech) => (
-                <span key={tech} className="px-2.5 py-1 text-xs rounded-full bg-current/5 border border-current/10 text-current/60">
-                  {tech}
-                </span>
-              ))}
+                {String(activeIndex + 1).padStart(2, "0")}
+              </motion.span>
             </div>
 
-            <div className="flex items-center gap-3">
-              {project.links.github && (
-                <a
-                  href={project.links.github}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="View source on GitHub"
-                  className="p-2 rounded-full border border-current/15 text-current/60 hover:text-current hover:border-current/40 transition-all"
-                >
-                  <FaGithub className="w-4 h-4" />
-                </a>
-              )}
-              {project.links.demo && (
-                <a
-                  href={project.links.demo}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-medium border transition-all hover:scale-[1.03]"
-                  style={{ borderColor: `${accent}55`, color: accent }}
-                >
-                  View system <ArrowUpRight className="w-3.5 h-3.5" />
-                </a>
-              )}
+            <div className="hidden lg:block w-24 rounded-2xl border border-zinc-200/80 bg-white/70 backdrop-blur-md p-2.5 shadow-xs">
+              <ProjectSchematic mockup={project.mockup} accent={UNIFIED_ACCENT} className="w-full h-auto" />
             </div>
-          </div>
 
-          {/* NEXT — the collection continues, glimpsed, not spoiled */}
-          <button
-            onClick={() => setActiveIndex((activeIndex + 1) % projects.length)}
-            className="group mt-6 w-full flex items-center justify-between text-left px-4 py-3 rounded-xl bg-current/[0.02] hover:bg-current/[0.05] border border-current/5 transition-colors"
-          >
-            <span className="text-[11px] uppercase tracking-wider text-current/30">Next in the archive</span>
-            <span className="text-sm text-current/60 group-hover:text-current transition-colors flex items-center gap-1.5">
-              {nextProject.title}
-              <ArrowUpRight className="w-3.5 h-3.5 opacity-50 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+            <span className="hidden lg:block text-[10px] uppercase tracking-widest text-zinc-400 leading-relaxed font-mono">
+              {atmosphere.classification}
             </span>
-          </button>
-        </div>
-      </div>
+          </div>
+
+          {/* MAIN SHOWCASE COLUMN */}
+          <div className="min-w-0">
+            {/* Header */}
+            <div className="space-y-3">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="px-3 py-1 text-[11px] font-mono uppercase tracking-wider rounded-full border border-zinc-200/80 bg-zinc-100/90 text-zinc-700 font-medium shadow-xs">
+                  {project.category}
+                </span>
+                <span className="px-2 py-0.5 text-xs text-zinc-400 ml-auto font-mono">
+                  {project.year}
+                </span>
+              </div>
+              <h3 className="text-3xl md:text-4xl font-semibold text-zinc-900 tracking-tight leading-tight">
+                {project.title}
+              </h3>
+              <p className="text-zinc-600 text-base md:text-lg leading-relaxed max-w-xl">
+                {project.oneLiner}
+              </p>
+            </div>
+
+            {/* STEP NAVIGATION — Clean Light Glass Segmented Tabs */}
+            <div className="mt-6 mb-5">
+              <div
+                role="tablist"
+                aria-label="Case file sections"
+                className="inline-flex flex-wrap gap-1 p-1 rounded-2xl bg-zinc-100/80 border border-zinc-200/80 backdrop-blur-md"
+              >
+                {STEPS.map((step, i) => {
+                  const isSelected = activeStep === i;
+                  return (
+                    <button
+                      key={step.key}
+                      role="tab"
+                      aria-selected={isSelected}
+                      onClick={() => setActiveStep(i)}
+                      className={`relative px-3.5 py-1.5 text-xs font-mono uppercase tracking-wider rounded-xl transition-all duration-200 cursor-pointer ${
+                        isSelected
+                          ? "text-zinc-900 font-semibold"
+                          : "text-zinc-500 hover:text-zinc-800"
+                      }`}
+                    >
+                      {isSelected && (
+                        <motion.div
+                          layoutId="activeExhibitGlassTab"
+                          transition={{ type: "spring", stiffness: 450, damping: 35 }}
+                          className="absolute inset-0 rounded-xl bg-white shadow-xs border border-zinc-200/70"
+                        />
+                      )}
+                      <span className="relative z-10">{step.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* STEP BODY with Animated Transitions */}
+            <div className="min-h-[220px]">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={`${project.id}-${activeStep}`}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.22, ease: "easeOut" }}
+                  className="space-y-4"
+                >
+                  <StepContent step={STEPS[activeStep].key} project={project} />
+                </motion.div>
+              </AnimatePresence>
+            </div>
+
+            {/* FOOTER — Stack, links, and next project shortcut */}
+            <div className="mt-8 pt-5 border-t border-zinc-200/80 flex flex-wrap items-end justify-between gap-4">
+              <div className="flex flex-wrap gap-1.5 max-w-md">
+                {project.stack.map((tech) => (
+                  <span
+                    key={tech}
+                    className="px-2.5 py-1 text-xs font-mono rounded-full bg-white/80 border border-zinc-200/80 text-zinc-600 shadow-xs"
+                  >
+                    {tech}
+                  </span>
+                ))}
+              </div>
+
+              <div className="flex items-center gap-3">
+                {project.links.github && (
+                  <a
+                    href={project.links.github}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="View source on GitHub"
+                    className="p-2.5 rounded-xl border border-zinc-200/80 bg-white/80 text-zinc-700 hover:text-zinc-950 hover:bg-white shadow-xs transition-all cursor-pointer"
+                  >
+                    <FaGithub className="w-4 h-4" />
+                  </a>
+                )}
+                {project.links.demo && (
+                  <a
+                    href={project.links.demo}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold bg-zinc-900 text-white hover:bg-zinc-800 shadow-xs hover:shadow-sm transition-all cursor-pointer"
+                  >
+                    View system <ArrowUpRight className="w-3.5 h-3.5" />
+                  </a>
+                )}
+              </div>
+            </div>
+
+            {/* NEXT — The collection continues smoothly */}
+            <button
+              onClick={() => setActiveIndex((activeIndex + 1) % projects.length)}
+              className="group mt-6 w-full flex items-center justify-between text-left px-4 py-3.5 rounded-2xl bg-zinc-50/80 hover:bg-white border border-zinc-200/80 transition-all cursor-pointer shadow-xs hover:shadow-sm"
+            >
+              <span className="text-[11px] font-mono uppercase tracking-wider text-zinc-400">
+                Next in the archive
+              </span>
+              <span className="text-sm font-medium text-zinc-700 group-hover:text-zinc-950 transition-colors flex items-center gap-1.5">
+                {nextProject.title}
+                <ArrowUpRight className="w-3.5 h-3.5 opacity-50 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+              </span>
+            </button>
+          </div>
+        </motion.div>
+      </AnimatePresence>
     </div>
   );
 }
@@ -231,160 +240,102 @@ export default function ProjectShowcase({
 function StepContent({
   step,
   project,
-  accent,
 }: {
   step: (typeof STEPS)[number]["key"];
   project: Project;
-  accent: string;
 }) {
   switch (step) {
     case "overview":
       return (
-        <>
+        <div className="space-y-4">
           <div className="flex flex-wrap gap-2">
             {project.features.map((feature) => (
-              <span key={feature} className="px-3 py-1 text-xs rounded-full border border-current/15 text-current/60">
+              <span
+                key={feature}
+                className="px-3 py-1.5 text-xs rounded-full border border-zinc-200/80 bg-white/80 text-zinc-700 shadow-xs font-medium"
+              >
                 {feature}
               </span>
             ))}
           </div>
-          <div className="grid grid-cols-3 gap-4 pt-2">
+
+          <div className="grid grid-cols-3 gap-3 pt-1">
             {project.metrics.map((metric) => (
-              <div key={metric.label}>
-                <p className="text-xl font-semibold text-current">{metric.value}</p>
-                <p className="text-[11px] text-current/40 uppercase tracking-wider">{metric.label}</p>
+              <div
+                key={metric.label}
+                className="p-4 rounded-2xl border border-zinc-200/80 bg-white/70 backdrop-blur-sm text-center shadow-xs transition-all hover:bg-white hover:shadow-sm"
+              >
+                <p className="text-2xl sm:text-3xl font-bold font-mono tracking-tight text-zinc-900">
+                  {metric.value}
+                </p>
+                <p className="text-[10px] sm:text-[11px] text-zinc-500 uppercase tracking-wider font-mono mt-1">
+                  {metric.label}
+                </p>
               </div>
             ))}
           </div>
-        </>
+        </div>
       );
 
     case "problem":
       return (
-        <>
-          <p className="text-current/80 leading-relaxed">{project.problem}</p>
-          <ul className="space-y-2">
+        <div className="space-y-3">
+          <p className="text-zinc-700 leading-relaxed text-sm sm:text-base">
+            {project.problem}
+          </p>
+          <ul className="space-y-2 pt-1">
             {project.challenges.map((c) => (
-              <li key={c} className="flex gap-3 text-sm text-current/60">
-                <span className="mt-1.5 w-1 h-1 rounded-full shrink-0" style={{ backgroundColor: accent }} />
-                {c}
+              <li
+                key={c}
+                className="flex items-start gap-3 text-xs sm:text-sm text-zinc-700 p-3.5 rounded-2xl bg-white/70 border border-zinc-200/80 shadow-xs"
+              >
+                <span className="mt-2 w-1.5 h-1.5 rounded-full bg-blue-600 shrink-0" />
+                <span className="leading-relaxed">{c}</span>
               </li>
             ))}
           </ul>
-        </>
+        </div>
       );
 
     case "solution":
       return (
-        <>
-          <p className="text-current/80 leading-relaxed">{project.solution}</p>
-          <div className="p-4 rounded-xl bg-current/[0.03] border-l-2" style={{ borderColor: accent }}>
-            <p className="text-xs uppercase tracking-wider text-current/40 mb-1">Field note</p>
-            <p className="text-sm text-current/70 italic">{project.lessons}</p>
-          </div>
-        </>
+        <div className="space-y-3">
+          <p className="text-zinc-700 leading-relaxed text-sm sm:text-base">
+            {project.solution}
+          </p>
+          {project.lessons && (
+            <div className="relative overflow-hidden p-4 sm:p-5 rounded-2xl border border-zinc-200/80 bg-zinc-50/90 shadow-xs border-l-4 border-l-blue-600">
+              <p className="text-xs font-mono uppercase tracking-wider text-zinc-500 mb-1.5 flex items-center gap-1.5 font-semibold">
+                <span className="w-1.5 h-1.5 rounded-full bg-blue-600" />
+                Engineering Field Note
+              </p>
+              <p className="text-sm text-zinc-700 italic leading-relaxed">
+                &quot;{project.lessons}&quot;
+              </p>
+            </div>
+          )}
+        </div>
       );
 
     case "evidence":
-      return <ProjectArtifacts images={project.images} accent={accent} />;
+      return <ProjectArtifacts images={project.images} accent={UNIFIED_ACCENT} />;
 
     case "outcome":
       return (
-        <>
-          <ul className="space-y-2">
-            {project.results.map((r) => (
-              <li key={r} className="flex gap-3 text-sm text-current/70">
-                <span className="mt-1.5 w-1 h-1 rounded-full shrink-0" style={{ backgroundColor: accent }} />
-                {r}
-              </li>
-            ))}
-          </ul>
-        </>
+        <ul className="space-y-2">
+          {project.results.map((r) => (
+            <li
+              key={r}
+              className="flex items-start gap-3 text-xs sm:text-sm text-zinc-700 p-3.5 rounded-2xl bg-white/70 border border-zinc-200/80 shadow-xs"
+            >
+              <CheckCircle2 className="mt-0.5 w-4 h-4 text-emerald-600 shrink-0" />
+              <span className="leading-relaxed">{r}</span>
+            </li>
+          ))}
+        </ul>
       );
 
     default:
       return null;
-  }
-}
-
-function AtmospherePattern({
-  pattern,
-  accent,
-  reduced,
-}: {
-  pattern: (typeof ATMOSPHERES)[Project["filter"]]["pattern"];
-  accent: string;
-  reduced: boolean;
-}) {
-  const animation = (name: string) => (reduced ? undefined : name);
-
-  switch (pattern) {
-    case "grid":
-      return (
-        <>
-          <div
-            className="absolute inset-0 opacity-[0.12]"
-            style={{
-              backgroundImage: `linear-gradient(${accent} 1px, transparent 1px), linear-gradient(90deg, ${accent} 1px, transparent 1px)`,
-              backgroundSize: "28px 28px",
-              animation: animation("project-grid-drift 18s linear infinite"),
-            }}
-          />
-          <div
-            className="absolute inset-y-0 w-1/3 opacity-40 blur-2xl"
-            style={{ background: `linear-gradient(90deg, transparent, ${accent}, transparent)`, animation: animation("project-sweep 7s ease-in-out infinite") }}
-          />
-        </>
-      );
-    case "ledger":
-      return (
-        <>
-          <div
-            className="absolute inset-0 opacity-[0.12]"
-            style={{ backgroundImage: `repeating-linear-gradient(0deg, ${accent} 0, ${accent} 1px, transparent 1px, transparent 34px)` }}
-          />
-          <div className="absolute inset-y-0 left-[18%] w-px opacity-30" style={{ backgroundColor: accent }} />
-          <div
-            className="absolute left-0 right-0 h-16 opacity-30 blur-xl"
-            style={{ background: `linear-gradient(180deg, transparent, ${accent}, transparent)`, animation: animation("project-ledger-scan 6s ease-in-out infinite") }}
-          />
-        </>
-      );
-    case "pulse":
-      return (
-        <>
-          <div className="absolute -right-24 -top-24 h-96 w-96 rounded-full blur-3xl opacity-[0.18]" style={{ backgroundColor: accent, animation: animation("project-pulse 5s ease-in-out infinite") }} />
-          <div className="absolute -right-12 top-8 h-64 w-64 rounded-full border opacity-25" style={{ borderColor: accent, animation: animation("project-orbit 14s linear infinite") }} />
-          <div className="absolute -right-2 top-20 h-40 w-40 rounded-full border opacity-20" style={{ borderColor: accent, animation: animation("project-orbit 9s linear infinite reverse") }} />
-        </>
-      );
-    case "network":
-      return (
-        <div className="absolute inset-0 opacity-[0.16]" style={{ transformOrigin: "80% 20%", animation: animation("project-network-breathe 12s ease-in-out infinite") }}>
-          <svg viewBox="0 0 400 300" className="w-full h-full">
-            {[
-              [40, 40, 160, 90],
-              [160, 90, 300, 50],
-              [160, 90, 220, 220],
-              [220, 220, 340, 200],
-              [40, 40, 90, 200],
-            ].map(([x1, y1, x2, y2], i) => (
-              <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke={accent} strokeWidth="1" />
-            ))}
-            {[[40, 40], [160, 90], [300, 50], [220, 220], [340, 200], [90, 200]].map(([cx, cy], i) => (
-              <circle key={i} cx={cx} cy={cy} r="3" fill={accent} style={{ animation: animation(`project-node-pulse 2.8s ease-in-out ${i * 0.3}s infinite`) }} />
-            ))}
-          </svg>
-        </div>
-      );
-    case "editorial":
-    default:
-      return (
-        <>
-          <div className="absolute inset-y-0 right-0 w-1/3 opacity-[0.14]" style={{ background: `linear-gradient(180deg, ${accent}, transparent)` }} />
-          <div className="absolute -right-20 top-0 h-full w-32 -skew-x-12 opacity-25" style={{ background: `linear-gradient(90deg, transparent, ${accent}, transparent)`, animation: animation("project-editorial-slide 9s ease-in-out infinite") }} />
-          <div className="absolute bottom-8 left-8 h-px w-40 opacity-35" style={{ backgroundColor: accent, animation: animation("project-rule-expand 5s ease-in-out infinite") }} />
-        </>
-      );
   }
 }
