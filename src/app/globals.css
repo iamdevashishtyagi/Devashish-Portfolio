@@ -3,6 +3,11 @@
 :root {
   --background: #FFFFFF;
   --foreground: #000000;
+  --achievements-bg: #F8FAFC;
+}
+
+body[data-theme="dark"] {
+  --achievements-bg: #000000;
 }
 
 @theme inline {
@@ -103,7 +108,7 @@ body[data-theme="dark"] #architecture .border-current\/10 {
 #achievements {
   --achievement-grid: rgb(15 23 42 / 0.06);
   --achievement-glow: rgb(59 130 246 / 0.15);
-  background: #F8FAFC;
+  background: var(--achievements-bg);
   color: #0F172A;
   transition: background-color 0.7s ease, color 0.7s ease;
 }
@@ -145,7 +150,7 @@ body[data-theme="dark"] #achievements .achievement-card {
 body[data-theme="dark"] #achievements {
   --achievement-grid: rgb(255 255 255 / 0.1);
   --achievement-glow: rgb(59 130 246 / 0.25);
-  background: #000000;
+  background: var(--achievements-bg);
   color: #FFFFFF;
 }
 

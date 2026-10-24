@@ -12,6 +12,7 @@ import Achievements from "@/src/app/sections/Achievements";
 import Faq from "@/src/app/sections/Faq";
 import Contact from "@/src/app/sections/Contact";
 import Footer from "@/src/app/components/ui/Footer";
+import TornBorder from "@/src/app/components/ui/TornBorder";
 import { profile, projects, faqs } from "@/src/app/data/profile";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://iamdevashishtyagi.vercel.app";
@@ -157,12 +158,25 @@ export default function Home() {
       <main>
         <Hero />
         <About />
+        {/* 1. Bottom border for: About Devashish Tyagi (THE SHORT VERSION) */}
+        <TornBorder variant={1} />
+
         <Experience />
+        {/* 2. Bottom border for: The Ascent (NOT JUST CODE — RESPONSIBILITY EARNED) */}
+        <TornBorder variant={2} />
+
         <Projects />
+        {/* 3. Bottom border for: Archive (ENGINEERING EXHIBITS) */}
+        <TornBorder variant={3} />
+
         <Wins />
         {/* <TechSlingshot /> */}
         <Architecture />
+
         <Achievements />
+        {/* 4. Bottom border for: The pattern behind the work (EVERY YES WIDENED THE APERTURE) */}
+        <TornBorder variant={1} />
+
         <Skills />
         {/* <Faq /> */}
         <Contact />
