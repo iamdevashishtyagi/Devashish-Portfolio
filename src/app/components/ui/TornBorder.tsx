@@ -46,7 +46,7 @@ export default function TornBottomBorder({
   id,
 }: TornBottomBorderProps) {
   const data = TORN_BOTTOM_VARIANTS[variant] || TORN_BOTTOM_VARIANTS[1];
-  const uniqueGradId = `torn-paper-fill-${variant}-${flip ? "f" : "n"}`;
+  const resolvedTopColor = topColor || "var(--background, #FFFFFF)";
 
   return (
     <div
@@ -64,26 +64,15 @@ export default function TornBottomBorder({
         preserveAspectRatio="none"
         className="w-full h-5 sm:h-7 md:h-9 block"
       >
-        <defs>
-          {/* Paper fill that smoothly matches and blends into the section background */}
-          <linearGradient id={uniqueGradId} x1="0" y1="0" x2="0" y2="1">
-            <stop
-              offset="0%"
-              stopColor={topColor || "var(--background, #FFFFFF)"}
-              stopOpacity={1}
-            />
-            <stop
-              offset="100%"
-              stopColor={topColor || "var(--background, #FFFFFF)"}
-              stopOpacity={1}
-            />
-          </linearGradient>
-        </defs>
-
         {/* The main paper body filled with the section's exact background color */}
         <path
+          className="torn-paper-body"
           d={data.fill}
-          fill={`url(#${uniqueGradId})`}
+          fill={resolvedTopColor}
+          style={{
+            fill: resolvedTopColor,
+            transition: "fill 0.7s ease",
+          }}
         />
 
         {/* Subtle micro contact shadow directly hugging the torn edge */}

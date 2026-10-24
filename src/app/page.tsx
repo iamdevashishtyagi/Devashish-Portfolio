@@ -175,7 +175,12 @@ export default function Home() {
 
         <Achievements />
         {/* 4. Bottom border for: The pattern behind the work (EVERY YES WIDENED THE APERTURE) */}
-        <TornBorder variant={1} />
+        <TornBorder
+          variant={1}
+          id="achievements-bottom-border"
+          className="achievements-torn-border"
+          topColor="var(--achievements-bg, #F8FAFC)"
+        />
 
         <Skills />
         {/* <Faq /> */}

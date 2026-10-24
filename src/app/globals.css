@@ -164,6 +164,14 @@ body[data-theme="dark"] #achievements .achievement-label {
   color: #a3a3a3;
 }
 
+.achievements-torn-border .torn-paper-body {
+  fill: var(--achievements-bg, #F8FAFC);
+}
+
+body[data-theme="dark"] .achievements-torn-border .torn-paper-body {
+  fill: var(--achievements-bg, #000000);
+}
+
 body[data-theme="dark"] #faq .heading-2,
 body[data-theme="dark"] #faq h2 {
   color: #ffffff;
