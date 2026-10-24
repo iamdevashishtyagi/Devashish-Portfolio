@@ -11,6 +11,7 @@ import Architecture from "@/src/app/sections/Architecture";
 import Achievements from "@/src/app/sections/Achievements";
 import Faq from "@/src/app/sections/Faq";
 import Contact from "@/src/app/sections/Contact";
+import NotesSection from "@/src/app/sections/Notes";
 import Footer from "@/src/app/components/ui/Footer";
 import TornBorder from "@/src/app/components/ui/TornBorder";
 import { profile, projects, faqs } from "@/src/app/data/profile";
@@ -149,10 +150,7 @@ const jsonLdGraph = {
 export default function Home() {
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdGraph) }}
-      />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdGraph) }}/>
       <ClientSmoothScroll />
       <Navigation />
       <main>
@@ -175,13 +173,11 @@ export default function Home() {
 
         <Achievements />
         {/* 4. Bottom border for: The pattern behind the work (EVERY YES WIDENED THE APERTURE) */}
-        <TornBorder
-          variant={1}
-          id="achievements-bottom-border"
-          className="achievements-torn-border"
-          topColor="var(--achievements-bg, #F8FAFC)"
-        />
-
+        <TornBorder variant={1} id="achievements-bottom-border" className="achievements-torn-border" topColor="var(--achievements-bg, #F8FAFC)"/>
+        {/* Guestbook Notes Section: Before you Leave, Leave a note */}
+        <NotesSection />
+        {/* Bottom border for Guestbook Notes */}
+        <TornBorder variant={2} id="notes-bottom-border" className="notes-torn-border" topColor="var(--notes-bg, #FFFFFF)"/>
         <Skills />
         {/* <Faq /> */}
         <Contact />

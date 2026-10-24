@@ -4,10 +4,12 @@
   --background: #FFFFFF;
   --foreground: #000000;
   --achievements-bg: #F8FAFC;
+  --notes-bg: #FFFFFF;
 }
 
 body[data-theme="dark"] {
   --achievements-bg: #000000;
+  --notes-bg: #000000;
 }
 
 @theme inline {
@@ -170,6 +172,60 @@ body[data-theme="dark"] #achievements .achievement-label {
 
 body[data-theme="dark"] .achievements-torn-border .torn-paper-body {
   fill: var(--achievements-bg, #000000);
+}
+
+.notes-torn-border .torn-paper-body {
+  fill: var(--notes-bg, #FFFFFF);
+}
+
+body[data-theme="dark"] .notes-torn-border .torn-paper-body {
+  fill: var(--notes-bg, #000000);
+}
+
+/* Two-Way Infinite Marquee Animations for Notes Showcase */
+@keyframes marquee-slide-left {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@keyframes marquee-slide-right {
+  0% {
+    transform: translate3d(-50%, 0, 0);
+  }
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.animate-marquee-left {
+  display: flex;
+  width: max-content;
+  will-change: transform;
+  animation: marquee-slide-left 42s linear infinite;
+}
+
+.animate-marquee-right {
+  display: flex;
+  width: max-content;
+  will-change: transform;
+  animation: marquee-slide-right 46s linear infinite;
+}
+
+.animate-marquee-left:hover,
+.animate-marquee-right:hover {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee-left,
+  .animate-marquee-right {
+    animation: none;
+    transform: none;
+  }
 }
 
 body[data-theme="dark"] #faq .heading-2,

@@ -47,12 +47,14 @@ export default function TornBottomBorder({
 }: TornBottomBorderProps) {
   const data = TORN_BOTTOM_VARIANTS[variant] || TORN_BOTTOM_VARIANTS[1];
   const resolvedTopColor = topColor || "var(--background, #FFFFFF)";
+  // Unique filter ID so multiple torn borders on the page don't collide
+  const filterId = `torn-shadow-${id ? id.replace(/[^a-zA-Z0-9_-]/g, "") : `v${variant}`}`;
 
   return (
     <div
       id={id}
       aria-hidden="true"
-      className={`relative w-full block select-none pointer-events-none overflow-hidden leading-none z-20 -my-[1px] ${
+      className={`relative w-full block select-none pointer-events-none overflow-visible leading-none z-20 -my-[1px] ${
         flip ? "-scale-x-100" : ""
       } ${className}`}
       style={{
@@ -62,13 +64,36 @@ export default function TornBottomBorder({
       <svg
         viewBox="0 0 1440 32"
         preserveAspectRatio="none"
-        className="w-full h-5 sm:h-7 md:h-9 block"
+        className="w-full h-5 sm:h-7 md:h-9 block overflow-visible"
       >
-        {/* The main paper body filled with the section's exact background color */}
+        <defs>
+          {/* One-sided downward drop shadow casting down from the torn edge onto the lower section */}
+          <filter id={filterId} x="-2%" y="0%" width="104%" height="320%">
+            {/* Soft ambient downward shadow */}
+            <feDropShadow
+              dx="0"
+              dy="4.5"
+              stdDeviation="3"
+              floodColor="#000000"
+              floodOpacity="0.10"
+            />
+            {/* Crisp contact shadow hugging the torn deckle */}
+            <feDropShadow
+              dx="0"
+              dy="1.5"
+              stdDeviation="1"
+              floodColor="#000000"
+              floodOpacity="0.07"
+            />
+          </filter>
+        </defs>
+
+        {/* The main paper body filled with the section's exact background color, casting shadow downward */}
         <path
           className="torn-paper-body"
           d={data.fill}
           fill={resolvedTopColor}
+          filter={`url(#${filterId})`}
           style={{
             fill: resolvedTopColor,
             transition: "fill 0.7s ease",

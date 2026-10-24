@@ -24,7 +24,7 @@ export const navLinks = [
   { label: "Systems", href: "#architecture" },
   { label: "Achievements", href: "#achievements" },
   { label: "Skills", href: "#skills" },
-  { label: "FAQ", href: "#faq" },
+  { label: "Notes", href: "#notes" },
   { label: "Contact", href: "#contact" },
 ];
 
