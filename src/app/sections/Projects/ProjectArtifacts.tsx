@@ -7,12 +7,10 @@ import { ProjectImage } from "@/src/app/data/profile";
 
 interface ProjectArtifactsProps {
   images: ProjectImage[];
-  accent: string;
 }
 
 export default function ProjectArtifacts({
   images,
-  accent,
 }: ProjectArtifactsProps) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 

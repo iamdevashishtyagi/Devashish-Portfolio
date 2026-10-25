@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Project } from "@/src/app/data/profile";
 import { ArrowUpRight, CheckCircle2 } from "lucide-react";
 import { FaGithub } from "react-icons/fa";
-import { ATMOSPHERES } from "./atmosphere";
+import { CLASSIFICATIONS } from "./atmosphere";
 import ProjectSchematic from "./ProjectSchematic";
 import ProjectArtifacts from "./ProjectArtifacts";
 
@@ -17,11 +17,11 @@ interface ProjectShowcaseProps {
 }
 
 const STEPS = [
-  { key: "overview", label: "Overview", verb: "Seeing the product" },
-  { key: "problem", label: "Problem", verb: "Understanding the context" },
-  { key: "solution", label: "Approach", verb: "Seeing the engineering" },
-  { key: "evidence", label: "Snapshots", verb: "Examining the artifacts" },
-  { key: "outcome", label: "Outcome", verb: "Seeing the consequence" },
+  { key: "overview", label: "Overview" },
+  { key: "problem", label: "Problem" },
+  { key: "solution", label: "Approach" },
+  { key: "evidence", label: "Snapshots" },
+  { key: "outcome", label: "Outcome" },
 ] as const;
 
 // Unified signature blue for refined, clean light accents across all cards
@@ -38,7 +38,7 @@ export default function ProjectShowcase({
   const [isHovered, setIsHovered] = useState(false);
 
   const project = projects[activeIndex];
-  const atmosphere = ATMOSPHERES[project.filter];
+  const classification = CLASSIFICATIONS[project.filter];
   const nextProject = projects[(activeIndex + 1) % projects.length];
 
   // Reset to overview tab whenever active project changes
@@ -61,7 +61,7 @@ export default function ProjectShowcase({
       onMouseMove={handleMouseMove}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className="relative overflow-hidden rounded-3xl bg-white/80 backdrop-blur-xl border border-zinc-200/90 shadow-[0_12px_40px_rgba(0,0,0,0.04),0_1px_3px_rgba(0,0,0,0.02)] ring-1 ring-inset ring-white/90 transition-all duration-300"
+      className="relative overflow-hidden rounded-3xl bg-white/75 backdrop-blur-2xl border border-white/80 border-t-white shadow-[0_20px_50px_rgba(15,23,42,0.06),0_1px_3px_rgba(0,0,0,0.02)] ring-1 ring-inset ring-white/90 transition-all duration-300"
     >
       {/* Light Glass Sheen — Pure subtle gradient reflection */}
       <div className="pointer-events-none absolute inset-x-0 top-0 h-44 bg-gradient-to-b from-white/70 via-white/30 to-transparent" />
@@ -104,7 +104,7 @@ export default function ProjectShowcase({
             </div>
 
             <span className="hidden lg:block text-[10px] uppercase tracking-widest text-zinc-400 leading-relaxed font-mono">
-              {atmosphere.classification}
+              {classification}
             </span>
           </div>
 
@@ -318,7 +318,7 @@ function StepContent({
       );
 
     case "evidence":
-      return <ProjectArtifacts images={project.images} accent={UNIFIED_ACCENT} />;
+      return <ProjectArtifacts images={project.images} />;
 
     case "outcome":
       return (

@@ -165,7 +165,7 @@ export default function Home() {
 
         <Projects />
         {/* 3. Bottom border for: Archive (ENGINEERING EXHIBITS) */}
-        <TornBorder variant={3} />
+        <TornBorder variant={3} topColor="#E0F2FE" />
 
         <Wins />
         {/* <TechSlingshot /> */}

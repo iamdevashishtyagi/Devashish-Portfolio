@@ -3,7 +3,7 @@
 
 import { motion } from "framer-motion";
 import { Project } from "@/src/app/data/profile";
-import { ATMOSPHERES } from "./atmosphere";
+import { CLASSIFICATIONS } from "./atmosphere";
 
 interface ProjectRailProps {
   projects: Project[];
@@ -17,7 +17,7 @@ export default function ProjectRail({ projects, activeIndex, onSelect }: Project
       <div className="relative flex md:flex-col gap-2 overflow-x-auto md:overflow-visible pb-2 md:pb-0 -mx-1 px-1 md:mx-0 md:px-0 scrollbar-none">
         {projects.map((project, i) => {
           const isActive = i === activeIndex;
-          const atmosphere = ATMOSPHERES[project.filter];
+          const classification = CLASSIFICATIONS[project.filter];
 
           return (
             <button
@@ -35,7 +35,7 @@ export default function ProjectRail({ projects, activeIndex, onSelect }: Project
                 <motion.div
                   layoutId="activeRailGlassPill"
                   transition={{ type: "spring", stiffness: 420, damping: 32 }}
-                  className="absolute inset-0 rounded-2xl bg-white border border-zinc-200/90 shadow-[0_4px_16px_rgba(0,0,0,0.05)] pointer-events-none"
+                  className="absolute inset-0 rounded-2xl bg-white/85 backdrop-blur-md border border-white/90 shadow-[0_4px_16px_rgba(0,0,0,0.05)] pointer-events-none"
                 />
               )}
 
@@ -65,7 +65,7 @@ export default function ProjectRail({ projects, activeIndex, onSelect }: Project
                   {project.title}
                 </span>
                 <span className="hidden md:block text-[10px] uppercase tracking-wider text-zinc-400 truncate font-mono mt-0.5">
-                  {atmosphere.classification}
+                  {classification}
                 </span>
               </span>
             </button>

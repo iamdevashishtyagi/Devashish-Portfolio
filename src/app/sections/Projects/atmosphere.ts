@@ -5,58 +5,14 @@ import { useEffect, useState } from "react";
 import { Project } from "@/src/app/data/profile";
 
 /**
- * Every project "filter" gets a distinct atmosphere: a background rhythm,
- * a density, and a case-file classification word. This is the axis that
- * makes an ERP feel structured and an AI/RAG system feel layered, without
- * forking the layout into five unrelated designs.
+ * Project archive classifications displayed in the rail and showcase header.
  */
-export type Atmosphere = {
-  classification: string;
-  rhythm: "systematic" | "precise" | "fluid" | "layered" | "editorial";
-  pattern: "grid" | "ledger" | "pulse" | "network" | "editorial";
-  description: string;
-};
-
-export const ATMOSPHERES: Record<Project["filter"], Atmosphere> = {
-  enterprise: {
-    classification: "SYSTEM OF RECORD",
-    rhythm: "systematic",
-    pattern: "grid",
-    description: "Structured, dense, load-bearing.",
-  },
-  compliance: {
-    classification: "REGULATED PIPELINE",
-    rhythm: "precise",
-    pattern: "ledger",
-    description: "Precise, controlled, zero tolerance.",
-  },
-  saas: {
-    classification: "OPERATIONAL PRODUCT",
-    rhythm: "fluid",
-    pattern: "pulse",
-    description: "Fluid, live, front-desk fast.",
-  },
-  ai: {
-    classification: "RETRIEVAL SYSTEM",
-    rhythm: "layered",
-    pattern: "network",
-    description: "Layered, connected, grounded.",
-  },
-  marketing: {
-    classification: "PUBLIC SURFACE",
-    rhythm: "editorial",
-    pattern: "editorial",
-    description: "Editorial, visual, expressive.",
-  },
-};
-
-export const ACCENT_HEX: Record<Project["accent"], string> = {
-  blue: "#3B82F6",
-  royalBlue: "#4F46E5",
-  emerald: "#10B981",
-  amber: "#F59E0B",
-  violet: "#8B5CF6",
-  red: "#EF4444",
+export const CLASSIFICATIONS: Record<Project["filter"], string> = {
+  enterprise: "SYSTEM OF RECORD",
+  compliance: "REGULATED PIPELINE",
+  saas: "OPERATIONAL PRODUCT",
+  ai: "RETRIEVAL SYSTEM",
+  marketing: "PUBLIC SURFACE",
 };
 
 /** Respects the OS-level reduced-motion preference and updates live. */
